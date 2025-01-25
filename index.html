@@ -43,6 +43,10 @@
             border-radius: 0.375rem;
             font-size: 1rem;
         }
+        .pattern-breakdown .consonant-blends { color: #4B0082; /* Bright Indigo */ }
+        .pattern-breakdown .vowel-pairs { color: #FFA500; /* Bright Orange */ }
+        .pattern-breakdown .double-letters { color: #008080; /* Bright Teal */ }
+        .pattern-breakdown .single-vowels { color: #9400D3; /* Bright Purple */ }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
@@ -124,7 +128,7 @@
                     let isBlend = false;
                     for (let blend of blends) {
                         if (word.slice(i, i + 2).toLowerCase() === blend) {
-                            html += `<span class="text-indigo-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                            html += `<span class="pattern-breakdown consonant-blends">${word.slice(i, i + 2)}</span>`;
                             i++;
                             isBlend = true;
                             break;
@@ -134,21 +138,21 @@
 
                     // Check for vowel pairs
                     if ('aeiou'.includes(word[i].toLowerCase()) && 'aeiou'.includes(word[i + 1]?.toLowerCase())) {
-                        html += `<span class="text-amber-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                        html += `<span class="pattern-breakdown vowel-pairs">${word.slice(i, i + 2)}</span>`;
                         i++;
                         continue;
                     }
 
                     // Check for doubled letters
                     if (word[i].toLowerCase() === word[i + 1]?.toLowerCase()) {
-                        html += `<span class="text-teal-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                        html += `<span class="pattern-breakdown double-letters">${word.slice(i, i + 2)}</span>`;
                         i++;
                         continue;
                     }
 
                     // Individual vowels
                     if ('aeiou'.includes(word[i].toLowerCase())) {
-                        html += `<span class="text-orange-600">${char}</span>`;
+                        html += `<span class="pattern-breakdown single-vowels">${char}</span>`;
                     } else {
                         html += `<span class="text-gray-700">${char}</span>`;
                     }
@@ -156,10 +160,10 @@
 
                 html += `</p>
                     <div class="text-sm space-y-1">
-                        <p><span class="text-indigo-600 font-bold">Indigo</span>: Consonant blends (like 'sh', 'th')</p>
-                        <p><span class="text-amber-600 font-bold">Amber</span>: Vowel pairs</p>
-                        <p><span class="text-teal-600 font-bold">Teal</span>: Double letters</p>
-                        <p><span class="text-orange-600">Orange</span>: Single vowels</p>
+                        <p><span class="pattern-breakdown consonant-blends">Indigo</span>: Consonant blends (like 'sh', 'th')</p>
+                        <p><span class="pattern-breakdown vowel-pairs">Amber</span>: Vowel pairs</p>
+                        <p><span class="pattern-breakdown double-letters">Teal</span>: Double letters</p>
+                        <p><span class="pattern-breakdown single-vowels">Purple</span>: Single vowels</p>
                     </div></div>`;
                 return html;
             }
