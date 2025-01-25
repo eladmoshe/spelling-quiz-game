@@ -43,6 +43,37 @@
             border-radius: 0.375rem;
             font-size: 1rem;
         }
+        
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .celebration {
+            animation: celebrate 0.5s ease-in-out;
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #3b82f6;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .success-feedback {
+            color: #059669;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
@@ -181,6 +212,22 @@
                 if (userAnswer === currentWord) {
                     this.currentWordCorrect = true;
                     this.showSuccess();
+                    
+                    // Add celebration effects
+                    const app = document.querySelector('#app');
+                    app.querySelector('.card').classList.add('celebration');
+                    
+                    // Create confetti effect
+                    for (let i = 0; i < 30; i++) {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * window.innerWidth + 'px';
+                        confetti.style.backgroundColor = ['#3b82f6', '#059669', '#fbbf24'][Math.floor(Math.random() * 3)];
+                        confetti.style.animation = `confetti ${1 + Math.random() * 2}s linear forwards`;
+                        document.body.appendChild(confetti);
+                        setTimeout(() => confetti.remove(), 3000);
+                    }
+                    
                     // Disable input and check button
                     input.disabled = true;
                     document.querySelector('button[onclick="game.checkAnswer()"]').disabled = true;
