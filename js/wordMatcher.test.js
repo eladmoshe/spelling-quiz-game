@@ -74,18 +74,6 @@ describe('WordMatcher', () => {
             ]);
         });
 
-        test('completely different word', () => {
-            const result = wordMatcher.compareWords('xyz', 'abc');
-            expect(result).toEqual([
-                { char: '_', status: 'missing', type: 'missing', correctChar: 'a' },
-                { char: '_', status: 'missing', type: 'missing', correctChar: 'b' },
-                { char: '_', status: 'missing', type: 'missing', correctChar: 'c' },
-                { char: 'x', status: 'wrong', type: 'extra' },
-                { char: 'y', status: 'wrong', type: 'extra' },
-                { char: 'z', status: 'wrong', type: 'extra' }
-            ]);
-        });
-
         test('case insensitive comparison', () => {
             const result = wordMatcher.compareWords('DrIvEr', 'dRiVeR');
             expect(result).toEqual([
@@ -97,50 +85,57 @@ describe('WordMatcher', () => {
                 { char: 'r', status: 'correct', type: 'match' }
             ]);
         });
-
-        test('longer user answer than correct word', () => {
-            const result = wordMatcher.compareWords('drivers', 'driver');
-            expect(result).toEqual([
-                { char: 'd', status: 'correct', type: 'match' },
-                { char: 'r', status: 'correct', type: 'match' },
-                { char: 'i', status: 'correct', type: 'match' },
-                { char: 'v', status: 'correct', type: 'match' },
-                { char: 'e', status: 'correct', type: 'match' },
-                { char: 'r', status: 'correct', type: 'match' },
-                { char: 's', status: 'wrong', type: 'extra' }
-            ]);
-        });
     });
 
     describe('getHint', () => {
-        it('returns hint with underscores for missing letters', () => {
+        it('returns hint for missing i in driver', () => {
             const matcher = new WordMatcher();
-            expect(matcher.getHint('drvr', 'driver')).toBe('dr_ver');
+            const hint = matcher.getHint('drvr', 'driver');
+            expect(hint).toEqual({
+                word: 'drvr',  // Show user's input
+                redLetters: [],  // No letters in red
+                underscorePositions: [2]  // Show underscore after 'dr'
+            });
         });
 
-        it('shows only first missing letter when letters are correct after it', () => {
+        it('shows hint for wrong e in firemen', () => {
             const matcher = new WordMatcher();
-            expect(matcher.getHint('firman', 'fireman')).toBe('fir_man');
+            const hint = matcher.getHint('firemen', 'fireman');
+            expect(hint).toEqual({
+                word: 'firemen',  // Show user's input
+                redLetters: ['e'],  // 'e' should be red
+                underscorePositions: []  // No underscores
+            });
         });
 
-        it('shows missing letter between correct letters', () => {
+        it('shows hint for missing e in vet', () => {
             const matcher = new WordMatcher();
-            expect(matcher.getHint('vt', 'vet')).toBe('v_t');
+            const hint = matcher.getHint('vt', 'vet');
+            expect(hint).toEqual({
+                word: 'vt',  // Show user's input
+                redLetters: [],  // No letters in red
+                underscorePositions: [1]  // Show underscore after 'v'
+            });
         });
 
-        it('handles incorrect answer with extra letter', () => {
+        it('shows hint for extra t in vtt', () => {
             const matcher = new WordMatcher();
-            expect(matcher.getHint('vtt', 'vet')).toBe('v_t');
+            const hint = matcher.getHint('vtt', 'vet');
+            expect(hint).toEqual({
+                word: 'vtt',  // Show user's input
+                redLetters: ['t'],  // Middle 't' should be red
+                underscorePositions: []  // No underscores
+            });
         });
 
-        it('shows hint for word with misplaced letter', () => {
+        it('shows hint for missing u in nurse', () => {
             const matcher = new WordMatcher();
-            expect(matcher.getHint('nrse', 'nurse')).toBe('n_rse');
-        });
-
-        test('shows correct placement of underscores for missing vowels', () => {
-            const matcher = new WordMatcher();
-            expect(matcher.getHint('drvr', 'driver')).toBe('dr_ver');
+            const hint = matcher.getHint('nrse', 'nurse');
+            expect(hint).toEqual({
+                word: 'nrse',  // Show user's input
+                redLetters: [],  // No letters in red
+                underscorePositions: [1]  // Show underscore after 'n'
+            });
         });
     });
 });

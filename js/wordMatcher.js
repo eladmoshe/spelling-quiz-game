@@ -140,32 +140,80 @@ class WordMatcher {
     }
 
     /**
-     * Generates a hint string where missing letters are replaced with underscores
+     * Get a hint for the user's answer
      * @param {string} userAnswer - The user's attempted spelling
-     * @param {string} correctWord - The correct spelling of the word
-     * @returns {string} The hint string with underscores for missing letters
+     * @param {string} correctWord - The correct spelling
+     * @returns {Object} Object containing:
+     *   - word: the user's input
+     *   - redLetters: array of letters that should be shown in red (wrong or extra)
+     *   - underscorePositions: array of positions where underscores should be shown (first missing letter)
      */
     getHint(userAnswer, correctWord) {
-        const comparison = this.compareWords(userAnswer, correctWord);
-        let result = '';
-        let hasShownUnderscore = false;
+        const redLetters = new Set();
+        const underscorePositions = new Set();
+        let foundFirstMissing = false;
         
-        // Build result by showing matches and one underscore for first missing letter
-        for (let i = 0; i < comparison.length; i++) {
-            const item = comparison[i];
-            
-            if (item.type === 'match') {
-                result += item.char;
-            } else if (item.type === 'missing' && !hasShownUnderscore) {
-                result += '_';
-                hasShownUnderscore = true;
-            } else if (item.type === 'missing') {
-                result += item.correctChar;
-            }
-            // Ignore 'extra' type items
+        // Count letters in correct word
+        const correctLetterCount = new Map();
+        for (const char of correctWord) {
+            correctLetterCount.set(char, (correctLetterCount.get(char) || 0) + 1);
         }
         
-        return result;
+        // Track used letters
+        const usedLetters = new Map();
+        
+        // First pass: Handle matching letters
+        for (let i = 0; i < Math.min(userAnswer.length, correctWord.length); i++) {
+            const userLetter = userAnswer[i];
+            const correctLetter = correctWord[i];
+            
+            if (userLetter === correctLetter) {
+                usedLetters.set(userLetter, (usedLetters.get(userLetter) || 0) + 1);
+            }
+        }
+        
+        // Second pass: Handle non-matching letters
+        for (let i = 0; i < Math.max(userAnswer.length, correctWord.length); i++) {
+            const userLetter = userAnswer[i];
+            const correctLetter = correctWord[i];
+            
+            if (i >= correctWord.length) {
+                // Extra letter at end
+                redLetters.add(userLetter);
+                continue;
+            }
+            
+            if (i >= userAnswer.length) {
+                // Missing letter at end
+                if (!foundFirstMissing) {
+                    underscorePositions.add(i);
+                    foundFirstMissing = true;
+                }
+                continue;
+            }
+            
+            if (userLetter !== correctLetter) {
+                const remainingCount = (correctLetterCount.get(userLetter) || 0) - (usedLetters.get(userLetter) || 0);
+                
+                if (remainingCount <= 0) {
+                    // Letter is either wrong or extra
+                    redLetters.add(userLetter);
+                } else if (!foundFirstMissing) {
+                    // Letter exists but in wrong position - show underscore
+                    underscorePositions.add(i);
+                    foundFirstMissing = true;
+                }
+                
+                // Update used count
+                usedLetters.set(userLetter, (usedLetters.get(userLetter) || 0) + 1);
+            }
+        }
+        
+        return {
+            word: userAnswer,
+            redLetters: Array.from(redLetters),
+            underscorePositions: Array.from(underscorePositions)
+        };
     }
 }
 
