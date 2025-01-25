@@ -113,9 +113,29 @@ describe('WordMatcher', () => {
     });
 
     describe('getHint', () => {
-        test('returns hint with underscores for missing letters', () => {
-            const hint = wordMatcher.getHint('drvr', 'driver');
-            expect(hint).toBe('dr_ver');
+        it('returns hint with underscores for missing letters', () => {
+            const matcher = new WordMatcher();
+            expect(matcher.getHint('drvr', 'driver')).toBe('dr_ver');
+        });
+
+        it('shows only first missing letter when letters are correct after it', () => {
+            const matcher = new WordMatcher();
+            expect(matcher.getHint('firman', 'fireman')).toBe('fir_man');
+        });
+
+        it('shows missing letter between correct letters', () => {
+            const matcher = new WordMatcher();
+            expect(matcher.getHint('vt', 'vet')).toBe('v_t');
+        });
+
+        it('handles incorrect answer with extra letter', () => {
+            const matcher = new WordMatcher();
+            expect(matcher.getHint('vtt', 'vet')).toBe('v_t');
+        });
+
+        it('shows hint for word with misplaced letter', () => {
+            const matcher = new WordMatcher();
+            expect(matcher.getHint('nrse', 'nurse')).toBe('n_rse');
         });
     });
 });

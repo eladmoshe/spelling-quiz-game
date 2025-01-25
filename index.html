@@ -96,26 +96,21 @@
 
             getNextLetterHint(userAnswer) {
                 const currentWord = this.wordList[this.currentIndex];
-                const correctSoFar = userAnswer.toLowerCase();
+                const hint = this.wordMatcher.getHint(userAnswer, currentWord);
+                const firstUnderscoreIndex = hint.indexOf('_');
                 
-                if (currentWord.toLowerCase().startsWith(correctSoFar)) {
-                    const nextLetterIndex = correctSoFar.length;
-                    if (nextLetterIndex < currentWord.length) {
-                        return {
-                            correct: true,
-                            message: `Next letter is: "${currentWord[nextLetterIndex]}"`,
-                            progress: `${correctSoFar}${currentWord[nextLetterIndex]}${'_'.repeat(currentWord.length - nextLetterIndex - 1)}`
-                        };
-                    }
+                if (firstUnderscoreIndex === -1) {
+                    return {
+                        correct: true,
+                        message: 'Correct!',
+                        progress: hint
+                    };
                 }
-
-                const firstWrongIndex = [...correctSoFar].findIndex((char, index) => 
-                    char !== currentWord[index]?.toLowerCase()
-                );
+                
                 return {
                     correct: false,
-                    message: `Check letter #${firstWrongIndex + 1}. Should be: "${currentWord[firstWrongIndex]}"`,
-                    progress: `${currentWord.slice(0, firstWrongIndex)}${currentWord[firstWrongIndex]}${'_'.repeat(currentWord.length - firstWrongIndex - 1)}`
+                    message: `Check letter #${firstUnderscoreIndex + 1}. Should be: "${currentWord[firstUnderscoreIndex]}"`,
+                    progress: hint
                 };
             }
 
@@ -230,7 +225,70 @@
                                 ${this.getWordPatterns(currentWord)}
                             </div>
                         ` : `
-                            <button onclick="game.showHint()" class="btn btn-outline w-full">
+                            <button onclick="game.displayHint()" class="btn btn-outline w-full">
+                                Need a hint?
+                            </button>
+                        `}
+                    </div>
+                `;
+            }
+
+            showError(userAnswer) {
+                const currentWord = this.wordList[this.currentIndex];
+                const comparison = this.compareWords(userAnswer, currentWord);
+                
+                if (!this.attempts[this.currentIndex]) {
+                    this.attempts[this.currentIndex] = 1;
+                } else {
+                    this.attempts[this.currentIndex]++;
+                }
+
+                let errorMessage = '';
+
+                // Find the first error or missing letter
+                let firstError = comparison.find(c => c.status !== 'correct');
+                if (firstError) {
+                    if (firstError.type === 'missing') {
+                        errorMessage = `Missing letter: "${firstError.correctChar}"`;
+                    } else if (firstError.type === 'extra') {
+                        errorMessage = `Extra or incorrect letter: "${firstError.char}"`;
+                    }
+                }
+
+                // Get the hint using our WordMatcher's getHint method
+                const hint = this.wordMatcher.getHint(userAnswer, currentWord);
+                
+                // Generate the visual comparison using the hint directly
+                let comparisonHtml = '';
+                for (let i = 0; i < hint.length; i++) {
+                    const char = hint[i];
+                    if (char === '_') {
+                        comparisonHtml += `<span class="text-red-500">_</span>`;
+                    } else if (i < userAnswer.length && char === userAnswer[i]) {
+                        comparisonHtml += `<span class="text-green-500">${char}</span>`;
+                    } else {
+                        comparisonHtml += `<span class="text-gray-500">${char}</span>`;
+                    }
+                }
+
+                const showPatternBreakdown = this.attempts[this.currentIndex] >= 3;
+                const resultDiv = document.querySelector('#result');
+                resultDiv.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <p class="text-sm font-medium text-red-800 mb-2">Your answer:</p>
+                            <p class="text-2xl font-mono tracking-wide">${comparisonHtml}</p>
+                            <p class="text-sm font-medium text-red-800 mt-2">${errorMessage}</p>
+                        </div>
+                        ${showPatternBreakdown ? `
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-800 mb-2">
+                                    Need help? Here's a pattern breakdown to help you remember:
+                                </p>
+                                ${this.getWordPatterns(currentWord)}
+                            </div>
+                        ` : `
+                            <button onclick="game.displayHint()" class="btn btn-outline w-full">
                                 Need a hint?
                             </button>
                         `}
@@ -270,76 +328,19 @@
                 setTimeout(() => this.pronounceWord(this.wordList[this.currentIndex]), 500);
             }
 
-            showError(userAnswer) {
+            displayHint() {
+                const input = document.querySelector('#answerInput');
+                const userAnswer = input.value;
                 const currentWord = this.wordList[this.currentIndex];
-                const comparison = this.compareWords(userAnswer, currentWord);
+                const hint = this.wordMatcher.getHint(userAnswer, currentWord);
                 
-                if (!this.attempts[this.currentIndex]) {
-                    this.attempts[this.currentIndex] = 1;
-                } else {
-                    this.attempts[this.currentIndex]++;
-                }
-
-                let comparisonHtml = '';
-                let errorMessage = '';
-
-                // Find the first error or missing letter
-                let firstError = comparison.find(c => c.status !== 'correct');
-                if (firstError) {
-                    if (firstError.type === 'missing') {
-                        errorMessage = `Missing letter: "${firstError.correctChar}"`;
-                    } else if (firstError.type === 'extra') {
-                        errorMessage = `Extra or incorrect letter: "${firstError.char}"`;
-                    }
-                }
-
-                // Generate the visual comparison
-                comparison.forEach(item => {
-                    if (item.status === 'correct') {
-                        comparisonHtml += `<span class="text-green-500">${item.char}</span>`;
-                    } else if (item.status === 'missing') {
-                        comparisonHtml += `<span class="text-red-500">_</span>`;
-                    } else if (item.status === 'wrong') {
-                        comparisonHtml += `<span class="text-red-500">${item.char}</span>`;
-                    }
-                });
-
-                const showPatternBreakdown = this.attempts[this.currentIndex] >= 3;
                 const resultDiv = document.querySelector('#result');
                 resultDiv.innerHTML = `
                     <div class="space-y-4">
-                        <div class="bg-red-50 p-4 rounded-lg">
-                            <p class="text-sm font-medium text-red-800 mb-2">Your answer:</p>
-                            <p class="text-2xl font-mono tracking-wide">${comparisonHtml}</p>
-                            <p class="text-sm font-medium text-red-800 mt-2">${errorMessage}</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-sm font-medium text-blue-800 mb-2">Hint:</p>
+                            <p class="text-2xl font-mono tracking-wide text-center">${hint}</p>
                         </div>
-                        ${showPatternBreakdown ? `
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-800 mb-2">
-                                    Need help? Here's a pattern breakdown to help you remember:
-                                </p>
-                                ${this.getWordPatterns(currentWord)}
-                            </div>
-                        ` : `
-                            <button onclick="game.showHint()" class="btn btn-outline w-full">
-                                Need a hint?
-                            </button>
-                        `}
-                    </div>
-                `;
-            }
-
-            showHint() {
-                const currentWord = this.wordList[this.currentIndex];
-                const hintDiv = document.querySelector('#result');
-                const existingContent = hintDiv.querySelector('.space-y-4');
-                
-                existingContent.innerHTML += `
-                    <div class="bg-gray-50 p-4 rounded-lg mt-4">
-                        <p class="text-sm font-medium text-gray-800 mb-2">
-                            Pattern breakdown to help you remember:
-                        </p>
-                        ${this.getWordPatterns(currentWord)}
                     </div>
                 `;
             }
@@ -399,7 +400,7 @@
                                             Listen to the word
                                         </button>
                                         
-                                        <button onclick="game.showError(document.querySelector('#answerInput').value)" class="btn btn-outline">
+                                        <button onclick="game.displayHint()" class="btn btn-outline">
                                             Hint
                                         </button>
                                     </div>
