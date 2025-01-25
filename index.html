@@ -215,7 +215,6 @@
                     }
                 }
 
-                const showPatternBreakdown = this.attempts[this.currentIndex] >= 3;
                 const resultDiv = document.querySelector('#result');
                 resultDiv.innerHTML = `
                     <div class="space-y-4">
@@ -224,14 +223,15 @@
                             <p class="text-2xl font-mono tracking-wide">${comparisonHtml}</p>
                             <p class="text-sm font-medium text-red-800 mt-2">${errorMessage}</p>
                         </div>
-                        ${showPatternBreakdown ? `
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-800 mb-2">
-                                    Need help? Here's a pattern breakdown to help you remember:
-                                </p>
-                                ${this.getWordPatterns(currentWord)}
-                            </div>
-                        ` : ''}
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm font-medium text-gray-800 mb-2">
+                                Need help? Here's a pattern breakdown to help you remember:
+                            </p>
+                            ${this.getWordPatterns(currentWord)}
+                        </div>
+                        <button onclick="game.nextWord()" class="btn btn-primary w-full">
+                            Next Word ➡️
+                        </button>
                     </div>
                 `;
             }
@@ -257,22 +257,18 @@
                     errorMessage = `Missing letter: "${currentWord[pos]}"`;
                 }
 
-                // Show error message and word patterns after 3 attempts
-                const showPatternBreakdown = this.attempts[this.currentIndex] >= 3;
                 const resultDiv = document.querySelector('#result');
                 resultDiv.innerHTML = `
                     <div class="space-y-4">
                         <div class="bg-red-50 p-4 rounded-lg">
                             <p class="text-sm font-medium text-red-800">${errorMessage}</p>
                         </div>
-                        ${showPatternBreakdown ? `
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-800 mb-2">
-                                    Need help? Here's a pattern breakdown to help you remember:
-                                </p>
-                                ${this.getWordPatterns(currentWord)}
-                            </div>
-                        ` : ''}
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm font-medium text-gray-800 mb-2">
+                                Need help? Here's a pattern breakdown to help you remember:
+                            </p>
+                            ${this.getWordPatterns(currentWord)}
+                        </div>
                     </div>
                 `;
             }
@@ -292,7 +288,7 @@
                         </div>
                         ${this.currentIndex < this.wordList.length - 1 ? `
                             <button onclick="game.nextWord()" class="btn btn-primary w-full">
-                                Next Word
+                                Next Word ➡️
                             </button>
                         ` : `
                             <div class="text-center">
