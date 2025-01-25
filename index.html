@@ -6,14 +6,40 @@
     <title>Spelling Quiz</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
+        body {
+            background: #f3f4f6;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        #app {
+            max-width: 42rem;
+            margin: 0 auto;
+        }
+
         .card {
             background: white;
-            border-radius: 0.5rem;
+            border-radius: 1rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
         }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
         .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
             font-weight: 500;
             cursor: pointer;
             display: inline-flex;
@@ -21,27 +47,44 @@
             justify-content: center;
             transition: all 0.2s;
         }
+
         .btn-primary {
             background-color: #3b82f6;
             color: white;
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1.125rem;
         }
+
         .btn-outline {
             border: 1px solid #e5e7eb;
             background-color: white;
+            color: #1f2937;
         }
+
         .btn:hover {
             opacity: 0.9;
         }
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
         .input {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.75rem;
             border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
+            border-radius: 0.5rem;
             font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .lang-toggle {
+            min-width: 100px;
+            text-align: center;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
         
         @keyframes celebrate {
@@ -50,13 +93,15 @@
             100% { transform: scale(1); }
         }
         
-        @keyframes confetti {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-        
         .celebration {
             animation: celebrate 0.5s ease-in-out;
+        }
+        
+        .success-feedback {
+            color: #059669;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 1rem;
         }
         
         .confetti {
@@ -68,27 +113,27 @@
             pointer-events: none;
         }
         
-        .success-feedback {
-            color: #059669;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 1rem;
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
-    <div id="app" class="max-w-2xl mx-auto"></div>
+<body>
+    <div id="app"></div>
     
     <script type="module">
         import WordMatcher from './js/wordMatcher.js';
+        import { translations } from './js/translations.js';
         
         class SpellingGame {
             constructor() {
                 this.wordList = [];
                 this.currentIndex = 0;
                 this.showPractice = false;
-                this.attempts = {};  // Track attempts per word
-                this.currentWordCorrect = false;  // Track if current word is correct
+                this.attempts = {};
+                this.currentWordCorrect = false;
+                this.language = localStorage.getItem('spellingQuizLanguage') || 'en';
                 
                 this.app = document.getElementById('app');
                 this.wordMatcher = new WordMatcher();
@@ -119,7 +164,7 @@
                 if (words.length > 0) {
                     this.wordList = this.shuffleArray(words);
                     this.currentIndex = 0;
-                    this.attempts = {};  // Reset attempts
+                    this.attempts = {};  
                     this.showPractice = true;
                     this.pronounceWord(this.wordList[0]);
                     this.render();
@@ -211,7 +256,6 @@
                 
                 if (userAnswer === currentWord) {
                     this.currentWordCorrect = true;
-                    this.showSuccess();
                     
                     // Add celebration effects
                     const app = document.querySelector('#app');
@@ -228,11 +272,10 @@
                         setTimeout(() => confetti.remove(), 3000);
                     }
                     
-                    // Disable input and check button
-                    input.disabled = true;
-                    document.querySelector('button[onclick="game.checkAnswer()"]').disabled = true;
                     // Play the word again after a short delay
-                    setTimeout(() => this.pronounceWord(this.wordList[this.currentIndex]), 1000);
+                    setTimeout(() => this.pronounceWord(currentWord), 1000);
+                    
+                    this.render();
                     return;
                 }
                 
@@ -253,12 +296,12 @@
                     if (hint.redLetterPositions.includes(i)) {
                         comparisonHtml += `<span class="text-red-500">${char}</span>`;
                         if (!errorMessage) {
-                            errorMessage = `Extra or incorrect letter: "${char}"`;
+                            errorMessage = `${this.t('checkLetter')} #${i + 1}`;
                         }
                     } else if (hint.underscorePositions.includes(i)) {
                         comparisonHtml += `<span class="text-red-500">_</span>`;
                         if (!errorMessage) {
-                            errorMessage = `Missing letter: "${currentWord[i]}"`;
+                            errorMessage = `${this.t('checkLetter')} #${i + 1}`;
                         }
                     } else {
                         comparisonHtml += `<span class="text-green-500">${char}</span>`;
@@ -270,28 +313,16 @@
                     if (hint.underscorePositions.includes(i)) {
                         comparisonHtml += `<span class="text-red-500">_</span>`;
                         if (!errorMessage) {
-                            errorMessage = `Missing letter: "${currentWord[i]}"`;
+                            errorMessage = `${this.t('checkLetter')} #${i + 1}`;
                         }
                     }
                 }
 
                 const resultDiv = document.querySelector('#result');
                 resultDiv.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="bg-red-50 p-4 rounded-lg">
-                            <p class="text-sm font-medium text-red-800 mb-2">Your answer:</p>
-                            <p class="text-2xl font-mono tracking-wide">${comparisonHtml}</p>
-                            <p class="text-sm font-medium text-red-800 mt-2">${errorMessage}</p>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <p class="text-sm font-medium text-gray-800 mb-2">
-                                Need help? Here's a pattern breakdown to help you remember:
-                            </p>
-                            ${this.getWordPatterns(currentWord)}
-                        </div>
-                        <button onclick="game.nextWord()" class="btn btn-primary w-full">
-                            Next Word ➡️
-                        </button>
+                    <div class="mt-4 p-4 bg-red-50 rounded-lg">
+                        <p class="text-xl font-mono tracking-wide text-center">${comparisonHtml}</p>
+                        <p class="text-sm font-medium text-red-800 text-center mt-2">${errorMessage}</p>
                     </div>
                 `;
             }
@@ -368,7 +399,7 @@
             nextWord() {
                 if (this.currentIndex < this.wordList.length - 1) {
                     this.currentIndex++;
-                    this.currentWordCorrect = false;  // Reset for new word
+                    this.currentWordCorrect = false;  
                     this.render();
                     setTimeout(() => this.pronounceWord(this.wordList[this.currentIndex]), 500);
                 } else {
@@ -383,63 +414,98 @@
                 this.render();
             }
 
+            t(key) {
+                const keys = key.split('.');
+                let value = translations[this.language];
+                for (const k of keys) {
+                    value = value[k];
+                }
+                return value;
+            }
+
+            toggleLanguage() {
+                this.language = this.language === 'en' ? 'he' : 'en';
+                localStorage.setItem('spellingQuizLanguage', this.language);
+                this.render();
+            }
+
             render() {
                 if (!this.showPractice) {
                     this.app.innerHTML = `
                         <div class="card">
-                            <div class="p-6">
-                                <div class="space-y-4">
-                                    <h2 class="text-xl font-bold">Enter Words</h2>
-                                    <input
-                                        id="wordInput"
-                                        class="input"
-                                        placeholder="Enter words separated by commas"
-                                    />
-                                    <button onclick="game.handleStart()" class="btn btn-primary w-full">
-                                        Start Practice
-                                    </button>
-                                </div>
+                            <div class="header-container">
+                                <h1 class="title">${this.t('enterWords')}</h1>
+                                <button onclick="game.toggleLanguage()" class="btn btn-outline lang-toggle">
+                                    ${this.t('switchToHebrew')}
+                                </button>
                             </div>
+                            <input type="text" id="wordInput" class="input" />
+                            <button onclick="game.handleStart()" class="btn btn-primary">
+                                ${this.t('start')}
+                            </button>
                         </div>
                     `;
                 } else {
+                    const currentWord = this.wordList[this.currentIndex];
+                    const isLastWord = this.currentIndex === this.wordList.length - 1;
+                    
+                    if (this.currentWordCorrect && isLastWord) {
+                        this.app.innerHTML = `
+                            <div class="card">
+                                <div class="header-container">
+                                    <h1 class="title">${this.t('practiceComplete')}</h1>
+                                    <button onclick="game.toggleLanguage()" class="btn btn-outline lang-toggle">
+                                        ${this.t('switchToHebrew')}
+                                    </button>
+                                </div>
+                                <button onclick="game.reset()" class="btn btn-primary">
+                                    ${this.t('startOver')}
+                                </button>
+                            </div>
+                        `;
+                        return;
+                    }
+
                     this.app.innerHTML = `
                         <div class="card">
-                            <div class="p-6">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <h2 class="text-xl font-bold">Spell the Word</h2>
-                                        <button onclick="game.reset()" class="btn btn-outline">
-                                            New Words
-                                        </button>
-                                    </div>
-                                    
-                                    <p class="text-center">Word ${this.currentIndex + 1} of ${this.wordList.length}</p>
-                                    
-                                    <button onclick="game.pronounceWord('${this.wordList[this.currentIndex]}')" class="btn btn-primary w-full">
-                                        Listen to the word
-                                    </button>
-
-                                    <input
-                                        id="answerInput"
-                                        class="input text-lg text-center"
-                                        placeholder="Type your answer"
-                                        onkeypress="if(event.key === 'Enter') game.checkAnswer()"
-                                        ${this.currentWordCorrect ? 'disabled' : ''}
-                                    />
-
-                                    <button 
-                                        onclick="game.checkAnswer()" 
-                                        class="btn btn-primary w-full"
-                                        ${this.currentWordCorrect ? 'disabled' : ''}>
-                                        Check Answer
-                                    </button>
-
-                                    <div id="result"></div>
-                                </div>
+                            <div class="header-container">
+                                <h1 class="title">Word ${this.currentIndex + 1} of ${this.wordList.length}</h1>
+                                <button onclick="game.toggleLanguage()" class="btn btn-outline lang-toggle">
+                                    ${this.t('switchToHebrew')}
+                                </button>
                             </div>
+                            <div class="flex gap-4 mb-4">
+                                <button onclick="game.pronounceWord('${currentWord}')" class="btn btn-outline flex-1">
+                                    ${this.t('listen')}
+                                </button>
+                            </div>
+                            <input type="text" id="answerInput" class="input" ${this.currentWordCorrect ? 'disabled' : ''} />
+                            ${this.currentWordCorrect ? `
+                                <div class="success-feedback">${this.t('correct')}</div>
+                                ${!isLastWord ? `
+                                    <button onclick="game.nextWord()" class="btn btn-primary">
+                                        ${this.t('next')}
+                                    </button>
+                                ` : ''}
+                            ` : `
+                                <button onclick="game.checkAnswer()" class="btn btn-primary">
+                                    ${this.t('check')}
+                                </button>
+                            `}
+                            <div id="result"></div>
+                            ${this.currentWordCorrect ? this.getWordPatterns(currentWord) : ''}
                         </div>
                     `;
+                    
+                    if (!this.currentWordCorrect) {
+                        const input = document.querySelector('#answerInput');
+                        input.focus();
+                        input.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                game.checkAnswer();
+                            }
+                        });
+                    }
                 }
             }
         }
