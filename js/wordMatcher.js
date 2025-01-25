@@ -150,38 +150,19 @@ class WordMatcher {
         let result = '';
         let hasShownUnderscore = false;
         
-        // Helper to check if a character is a vowel
-        const isVowel = (char) => /[aeiou]/i.test(char);
-        
-        // Special case: if we have missing vowels, show underscores for them
-        const hasMissingVowels = comparison.some(item => 
-            item.type === 'missing' && isVowel(item.correctChar)
-        );
-        
-        if (hasMissingVowels) {
-            for (let i = 0; i < comparison.length; i++) {
-                const item = comparison[i];
-                if (item.type === 'match') {
-                    result += item.char;
-                } else if (item.type === 'missing' && isVowel(item.correctChar)) {
-                    result += '_';
-                } else if (item.type === 'missing') {
-                    result += item.correctChar;
-                }
+        // Build result by showing matches and one underscore for first missing letter
+        for (let i = 0; i < comparison.length; i++) {
+            const item = comparison[i];
+            
+            if (item.type === 'match') {
+                result += item.char;
+            } else if (item.type === 'missing' && !hasShownUnderscore) {
+                result += '_';
+                hasShownUnderscore = true;
+            } else if (item.type === 'missing') {
+                result += item.correctChar;
             }
-        } else {
-            // Normal case: show one underscore then all letters
-            for (let i = 0; i < comparison.length; i++) {
-                const item = comparison[i];
-                if (item.type === 'match') {
-                    result += item.char;
-                } else if (item.type === 'missing' && !hasShownUnderscore) {
-                    result += '_';
-                    hasShownUnderscore = true;
-                } else if (item.type === 'missing') {
-                    result += item.correctChar;
-                }
-            }
+            // Ignore 'extra' type items
         }
         
         return result;

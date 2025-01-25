@@ -115,7 +115,7 @@ describe('WordMatcher', () => {
     describe('getHint', () => {
         it('returns hint with underscores for missing letters', () => {
             const matcher = new WordMatcher();
-            expect(matcher.getHint('drvr', 'driver')).toBe('dr_v_r');
+            expect(matcher.getHint('drvr', 'driver')).toBe('dr_ver');
         });
 
         it('shows only first missing letter when letters are correct after it', () => {
@@ -140,7 +140,7 @@ describe('WordMatcher', () => {
 
         test('shows correct placement of underscores for missing vowels', () => {
             const matcher = new WordMatcher();
-            expect(matcher.getHint('drvr', 'driver')).toBe('dr_v_r');
+            expect(matcher.getHint('drvr', 'driver')).toBe('dr_ver');
         });
     });
 });
