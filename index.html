@@ -224,11 +224,7 @@
                                 </p>
                                 ${this.getWordPatterns(currentWord)}
                             </div>
-                        ` : `
-                            <button onclick="game.displayHint()" class="btn btn-outline w-full">
-                                Need a hint?
-                            </button>
-                        `}
+                        ` : ''}
                     </div>
                 `;
             }
@@ -287,11 +283,7 @@
                                 </p>
                                 ${this.getWordPatterns(currentWord)}
                             </div>
-                        ` : `
-                            <button onclick="game.displayHint()" class="btn btn-outline w-full">
-                                Need a hint?
-                            </button>
-                        `}
+                        ` : ''}
                     </div>
                 `;
             }
@@ -326,23 +318,6 @@
                     </div>
                 `;
                 setTimeout(() => this.pronounceWord(this.wordList[this.currentIndex]), 500);
-            }
-
-            displayHint() {
-                const input = document.querySelector('#answerInput');
-                const userAnswer = input.value;
-                const currentWord = this.wordList[this.currentIndex];
-                const hint = this.wordMatcher.getHint(userAnswer, currentWord);
-                
-                const resultDiv = document.querySelector('#result');
-                resultDiv.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <p class="text-sm font-medium text-blue-800 mb-2">Hint:</p>
-                            <p class="text-2xl font-mono tracking-wide text-center">${hint}</p>
-                        </div>
-                    </div>
-                `;
             }
 
             nextWord() {
@@ -395,17 +370,9 @@
                                     
                                     <p class="text-center">Word ${this.currentIndex + 1} of ${this.wordList.length}</p>
                                     
-                                    <div class="flex gap-2">
-                                        <button onclick="game.pronounceWord('${this.wordList[this.currentIndex]}')" class="btn btn-primary flex-1">
-                                            Listen to the word
-                                        </button>
-                                        
-                                        <button onclick="game.displayHint()" class="btn btn-outline">
-                                            Hint
-                                        </button>
-                                    </div>
-
-                                    <div id="hint" style="display: none;"></div>
+                                    <button onclick="game.pronounceWord('${this.wordList[this.currentIndex]}')" class="btn btn-primary w-full">
+                                        Listen to the word
+                                    </button>
 
                                     <input
                                         id="answerInput"
