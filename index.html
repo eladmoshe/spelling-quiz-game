@@ -54,6 +54,7 @@
                 this.wordList = [];
                 this.currentIndex = 0;
                 this.showPractice = false;
+                this.attempts = {};  // Track attempts per word
                 
                 this.app = document.getElementById('app');
                 this.render();
@@ -83,6 +84,7 @@
                 if (words.length > 0) {
                     this.wordList = this.shuffleArray(words);
                     this.currentIndex = 0;
+                    this.attempts = {};  // Reset attempts
                     this.showPractice = true;
                     this.pronounceWord(this.wordList[0]);
                     this.render();
@@ -124,7 +126,7 @@
                     let isBlend = false;
                     for (let blend of blends) {
                         if (word.slice(i, i + 2).toLowerCase() === blend) {
-                            html += `<span class="text-blue-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                            html += `<span class="text-indigo-600 font-bold">${word.slice(i, i + 2)}</span>`;
                             i++;
                             isBlend = true;
                             break;
@@ -134,21 +136,21 @@
 
                     // Check for vowel pairs
                     if ('aeiou'.includes(word[i].toLowerCase()) && 'aeiou'.includes(word[i + 1]?.toLowerCase())) {
-                        html += `<span class="text-purple-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                        html += `<span class="text-amber-600 font-bold">${word.slice(i, i + 2)}</span>`;
                         i++;
                         continue;
                     }
 
                     // Check for doubled letters
                     if (word[i].toLowerCase() === word[i + 1]?.toLowerCase()) {
-                        html += `<span class="text-green-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                        html += `<span class="text-teal-600 font-bold">${word.slice(i, i + 2)}</span>`;
                         i++;
                         continue;
                     }
 
                     // Individual vowels
                     if ('aeiou'.includes(word[i].toLowerCase())) {
-                        html += `<span class="text-red-600">${char}</span>`;
+                        html += `<span class="text-orange-600">${char}</span>`;
                     } else {
                         html += `<span class="text-gray-700">${char}</span>`;
                     }
@@ -156,25 +158,160 @@
 
                 html += `</p>
                     <div class="text-sm space-y-1">
-                        <p><span class="text-blue-600 font-bold">Blue</span>: Consonant blends (like 'sh', 'th')</p>
-                        <p><span class="text-purple-600 font-bold">Purple</span>: Vowel pairs</p>
-                        <p><span class="text-green-600 font-bold">Green</span>: Double letters</p>
-                        <p><span class="text-red-600">Red</span>: Single vowels</p>
+                        <p><span class="text-indigo-600 font-bold">Indigo</span>: Consonant blends (like 'sh', 'th')</p>
+                        <p><span class="text-amber-600 font-bold">Amber</span>: Vowel pairs</p>
+                        <p><span class="text-teal-600 font-bold">Teal</span>: Double letters</p>
+                        <p><span class="text-orange-600">Orange</span>: Single vowels</p>
                     </div></div>`;
                 return html;
+            }
+
+            compareWords(userAnswer, correctWord) {
+                userAnswer = userAnswer.toLowerCase();
+                correctWord = correctWord.toLowerCase();
+                let result = [];
+                let i = 0;
+                let j = 0;
+
+                while (i < userAnswer.length || j < correctWord.length) {
+                    // Look ahead for next matching sequence
+                    let bestMatch = {start: -1, length: 0};
+                    
+                    // Try to find the longest matching sequence ahead
+                    for (let lookAhead = 0; lookAhead < 3 && i + lookAhead < userAnswer.length; lookAhead++) {
+                        let matchLength = 0;
+                        while (i + lookAhead + matchLength < userAnswer.length && 
+                               j + matchLength < correctWord.length && 
+                               userAnswer[i + lookAhead + matchLength] === correctWord[j + matchLength]) {
+                            matchLength++;
+                        }
+                        if (matchLength > bestMatch.length) {
+                            bestMatch = {start: lookAhead, length: matchLength};
+                        }
+                    }
+
+                    // Case 1: Found a matching sequence
+                    if (bestMatch.length > 0) {
+                        // Add any missing letters before the match
+                        for (let k = 0; k < bestMatch.start; k++) {
+                            result.push({
+                                char: '_',
+                                status: 'missing',
+                                correctChar: correctWord[j],
+                                type: 'missing'
+                            });
+                            j++;
+                        }
+                        
+                        // Add the matching sequence
+                        for (let k = 0; k < bestMatch.length; k++) {
+                            result.push({
+                                char: userAnswer[i + bestMatch.start + k],
+                                status: 'correct',
+                                type: 'match'
+                            });
+                        }
+                        i += bestMatch.start + bestMatch.length;
+                        j += bestMatch.length;
+                        continue;
+                    }
+
+                    // Case 2: Missing letter in user answer
+                    if (j < correctWord.length && (i >= userAnswer.length || 
+                        (i + 1 < userAnswer.length && userAnswer[i + 1] === correctWord[j + 1]))) {
+                        result.push({
+                            char: '_',
+                            status: 'missing',
+                            correctChar: correctWord[j],
+                            type: 'missing'
+                        });
+                        j++;
+                        continue;
+                    }
+
+                    // Case 3: Extra or wrong letter in user answer
+                    if (i < userAnswer.length) {
+                        result.push({
+                            char: userAnswer[i],
+                            status: 'wrong',
+                            type: 'extra'
+                        });
+                        i++;
+                    }
+                }
+
+                return result;
+            }
+
+            findNextMatch(userSlice, correctSlice) {
+                if (!userSlice || !correctSlice) return -1;
+                for (let i = 0; i < correctSlice.length; i++) {
+                    if (userSlice[0] === correctSlice[i]) {
+                        return i;
+                    }
+                }
+                return -1;
             }
 
             checkAnswer() {
                 const input = document.querySelector('#answerInput');
                 const userAnswer = input.value;
                 const currentWord = this.wordList[this.currentIndex];
-                const isCorrect = userAnswer.toLowerCase() === currentWord.toLowerCase();
+                const comparison = this.compareWords(userAnswer, currentWord);
                 
-                if (isCorrect) {
-                    this.showSuccess();
+                if (!this.attempts[this.currentIndex]) {
+                    this.attempts[this.currentIndex] = 1;
                 } else {
-                    this.showError(userAnswer);
+                    this.attempts[this.currentIndex]++;
                 }
+
+                let comparisonHtml = '';
+                let errorMessage = '';
+
+                // Find the first error or missing letter
+                let firstError = comparison.find(c => c.status !== 'correct');
+                if (firstError) {
+                    if (firstError.type === 'missing') {
+                        errorMessage = `Missing letter: "${firstError.correctChar}"`;
+                    } else if (firstError.type === 'extra') {
+                        errorMessage = `Extra or incorrect letter: "${firstError.char}"`;
+                    }
+                }
+
+                // Generate the visual comparison
+                comparison.forEach(item => {
+                    if (item.status === 'correct') {
+                        comparisonHtml += `<span class="text-green-500">${item.char}</span>`;
+                    } else if (item.status === 'missing') {
+                        comparisonHtml += `<span class="text-red-500">_</span>`;
+                    } else if (item.status === 'wrong') {
+                        comparisonHtml += `<span class="text-red-500">${item.char}</span>`;
+                    }
+                });
+
+                const showPatternBreakdown = this.attempts[this.currentIndex] >= 3;
+                const resultDiv = document.querySelector('#result');
+                resultDiv.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <p class="text-sm font-medium text-red-800 mb-2">Your answer:</p>
+                            <p class="text-2xl font-mono tracking-wide">${comparisonHtml}</p>
+                            <p class="text-sm font-medium text-red-800 mt-2">${errorMessage}</p>
+                        </div>
+                        ${showPatternBreakdown ? `
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-800 mb-2">
+                                    Need help? Here's a pattern breakdown to help you remember:
+                                </p>
+                                ${this.getWordPatterns(currentWord)}
+                            </div>
+                        ` : `
+                            <button onclick="game.showHint()" class="btn btn-outline w-full">
+                                Need a hint?
+                            </button>
+                        `}
+                    </div>
+                `;
             }
 
             showSuccess() {
@@ -210,15 +347,77 @@
             }
 
             showError(userAnswer) {
-                const hint = this.getNextLetterHint(userAnswer);
-                const hintDiv = document.querySelector('#hint');
-                hintDiv.innerHTML = `
-                    <div class="bg-yellow-50 p-3 rounded-md">
-                        <p class="text-center font-medium mb-2">${hint.message}</p>
-                        <p class="font-mono text-center text-lg">${hint.progress}</p>
+                const currentWord = this.wordList[this.currentIndex];
+                const comparison = this.compareWords(userAnswer, currentWord);
+                
+                if (!this.attempts[this.currentIndex]) {
+                    this.attempts[this.currentIndex] = 1;
+                } else {
+                    this.attempts[this.currentIndex]++;
+                }
+
+                let comparisonHtml = '';
+                let errorMessage = '';
+
+                // Find the first error or missing letter
+                let firstError = comparison.find(c => c.status !== 'correct');
+                if (firstError) {
+                    if (firstError.type === 'missing') {
+                        errorMessage = `Missing letter: "${firstError.correctChar}"`;
+                    } else if (firstError.type === 'extra') {
+                        errorMessage = `Extra or incorrect letter: "${firstError.char}"`;
+                    }
+                }
+
+                // Generate the visual comparison
+                comparison.forEach(item => {
+                    if (item.status === 'correct') {
+                        comparisonHtml += `<span class="text-green-500">${item.char}</span>`;
+                    } else if (item.status === 'missing') {
+                        comparisonHtml += `<span class="text-red-500">_</span>`;
+                    } else if (item.status === 'wrong') {
+                        comparisonHtml += `<span class="text-red-500">${item.char}</span>`;
+                    }
+                });
+
+                const showPatternBreakdown = this.attempts[this.currentIndex] >= 3;
+                const resultDiv = document.querySelector('#result');
+                resultDiv.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <p class="text-sm font-medium text-red-800 mb-2">Your answer:</p>
+                            <p class="text-2xl font-mono tracking-wide">${comparisonHtml}</p>
+                            <p class="text-sm font-medium text-red-800 mt-2">${errorMessage}</p>
+                        </div>
+                        ${showPatternBreakdown ? `
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-800 mb-2">
+                                    Need help? Here's a pattern breakdown to help you remember:
+                                </p>
+                                ${this.getWordPatterns(currentWord)}
+                            </div>
+                        ` : `
+                            <button onclick="game.showHint()" class="btn btn-outline w-full">
+                                Need a hint?
+                            </button>
+                        `}
                     </div>
                 `;
-                hintDiv.style.display = 'block';
+            }
+
+            showHint() {
+                const currentWord = this.wordList[this.currentIndex];
+                const hintDiv = document.querySelector('#result');
+                const existingContent = hintDiv.querySelector('.space-y-4');
+                
+                existingContent.innerHTML += `
+                    <div class="bg-gray-50 p-4 rounded-lg mt-4">
+                        <p class="text-sm font-medium text-gray-800 mb-2">
+                            Pattern breakdown to help you remember:
+                        </p>
+                        ${this.getWordPatterns(currentWord)}
+                    </div>
+                `;
             }
 
             nextWord() {
