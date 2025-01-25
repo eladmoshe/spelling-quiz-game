@@ -176,7 +176,7 @@
                 const input = document.querySelector('#answerInput');
                 const userAnswer = input.value;
                 const currentWord = this.wordList[this.currentIndex];
-                const comparison = this.compareWords(userAnswer, currentWord);
+                const hint = this.wordMatcher.getHint(userAnswer, currentWord);
                 
                 if (!this.attempts[this.currentIndex]) {
                     this.attempts[this.currentIndex] = 1;
@@ -187,26 +187,33 @@
                 let comparisonHtml = '';
                 let errorMessage = '';
 
-                // Find the first error or missing letter
-                let firstError = comparison.find(c => c.status !== 'correct');
-                if (firstError) {
-                    if (firstError.type === 'missing') {
-                        errorMessage = `Missing letter: "${firstError.correctChar}"`;
-                    } else if (firstError.type === 'extra') {
-                        errorMessage = `Extra or incorrect letter: "${firstError.char}"`;
-                    }
-                }
-
                 // Generate the visual comparison
-                comparison.forEach(item => {
-                    if (item.status === 'correct') {
-                        comparisonHtml += `<span class="text-green-500">${item.char}</span>`;
-                    } else if (item.status === 'missing') {
+                let chars = hint.word.split('');
+                chars.forEach((char, i) => {
+                    if (hint.redLetters.includes(char)) {
+                        comparisonHtml += `<span class="text-red-500">${char}</span>`;
+                        if (!errorMessage) {
+                            errorMessage = `Extra or incorrect letter: "${char}"`;
+                        }
+                    } else if (hint.underscorePositions.includes(i)) {
                         comparisonHtml += `<span class="text-red-500">_</span>`;
-                    } else if (item.status === 'wrong') {
-                        comparisonHtml += `<span class="text-red-500">${item.char}</span>`;
+                        if (!errorMessage) {
+                            errorMessage = `Missing letter: "${currentWord[i]}"`;
+                        }
+                    } else {
+                        comparisonHtml += `<span class="text-green-500">${char}</span>`;
                     }
                 });
+
+                // Add underscores for any remaining missing letters
+                for (let i = chars.length; i < currentWord.length; i++) {
+                    if (hint.underscorePositions.includes(i)) {
+                        comparisonHtml += `<span class="text-red-500">_</span>`;
+                        if (!errorMessage) {
+                            errorMessage = `Missing letter: "${currentWord[i]}"`;
+                        }
+                    }
+                }
 
                 const showPatternBreakdown = this.attempts[this.currentIndex] >= 3;
                 const resultDiv = document.querySelector('#result');
@@ -231,7 +238,7 @@
 
             showError(userAnswer) {
                 const currentWord = this.wordList[this.currentIndex];
-                const comparison = this.compareWords(userAnswer, currentWord);
+                const hint = this.wordMatcher.getHint(userAnswer, currentWord);
                 
                 if (!this.attempts[this.currentIndex]) {
                     this.attempts[this.currentIndex] = 1;
@@ -241,40 +248,21 @@
 
                 let errorMessage = '';
 
-                // Find the first error or missing letter
-                let firstError = comparison.find(c => c.status !== 'correct');
-                if (firstError) {
-                    if (firstError.type === 'missing') {
-                        errorMessage = `Missing letter: "${firstError.correctChar}"`;
-                    } else if (firstError.type === 'extra') {
-                        errorMessage = `Extra or incorrect letter: "${firstError.char}"`;
-                    }
+                // Find the first error
+                if (hint.redLetters.length > 0) {
+                    errorMessage = `Extra or incorrect letter: "${hint.redLetters[0]}"`;
+                } else if (hint.underscorePositions.length > 0) {
+                    const pos = hint.underscorePositions[0];
+                    errorMessage = `Missing letter: "${currentWord[pos]}"`;
                 }
 
-                // Get the hint using our WordMatcher's getHint method
-                const hint = this.wordMatcher.getHint(userAnswer, currentWord);
-                
-                // Generate the visual comparison using the hint directly
-                let comparisonHtml = '';
-                for (let i = 0; i < hint.length; i++) {
-                    const char = hint[i];
-                    if (char === '_') {
-                        comparisonHtml += `<span class="text-red-500">_</span>`;
-                    } else if (i < userAnswer.length && char === userAnswer[i]) {
-                        comparisonHtml += `<span class="text-green-500">${char}</span>`;
-                    } else {
-                        comparisonHtml += `<span class="text-gray-500">${char}</span>`;
-                    }
-                }
-
+                // Show error message and word patterns after 3 attempts
                 const showPatternBreakdown = this.attempts[this.currentIndex] >= 3;
                 const resultDiv = document.querySelector('#result');
                 resultDiv.innerHTML = `
                     <div class="space-y-4">
                         <div class="bg-red-50 p-4 rounded-lg">
-                            <p class="text-sm font-medium text-red-800 mb-2">Your answer:</p>
-                            <p class="text-2xl font-mono tracking-wide">${comparisonHtml}</p>
-                            <p class="text-sm font-medium text-red-800 mt-2">${errorMessage}</p>
+                            <p class="text-sm font-medium text-red-800">${errorMessage}</p>
                         </div>
                         ${showPatternBreakdown ? `
                             <div class="bg-gray-50 p-4 rounded-lg">

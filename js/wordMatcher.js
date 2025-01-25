@@ -195,17 +195,27 @@ class WordMatcher {
             if (userLetter !== correctLetter) {
                 const remainingCount = (correctLetterCount.get(userLetter) || 0) - (usedLetters.get(userLetter) || 0);
                 
-                if (remainingCount <= 0) {
+                if (i >= userAnswer.length || i >= correctWord.length) {
+                    // Handle extra or missing letters at the end
+                    if (userLetter) {
+                        redLetters.add(userLetter);
+                    } else if (!foundFirstMissing) {
+                        underscorePositions.add(i);
+                        foundFirstMissing = true;
+                    }
+                } else if (remainingCount <= 0) {
                     // Letter is either wrong or extra
                     redLetters.add(userLetter);
                 } else if (!foundFirstMissing) {
-                    // Letter exists but in wrong position - show underscore
+                    // Letter exists but in wrong position - show underscore for the missing letter
                     underscorePositions.add(i);
                     foundFirstMissing = true;
                 }
                 
                 // Update used count
-                usedLetters.set(userLetter, (usedLetters.get(userLetter) || 0) + 1);
+                if (userLetter) {
+                    usedLetters.set(userLetter, (usedLetters.get(userLetter) || 0) + 1);
+                }
             }
         }
         
