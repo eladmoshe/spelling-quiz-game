@@ -57,6 +57,7 @@
                 this.currentIndex = 0;
                 this.showPractice = false;
                 this.attempts = {};  // Track attempts per word
+                this.currentWordCorrect = false;  // Track if current word is correct
                 
                 this.app = document.getElementById('app');
                 this.wordMatcher = new WordMatcher();
@@ -174,8 +175,20 @@
 
             checkAnswer() {
                 const input = document.querySelector('#answerInput');
-                const userAnswer = input.value;
-                const currentWord = this.wordList[this.currentIndex];
+                const userAnswer = input.value.trim().toLowerCase();
+                const currentWord = this.wordList[this.currentIndex].toLowerCase();
+                
+                if (userAnswer === currentWord) {
+                    this.currentWordCorrect = true;
+                    this.showSuccess();
+                    // Disable input and check button
+                    input.disabled = true;
+                    document.querySelector('button[onclick="game.checkAnswer()"]').disabled = true;
+                    // Play the word again after a short delay
+                    setTimeout(() => this.pronounceWord(this.wordList[this.currentIndex]), 1000);
+                    return;
+                }
+                
                 const hint = this.wordMatcher.getHint(userAnswer, currentWord);
                 
                 if (!this.attempts[this.currentIndex]) {
@@ -308,6 +321,7 @@
             nextWord() {
                 if (this.currentIndex < this.wordList.length - 1) {
                     this.currentIndex++;
+                    this.currentWordCorrect = false;  // Reset for new word
                     this.render();
                     setTimeout(() => this.pronounceWord(this.wordList[this.currentIndex]), 500);
                 } else {
@@ -364,9 +378,13 @@
                                         class="input text-lg text-center"
                                         placeholder="Type your answer"
                                         onkeypress="if(event.key === 'Enter') game.checkAnswer()"
+                                        ${this.currentWordCorrect ? 'disabled' : ''}
                                     />
 
-                                    <button onclick="game.checkAnswer()" class="btn btn-primary w-full">
+                                    <button 
+                                        onclick="game.checkAnswer()" 
+                                        class="btn btn-primary w-full"
+                                        ${this.currentWordCorrect ? 'disabled' : ''}>
                                         Check Answer
                                     </button>
 
