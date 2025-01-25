@@ -146,23 +146,42 @@ class WordMatcher {
      * @returns {string} The hint string with underscores for missing letters
      */
     getHint(userAnswer, correctWord) {
-        userAnswer = userAnswer.toLowerCase();
-        correctWord = correctWord.toLowerCase();
+        const comparison = this.compareWords(userAnswer, correctWord);
+        let result = '';
+        let hasShownUnderscore = false;
         
-        // Find the first mismatch
-        let firstMismatch = 0;
-        while (firstMismatch < userAnswer.length && firstMismatch < correctWord.length) {
-            if (userAnswer[firstMismatch] !== correctWord[firstMismatch]) {
-                break;
+        // Helper to check if a character is a vowel
+        const isVowel = (char) => /[aeiou]/i.test(char);
+        
+        // Special case: if we have missing vowels, show underscores for them
+        const hasMissingVowels = comparison.some(item => 
+            item.type === 'missing' && isVowel(item.correctChar)
+        );
+        
+        if (hasMissingVowels) {
+            for (let i = 0; i < comparison.length; i++) {
+                const item = comparison[i];
+                if (item.type === 'match') {
+                    result += item.char;
+                } else if (item.type === 'missing' && isVowel(item.correctChar)) {
+                    result += '_';
+                } else if (item.type === 'missing') {
+                    result += item.correctChar;
+                }
             }
-            firstMismatch++;
-        }
-        
-        // Build the hint string
-        let result = correctWord.substring(0, firstMismatch); // Keep all matching letters
-        if (firstMismatch < correctWord.length) {
-            result += '_'; // Show underscore for the first missing letter
-            result += correctWord.substring(firstMismatch + 1); // Show the rest of the word
+        } else {
+            // Normal case: show one underscore then all letters
+            for (let i = 0; i < comparison.length; i++) {
+                const item = comparison[i];
+                if (item.type === 'match') {
+                    result += item.char;
+                } else if (item.type === 'missing' && !hasShownUnderscore) {
+                    result += '_';
+                    hasShownUnderscore = true;
+                } else if (item.type === 'missing') {
+                    result += item.correctChar;
+                }
+            }
         }
         
         return result;
