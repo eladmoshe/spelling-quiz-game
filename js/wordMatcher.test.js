@@ -93,7 +93,7 @@ describe('WordMatcher', () => {
             const hint = matcher.getHint('drvr', 'driver');
             expect(hint).toEqual({
                 word: 'drvr',  // Show user's input
-                redLetters: [],  // No letters in red
+                redLetterPositions: [],  // No letters in red
                 underscorePositions: [2]  // Show underscore after 'dr'
             });
         });
@@ -103,7 +103,7 @@ describe('WordMatcher', () => {
             const hint = matcher.getHint('firemen', 'fireman');
             expect(hint).toEqual({
                 word: 'firemen',  // Show user's input
-                redLetters: ['e'],  // 'e' should be red
+                redLetterPositions: [5],  // Only the second 'e' should be red
                 underscorePositions: []  // No underscores
             });
         });
@@ -113,7 +113,7 @@ describe('WordMatcher', () => {
             const hint = matcher.getHint('vt', 'vet');
             expect(hint).toEqual({
                 word: 'vt',  // Show user's input
-                redLetters: [],  // No letters in red
+                redLetterPositions: [],  // No letters in red
                 underscorePositions: [1]  // Show underscore after 'v'
             });
         });
@@ -123,7 +123,7 @@ describe('WordMatcher', () => {
             const hint = matcher.getHint('vtt', 'vet');
             expect(hint).toEqual({
                 word: 'vtt',  // Show user's input
-                redLetters: ['t'],  // Middle 't' should be red
+                redLetterPositions: [1],  // First extra 't' should be red
                 underscorePositions: []  // No underscores
             });
         });
@@ -133,8 +133,18 @@ describe('WordMatcher', () => {
             const hint = matcher.getHint('nrse', 'nurse');
             expect(hint).toEqual({
                 word: 'nrse',  // Show user's input
-                redLetters: [],  // No letters in red
+                redLetterPositions: [],  // No letters in red
                 underscorePositions: [1]  // Show underscore after 'n'
+            });
+        });
+
+        it('shows hint for firemen case', () => {
+            const matcher = new WordMatcher();
+            const hint = matcher.getHint('firemen', 'fireman');
+            expect(hint).toEqual({
+                word: 'firemen',  // Show user's input
+                redLetterPositions: [5],  // The 'e' at position 5 should be red
+                underscorePositions: []  // No underscores
             });
         });
     });

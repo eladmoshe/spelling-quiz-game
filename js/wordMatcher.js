@@ -145,11 +145,11 @@ class WordMatcher {
      * @param {string} correctWord - The correct spelling
      * @returns {Object} Object containing:
      *   - word: the user's input
-     *   - redLetters: array of letters that should be shown in red (wrong or extra)
+     *   - redLetterPositions: array of positions where letters should be shown in red (wrong or extra)
      *   - underscorePositions: array of positions where underscores should be shown (first missing letter)
      */
     getHint(userAnswer, correctWord) {
-        const redLetters = new Set();
+        const redLetterPositions = new Set();
         const underscorePositions = new Set();
         let foundFirstMissing = false;
         
@@ -177,15 +177,11 @@ class WordMatcher {
             const userLetter = userAnswer[i];
             const correctLetter = correctWord[i];
             
-            if (i >= correctWord.length) {
-                // Extra letter at end
-                redLetters.add(userLetter);
-                continue;
-            }
-            
-            if (i >= userAnswer.length) {
-                // Missing letter at end
-                if (!foundFirstMissing) {
+            if (i >= userAnswer.length || i >= correctWord.length) {
+                // Handle extra or missing letters at the end
+                if (userLetter) {
+                    redLetterPositions.add(i);
+                } else if (!foundFirstMissing) {
                     underscorePositions.add(i);
                     foundFirstMissing = true;
                 }
@@ -195,19 +191,11 @@ class WordMatcher {
             if (userLetter !== correctLetter) {
                 const remainingCount = (correctLetterCount.get(userLetter) || 0) - (usedLetters.get(userLetter) || 0);
                 
-                if (i >= userAnswer.length || i >= correctWord.length) {
-                    // Handle extra or missing letters at the end
-                    if (userLetter) {
-                        redLetters.add(userLetter);
-                    } else if (!foundFirstMissing) {
-                        underscorePositions.add(i);
-                        foundFirstMissing = true;
-                    }
-                } else if (remainingCount <= 0) {
+                if (remainingCount <= 0) {
                     // Letter is either wrong or extra
-                    redLetters.add(userLetter);
+                    redLetterPositions.add(i);
                 } else if (!foundFirstMissing) {
-                    // Letter exists but in wrong position - show underscore for the missing letter
+                    // Letter exists but in wrong position - show underscore
                     underscorePositions.add(i);
                     foundFirstMissing = true;
                 }
@@ -221,7 +209,7 @@ class WordMatcher {
         
         return {
             word: userAnswer,
-            redLetters: Array.from(redLetters),
+            redLetterPositions: Array.from(redLetterPositions),
             underscorePositions: Array.from(underscorePositions)
         };
     }

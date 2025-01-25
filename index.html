@@ -190,7 +190,7 @@
                 // Generate the visual comparison
                 let chars = hint.word.split('');
                 chars.forEach((char, i) => {
-                    if (hint.redLetters.includes(char)) {
+                    if (hint.redLetterPositions.includes(i)) {
                         comparisonHtml += `<span class="text-red-500">${char}</span>`;
                         if (!errorMessage) {
                             errorMessage = `Extra or incorrect letter: "${char}"`;
@@ -249,8 +249,9 @@
                 let errorMessage = '';
 
                 // Find the first error
-                if (hint.redLetters.length > 0) {
-                    errorMessage = `Extra or incorrect letter: "${hint.redLetters[0]}"`;
+                if (hint.redLetterPositions.length > 0) {
+                    const pos = hint.redLetterPositions[0];
+                    errorMessage = `Extra or incorrect letter: "${userAnswer[pos]}"`;
                 } else if (hint.underscorePositions.length > 0) {
                     const pos = hint.underscorePositions[0];
                     errorMessage = `Missing letter: "${currentWord[pos]}"`;
