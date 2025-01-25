@@ -169,56 +169,49 @@
             compareWords(userAnswer, correctWord) {
                 userAnswer = userAnswer.toLowerCase();
                 correctWord = correctWord.toLowerCase();
+                
+                // Find the longest common subsequence
+                const lcs = this.longestCommonSubsequence(userAnswer, correctWord);
+                
                 let result = [];
-                let i = 0;
-                let j = 0;
-
-                while (i < userAnswer.length || j < correctWord.length) {
-                    // Look ahead for next matching sequence
-                    let bestMatch = {start: -1, length: 0};
-                    
-                    // Try to find the longest matching sequence ahead
-                    for (let lookAhead = 0; lookAhead < 3 && i + lookAhead < userAnswer.length; lookAhead++) {
-                        let matchLength = 0;
-                        while (i + lookAhead + matchLength < userAnswer.length && 
-                               j + matchLength < correctWord.length && 
-                               userAnswer[i + lookAhead + matchLength] === correctWord[j + matchLength]) {
-                            matchLength++;
-                        }
-                        if (matchLength > bestMatch.length) {
-                            bestMatch = {start: lookAhead, length: matchLength};
-                        }
-                    }
-
-                    // Case 1: Found a matching sequence
-                    if (bestMatch.length > 0) {
-                        // Add any missing letters before the match
-                        for (let k = 0; k < bestMatch.start; k++) {
-                            result.push({
-                                char: '_',
-                                status: 'missing',
-                                correctChar: correctWord[j],
-                                type: 'missing'
-                            });
-                            j++;
-                        }
-                        
-                        // Add the matching sequence
-                        for (let k = 0; k < bestMatch.length; k++) {
-                            result.push({
-                                char: userAnswer[i + bestMatch.start + k],
-                                status: 'correct',
-                                type: 'match'
-                            });
-                        }
-                        i += bestMatch.start + bestMatch.length;
-                        j += bestMatch.length;
-                        continue;
-                    }
-
-                    // Case 2: Missing letter in user answer
-                    if (j < correctWord.length && (i >= userAnswer.length || 
-                        (i + 1 < userAnswer.length && userAnswer[i + 1] === correctWord[j + 1]))) {
+                let i = 0;  // index in userAnswer
+                let j = 0;  // index in correctWord
+                let k = 0;  // index in lcs
+                
+                while (j < correctWord.length) {
+                    if (k < lcs.length && i < userAnswer.length && 
+                        userAnswer[i] === lcs[k] && 
+                        correctWord[j] === lcs[k]) {
+                        // Matching character from LCS
+                        result.push({
+                            char: userAnswer[i],
+                            status: 'correct',
+                            type: 'match'
+                        });
+                        i++;
+                        j++;
+                        k++;
+                    } else if (i < userAnswer.length && userAnswer[i] === correctWord[j]) {
+                        // Matching character not in LCS
+                        result.push({
+                            char: userAnswer[i],
+                            status: 'correct',
+                            type: 'match'
+                        });
+                        i++;
+                        j++;
+                    } else if (i < userAnswer.length && 
+                             k < lcs.length && 
+                             userAnswer[i] === lcs[k]) {
+                        // Extra character in user answer
+                        result.push({
+                            char: userAnswer[i],
+                            status: 'wrong',
+                            type: 'extra'
+                        });
+                        i++;
+                    } else {
+                        // Missing character in user answer
                         result.push({
                             char: '_',
                             status: 'missing',
@@ -226,21 +219,60 @@
                             type: 'missing'
                         });
                         j++;
-                        continue;
-                    }
-
-                    // Case 3: Extra or wrong letter in user answer
-                    if (i < userAnswer.length) {
-                        result.push({
-                            char: userAnswer[i],
-                            status: 'wrong',
-                            type: 'extra'
-                        });
-                        i++;
                     }
                 }
-
+                
+                // Add any remaining extra characters from user answer
+                while (i < userAnswer.length) {
+                    result.push({
+                        char: userAnswer[i],
+                        status: 'wrong',
+                        type: 'extra'
+                    });
+                    i++;
+                }
+                
                 return result;
+            }
+
+            longestCommonSubsequence(str1, str2) {
+                const m = str1.length;
+                const n = str2.length;
+                const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
+                const backtrack = Array(m + 1).fill().map(() => Array(n + 1).fill(''));
+                
+                // Fill the dp table
+                for (let i = 1; i <= m; i++) {
+                    for (let j = 1; j <= n; j++) {
+                        if (str1[i - 1] === str2[j - 1]) {
+                            dp[i][j] = dp[i - 1][j - 1] + 1;
+                            backtrack[i][j] = 'diag';
+                        } else if (dp[i - 1][j] >= dp[i][j - 1]) {
+                            dp[i][j] = dp[i - 1][j];
+                            backtrack[i][j] = 'up';
+                        } else {
+                            dp[i][j] = dp[i][j - 1];
+                            backtrack[i][j] = 'left';
+                        }
+                    }
+                }
+                
+                // Reconstruct the LCS
+                let lcs = '';
+                let i = m, j = n;
+                while (i > 0 && j > 0) {
+                    if (backtrack[i][j] === 'diag') {
+                        lcs = str1[i - 1] + lcs;
+                        i--;
+                        j--;
+                    } else if (backtrack[i][j] === 'up') {
+                        i--;
+                    } else {
+                        j--;
+                    }
+                }
+                
+                return lcs;
             }
 
             findNextMatch(userSlice, correctSlice) {
