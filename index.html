@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spelling Game</title>
+    <title>Spelling Quiz</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
         .card {
@@ -47,8 +47,10 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
     <div id="app" class="max-w-2xl mx-auto"></div>
-
-    <script>
+    
+    <script type="module">
+        import WordMatcher from './js/wordMatcher.js';
+        
         class SpellingGame {
             constructor() {
                 this.wordList = [];
@@ -57,6 +59,7 @@
                 this.attempts = {};  // Track attempts per word
                 
                 this.app = document.getElementById('app');
+                this.wordMatcher = new WordMatcher();
                 this.render();
             }
 
@@ -167,122 +170,11 @@
             }
 
             compareWords(userAnswer, correctWord) {
-                userAnswer = userAnswer.toLowerCase();
-                correctWord = correctWord.toLowerCase();
-                
-                // Find the longest common subsequence
-                const lcs = this.longestCommonSubsequence(userAnswer, correctWord);
-                
-                let result = [];
-                let i = 0;  // index in userAnswer
-                let j = 0;  // index in correctWord
-                let k = 0;  // index in lcs
-                
-                while (j < correctWord.length) {
-                    if (k < lcs.length && i < userAnswer.length && 
-                        userAnswer[i] === lcs[k] && 
-                        correctWord[j] === lcs[k]) {
-                        // Matching character from LCS
-                        result.push({
-                            char: userAnswer[i],
-                            status: 'correct',
-                            type: 'match'
-                        });
-                        i++;
-                        j++;
-                        k++;
-                    } else if (i < userAnswer.length && userAnswer[i] === correctWord[j]) {
-                        // Matching character not in LCS
-                        result.push({
-                            char: userAnswer[i],
-                            status: 'correct',
-                            type: 'match'
-                        });
-                        i++;
-                        j++;
-                    } else if (i < userAnswer.length && 
-                             k < lcs.length && 
-                             userAnswer[i] === lcs[k]) {
-                        // Extra character in user answer
-                        result.push({
-                            char: userAnswer[i],
-                            status: 'wrong',
-                            type: 'extra'
-                        });
-                        i++;
-                    } else {
-                        // Missing character in user answer
-                        result.push({
-                            char: '_',
-                            status: 'missing',
-                            correctChar: correctWord[j],
-                            type: 'missing'
-                        });
-                        j++;
-                    }
-                }
-                
-                // Add any remaining extra characters from user answer
-                while (i < userAnswer.length) {
-                    result.push({
-                        char: userAnswer[i],
-                        status: 'wrong',
-                        type: 'extra'
-                    });
-                    i++;
-                }
-                
-                return result;
-            }
-
-            longestCommonSubsequence(str1, str2) {
-                const m = str1.length;
-                const n = str2.length;
-                const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
-                const backtrack = Array(m + 1).fill().map(() => Array(n + 1).fill(''));
-                
-                // Fill the dp table
-                for (let i = 1; i <= m; i++) {
-                    for (let j = 1; j <= n; j++) {
-                        if (str1[i - 1] === str2[j - 1]) {
-                            dp[i][j] = dp[i - 1][j - 1] + 1;
-                            backtrack[i][j] = 'diag';
-                        } else if (dp[i - 1][j] >= dp[i][j - 1]) {
-                            dp[i][j] = dp[i - 1][j];
-                            backtrack[i][j] = 'up';
-                        } else {
-                            dp[i][j] = dp[i][j - 1];
-                            backtrack[i][j] = 'left';
-                        }
-                    }
-                }
-                
-                // Reconstruct the LCS
-                let lcs = '';
-                let i = m, j = n;
-                while (i > 0 && j > 0) {
-                    if (backtrack[i][j] === 'diag') {
-                        lcs = str1[i - 1] + lcs;
-                        i--;
-                        j--;
-                    } else if (backtrack[i][j] === 'up') {
-                        i--;
-                    } else {
-                        j--;
-                    }
-                }
-                
-                return lcs;
+                return this.wordMatcher.compareWords(userAnswer, correctWord);
             }
 
             findNextMatch(userSlice, correctSlice) {
-                if (!userSlice || !correctSlice) return -1;
-                for (let i = 0; i < correctSlice.length; i++) {
-                    if (userSlice[0] === correctSlice[i]) {
-                        return i;
-                    }
-                }
-                return -1;
+                return this.wordMatcher.findNextMatch(userSlice, correctSlice);
             }
 
             checkAnswer() {
@@ -534,7 +426,8 @@
             }
         }
 
-        const game = new SpellingGame();
+        // Create and initialize the game instance
+        window.game = new SpellingGame();
     </script>
 </body>
 </html>
