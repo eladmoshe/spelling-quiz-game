@@ -111,4 +111,11 @@ describe('WordMatcher', () => {
             ]);
         });
     });
+
+    describe('getHint', () => {
+        test('returns hint with underscores for missing letters', () => {
+            const hint = wordMatcher.getHint('drvr', 'driver');
+            expect(hint).toBe('dr_ver');
+        });
+    });
 });

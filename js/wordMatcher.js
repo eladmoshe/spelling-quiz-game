@@ -138,6 +138,35 @@ class WordMatcher {
         }
         return -1;
     }
+
+    /**
+     * Generates a hint string where missing letters are replaced with underscores
+     * @param {string} userAnswer - The user's attempted spelling
+     * @param {string} correctWord - The correct spelling of the word
+     * @returns {string} The hint string with underscores for missing letters
+     */
+    getHint(userAnswer, correctWord) {
+        userAnswer = userAnswer.toLowerCase();
+        correctWord = correctWord.toLowerCase();
+        
+        // Find the first mismatch
+        let firstMismatch = 0;
+        while (firstMismatch < userAnswer.length && firstMismatch < correctWord.length) {
+            if (userAnswer[firstMismatch] !== correctWord[firstMismatch]) {
+                break;
+            }
+            firstMismatch++;
+        }
+        
+        // Build the hint string
+        let result = correctWord.substring(0, firstMismatch); // Keep all matching letters
+        if (firstMismatch < correctWord.length) {
+            result += '_'; // Show underscore for the first missing letter
+            result += correctWord.substring(firstMismatch + 1); // Show the rest of the word
+        }
+        
+        return result;
+    }
 }
 
 // Export the WordMatcher class
