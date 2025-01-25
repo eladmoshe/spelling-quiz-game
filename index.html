@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spelling Game</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-outline {
+            border: 1px solid #e5e7eb;
+            background-color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+    <div id="app" class="max-w-2xl mx-auto"></div>
+
+    <script>
+        class SpellingGame {
+            constructor() {
+                this.wordList = [];
+                this.currentIndex = 0;
+                this.showPractice = false;
+                
+                this.app = document.getElementById('app');
+                this.render();
+            }
+
+            shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+
+            pronounceWord(word) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.rate = 0.5;
+                utterance.pitch = 1;
+                utterance.volume = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            handleStart() {
+                const input = document.querySelector('#wordInput');
+                const words = input.value.split(',').map(word => word.trim()).filter(word => word);
+                if (words.length > 0) {
+                    this.wordList = this.shuffleArray(words);
+                    this.currentIndex = 0;
+                    this.showPractice = true;
+                    this.pronounceWord(this.wordList[0]);
+                    this.render();
+                }
+            }
+
+            getNextLetterHint(userAnswer) {
+                const currentWord = this.wordList[this.currentIndex];
+                const correctSoFar = userAnswer.toLowerCase();
+                
+                if (currentWord.toLowerCase().startsWith(correctSoFar)) {
+                    const nextLetterIndex = correctSoFar.length;
+                    if (nextLetterIndex < currentWord.length) {
+                        return {
+                            correct: true,
+                            message: `Next letter is: "${currentWord[nextLetterIndex]}"`,
+                            progress: `${correctSoFar}${currentWord[nextLetterIndex]}${'_'.repeat(currentWord.length - nextLetterIndex - 1)}`
+                        };
+                    }
+                }
+
+                const firstWrongIndex = [...correctSoFar].findIndex((char, index) => 
+                    char !== currentWord[index]?.toLowerCase()
+                );
+                return {
+                    correct: false,
+                    message: `Check letter #${firstWrongIndex + 1}. Should be: "${currentWord[firstWrongIndex]}"`,
+                    progress: `${currentWord.slice(0, firstWrongIndex)}${currentWord[firstWrongIndex]}${'_'.repeat(currentWord.length - firstWrongIndex - 1)}`
+                };
+            }
+
+            getWordPatterns(word) {
+                let html = '<div class="space-y-2"><p class="text-2xl font-mono tracking-wide text-center">';
+                
+                for (let i = 0; i < word.length; i++) {
+                    const char = word[i];
+                    // Check for consonant blends
+                    const blends = ['bl','br','ch','cl','cr','dr','fl','fr','gl','gr','pl','pr','sc','sh','sk','sl','sm','sn','sp','st','sw','th','tr','tw','wh'];
+                    let isBlend = false;
+                    for (let blend of blends) {
+                        if (word.slice(i, i + 2).toLowerCase() === blend) {
+                            html += `<span class="text-blue-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                            i++;
+                            isBlend = true;
+                            break;
+                        }
+                    }
+                    if (isBlend) continue;
+
+                    // Check for vowel pairs
+                    if ('aeiou'.includes(word[i].toLowerCase()) && 'aeiou'.includes(word[i + 1]?.toLowerCase())) {
+                        html += `<span class="text-purple-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                        i++;
+                        continue;
+                    }
+
+                    // Check for doubled letters
+                    if (word[i].toLowerCase() === word[i + 1]?.toLowerCase()) {
+                        html += `<span class="text-green-600 font-bold">${word.slice(i, i + 2)}</span>`;
+                        i++;
+                        continue;
+                    }
+
+                    // Individual vowels
+                    if ('aeiou'.includes(word[i].toLowerCase())) {
+                        html += `<span class="text-red-600">${char}</span>`;
+                    } else {
+                        html += `<span class="text-gray-700">${char}</span>`;
+                    }
+                }
+
+                html += `</p>
+                    <div class="text-sm space-y-1">
+                        <p><span class="text-blue-600 font-bold">Blue</span>: Consonant blends (like 'sh', 'th')</p>
+                        <p><span class="text-purple-600 font-bold">Purple</span>: Vowel pairs</p>
+                        <p><span class="text-green-600 font-bold">Green</span>: Double letters</p>
+                        <p><span class="text-red-600">Red</span>: Single vowels</p>
+                    </div></div>`;
+                return html;
+            }
+
+            checkAnswer() {
+                const input = document.querySelector('#answerInput');
+                const userAnswer = input.value;
+                const currentWord = this.wordList[this.currentIndex];
+                const isCorrect = userAnswer.toLowerCase() === currentWord.toLowerCase();
+                
+                if (isCorrect) {
+                    this.showSuccess();
+                } else {
+                    this.showError(userAnswer);
+                }
+            }
+
+            showSuccess() {
+                const resultDiv = document.querySelector('#result');
+                resultDiv.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-center gap-2 text-green-500">
+                            <span class="text-lg font-medium">Excellent job!</span>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <p class="text-sm font-medium text-green-800 mb-2">
+                                Let's break down this word to help you remember it:
+                            </p>
+                            ${this.getWordPatterns(this.wordList[this.currentIndex])}
+                        </div>
+                        ${this.currentIndex < this.wordList.length - 1 ? `
+                            <button onclick="game.nextWord()" class="btn btn-primary w-full">
+                                Next Word
+                            </button>
+                        ` : `
+                            <div class="text-center">
+                                <p class="text-lg font-medium text-green-500 mb-4">
+                                    Congratulations! You've completed all words! 🎉
+                                </p>
+                                <button onclick="game.reset()" class="btn btn-primary">
+                                    Practice New Words
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                `;
+                setTimeout(() => this.pronounceWord(this.wordList[this.currentIndex]), 500);
+            }
+
+            showError(userAnswer) {
+                const hint = this.getNextLetterHint(userAnswer);
+                const hintDiv = document.querySelector('#hint');
+                hintDiv.innerHTML = `
+                    <div class="bg-yellow-50 p-3 rounded-md">
+                        <p class="text-center font-medium mb-2">${hint.message}</p>
+                        <p class="font-mono text-center text-lg">${hint.progress}</p>
+                    </div>
+                `;
+                hintDiv.style.display = 'block';
+            }
+
+            nextWord() {
+                if (this.currentIndex < this.wordList.length - 1) {
+                    this.currentIndex++;
+                    this.render();
+                    setTimeout(() => this.pronounceWord(this.wordList[this.currentIndex]), 500);
+                } else {
+                    this.reset();
+                }
+            }
+
+            reset() {
+                this.wordList = [];
+                this.currentIndex = 0;
+                this.showPractice = false;
+                this.render();
+            }
+
+            render() {
+                if (!this.showPractice) {
+                    this.app.innerHTML = `
+                        <div class="card">
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <h2 class="text-xl font-bold">Enter Words</h2>
+                                    <input
+                                        id="wordInput"
+                                        class="input"
+                                        placeholder="Enter words separated by commas"
+                                    />
+                                    <button onclick="game.handleStart()" class="btn btn-primary w-full">
+                                        Start Practice
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    this.app.innerHTML = `
+                        <div class="card">
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <h2 class="text-xl font-bold">Spell the Word</h2>
+                                        <button onclick="game.reset()" class="btn btn-outline">
+                                            New Words
+                                        </button>
+                                    </div>
+                                    
+                                    <p class="text-center">Word ${this.currentIndex + 1} of ${this.wordList.length}</p>
+                                    
+                                    <div class="flex gap-2">
+                                        <button onclick="game.pronounceWord('${this.wordList[this.currentIndex]}')" class="btn btn-primary flex-1">
+                                            Listen to the word
+                                        </button>
+                                        
+                                        <button onclick="game.showError(document.querySelector('#answerInput').value)" class="btn btn-outline">
+                                            Hint
+                                        </button>
+                                    </div>
+
+                                    <div id="hint" style="display: none;"></div>
+
+                                    <input
+                                        id="answerInput"
+                                        class="input text-lg text-center"
+                                        placeholder="Type your answer"
+                                        onkeypress="if(event.key === 'Enter') game.checkAnswer()"
+                                    />
+
+                                    <button onclick="game.checkAnswer()" class="btn btn-primary w-full">
+                                        Check Answer
+                                    </button>
+
+                                    <div id="result"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        const game = new SpellingGame();
+    </script>
+</body>
+</html>
