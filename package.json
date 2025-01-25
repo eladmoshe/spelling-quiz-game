@@ -3,10 +3,19 @@
   "version": "1.0.0",
   "description": "A spelling quiz game",
   "main": "index.html",
+  "type": "module",
   "scripts": {
-    "start": "http-server -c-1"
+    "start": "http-server -c-1",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "http-server": "^14.1.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "transform": {},
+    "testEnvironment": "node"
   }
 }
