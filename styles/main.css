@@ -132,6 +132,15 @@ body {
     color: var(--text);
 }
 
+.input.error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.input.error::placeholder {
+    color: #ef4444;
+}
+
 .input:focus {
     outline: none;
     border-color: var(--primary);
@@ -163,10 +172,21 @@ body {
 }
 
 @keyframes celebrate {
-    0% { transform: scale(1) rotate(0); }
-    25% { transform: scale(1.3) rotate(-10deg); }
-    75% { transform: scale(1.3) rotate(10deg); }
-    100% { transform: scale(1) rotate(0); }
+    0% {
+        transform: scale(1) rotate(0);
+    }
+
+    25% {
+        transform: scale(1.3) rotate(-10deg);
+    }
+
+    75% {
+        transform: scale(1.3) rotate(10deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+    }
 }
 
 .celebration {
@@ -253,9 +273,17 @@ body {
 }
 
 @keyframes confettiSway {
-    0% { transform: translateX(-8px) rotate(-5deg); }
-    50% { transform: translateX(8px) rotate(5deg); }
-    100% { transform: translateX(-8px) rotate(-5deg); }
+    0% {
+        transform: translateX(-8px) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateX(8px) rotate(5deg);
+    }
+
+    100% {
+        transform: translateX(-8px) rotate(-5deg);
+    }
 }
 
 .confetti {
@@ -286,14 +314,17 @@ body {
         transform: translateY(-100vh) rotate(0deg) scale(0);
         opacity: 1;
     }
+
     10% {
         transform: translateY(-80vh) rotate(90deg) scale(1);
         opacity: 1;
     }
+
     50% {
         transform: translateY(0) rotate(360deg) scale(1);
         opacity: 1;
     }
+
     100% {
         transform: translateY(100vh) rotate(720deg) scale(0.5);
         opacity: 0;
@@ -305,12 +336,15 @@ body {
         transform: scale(0) rotate(-45deg);
         opacity: 0;
     }
+
     50% {
         transform: scale(1.2) rotate(10deg);
     }
+
     75% {
         transform: scale(0.9) rotate(-5deg);
     }
+
     100% {
         transform: scale(1) rotate(0);
         opacity: 1;

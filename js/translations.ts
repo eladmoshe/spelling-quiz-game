@@ -32,6 +32,7 @@ interface Translation {
     perfectWords: string;
     accuracy: string;
     showMistakes: string;
+    onlyEnglishLetters: string;
 }
 
 interface Translations {
@@ -71,7 +72,8 @@ export const translations: Translations = {
             doubleLetters: "Double letters",
             singleVowels: "Single vowels"
         },
-        showMistakes: 'Show Mistakes Report'
+        showMistakes: 'Show Mistakes Report',
+        onlyEnglishLetters: 'Only English letters allowed'
     },
     he: {
         title: 'תרגול איות',
@@ -104,6 +106,7 @@ export const translations: Translations = {
             doubleLetters: "אותיות כפולות",
             singleVowels: "תנועות בודדות"
         },
-        showMistakes: 'הצג דוח טעויות'
+        showMistakes: 'הצג דוח טעויות',
+        onlyEnglishLetters: 'רק אותיות באנגלית מותרות'
     }
 };

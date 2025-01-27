@@ -515,7 +515,44 @@ class SpellingGame {
         const input = document.querySelector('#wordInput') as HTMLInputElement;
         if (!input) return;
 
-        const words = input.value.split(',').map(word => word.trim()).filter(word => word);
+        // Add input validation
+        const inputValue = input.value;
+        const isValidInput = /^[a-zA-Z,\s]+$/.test(inputValue);
+        
+        if (!isValidInput) {
+            input.classList.add('error');
+            // Clear the input value and set error message
+            input.value = '';
+            input.placeholder = translations[this.language].onlyEnglishLetters;
+            
+            // Add error message below the input
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'text-red-500 text-sm mt-1';
+            errorDiv.textContent = translations[this.language].onlyEnglishLetters;
+            
+            // Remove any existing error message
+            const existingError = input.parentElement?.querySelector('.text-red-500');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Add new error message
+            input.parentElement?.appendChild(errorDiv);
+            
+            // Remove error state after 3 seconds
+            setTimeout(() => {
+                input.classList.remove('error');
+                errorDiv.remove();
+                input.placeholder = translations[this.language].wordsPlaceholder;
+            }, 3000);
+            
+            return;
+        }
+
+        const words = inputValue.split(',')
+            .map(word => word.trim())
+            .filter(word => word && /^[a-zA-Z\s]+$/.test(word));
+
         if (words.length > 0) {
             this.savePreviousWordSet(words);
             this.wordList = this.shuffleArray(words);
