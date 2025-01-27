@@ -217,14 +217,89 @@ class SpellingGame {
     }
 
     private createConfetti(): void {
-        for (let i = 0; i < 50; i++) {
+        const shapes = ['square', 'triangle', 'circle'];
+        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+        
+        for (let i = 0; i < 100; i++) {
             const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.left = Math.random() * window.innerWidth + 'px';
-            confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 50%)`;
-            confetti.style.animation = `confetti ${1 + Math.random() * 2}s linear forwards`;
+            confetti.className = `confetti ${shapes[Math.floor(Math.random() * shapes.length)]}`;
+            confetti.style.left = `${Math.random() * 100}vw`;
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = `${Math.random() * 2}s`;
+            confetti.style.animationDuration = `${3 + Math.random() * 2}s`;
             document.body.appendChild(confetti);
-            setTimeout(() => confetti.remove(), 3000);
+            setTimeout(() => confetti.remove(), 5000);
+        }
+    }
+
+    private getCompletionStats(): { totalAttempts: number; perfectWords: number } {
+        const totalAttempts = Object.values(this.attempts).reduce((sum, attempts) => sum + attempts, 0);
+        const perfectWords = Object.values(this.attempts).filter(attempts => attempts === 1).length;
+        return { totalAttempts, perfectWords };
+    }
+
+    private renderCompletionScreen(): string {
+        const stats = this.getCompletionStats();
+        const accuracy = Math.round((stats.perfectWords / this.wordList.length) * 100);
+        
+        return `
+            <div class="card text-center">
+                <div class="space-y-8">
+                    <div class="space-y-4">
+                        <div class="text-6xl mb-4">🎉</div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            ${translations[this.language].practiceComplete}
+                        </h1>
+                        <p class="text-lg text-gray-600">
+                            ${translations[this.language].greatJob || 'Great job practicing your spelling!'}
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600">${this.wordList.length}</div>
+                            <div class="text-sm text-gray-600">${translations[this.language].totalWords || 'Total Words'}</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600">${stats.perfectWords}</div>
+                            <div class="text-sm text-gray-600">${translations[this.language].perfectWords || 'Perfect Words'}</div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-yellow-600">${accuracy}%</div>
+                            <div class="text-sm text-gray-600">${translations[this.language].accuracy || 'Accuracy'}</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <button onclick="window.game.startOver()" class="btn btn-primary">
+                            ${translations[this.language].startOver}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    public startOver(): void {
+        this.showPractice = false;
+        this.wordList = [];
+        this.currentIndex = 0;
+        this.attempts = {};
+        this.currentWordCorrect = false;
+        this.render();
+    }
+
+    public nextWord(): void {
+        if (this.currentIndex < this.wordList.length - 1) {
+            this.currentIndex++;
+            this.currentWordCorrect = false;
+            this.pronounceWord(this.wordList[this.currentIndex]);
+            this.render();
+        } else {
+            // Show completion screen with confetti
+            this.showPractice = false;
+            this.createConfetti();
+            this.render();
         }
     }
 
@@ -347,7 +422,53 @@ class SpellingGame {
     }
 
     private render(): void {
-        const practiceSection = this.showPractice ? this.renderPracticeSection() : '';
+        let content;
+        
+        if (!this.showPractice && this.wordList.length > 0) {
+            // Show completion screen
+            content = this.renderCompletionScreen();
+        } else if (!this.showPractice) {
+            // Show initial screen
+            content = `
+                <div class="card">
+                    <div class="space-y-6">
+                        <div class="text-center">
+                            <h1 class="title">
+                                ${translations[this.language].title}
+                            </h1>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700">
+                                    ${translations[this.language].enterWords}
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="wordInput" 
+                                    class="input" 
+                                    placeholder="${translations[this.language].wordsPlaceholder}"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                >
+                                <p class="hint">
+                                    ${translations[this.language].instructions}
+                                </p>
+                            </div>
+                            <button 
+                                onclick="window.game.handleStart()"
+                                class="btn btn-primary"
+                            >
+                                ${translations[this.language].start}
+                            </button>
+                        </div>
+                        ${this.renderPreviousSets()}
+                    </div>
+                </div>
+            `;
+        } else {
+            // Show practice screen
+            content = this.renderPracticeSection();
+        }
         
         this.app.innerHTML = `
             <div class="container mx-auto px-4 py-8 max-w-2xl">
@@ -359,42 +480,7 @@ class SpellingGame {
                         ${this.language === 'en' ? 'עברית' : 'English'}
                     </button>
                 </div>
-                ${!this.showPractice ? `
-                    <div class="card">
-                        <div class="space-y-6">
-                            <div class="text-center">
-                                <h1 class="title">
-                                    ${translations[this.language].title}
-                                </h1>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="space-y-2">
-                                    <label class="block text-sm font-medium text-gray-700">
-                                        ${translations[this.language].enterWords}
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="wordInput" 
-                                        class="input" 
-                                        placeholder="${translations[this.language].wordsPlaceholder}"
-                                        autocomplete="off"
-                                        spellcheck="false"
-                                    >
-                                    <p class="hint">
-                                        ${translations[this.language].instructions}
-                                    </p>
-                                </div>
-                                <button 
-                                    onclick="window.game.handleStart()"
-                                    class="btn btn-primary"
-                                >
-                                    ${translations[this.language].start}
-                                </button>
-                            </div>
-                            ${this.renderPreviousSets()}
-                        </div>
-                    </div>
-                ` : practiceSection}
+                ${content}
             </div>
         `;
     }
@@ -403,18 +489,6 @@ class SpellingGame {
         this.language = this.language === 'en' ? 'he' : 'en';
         localStorage.setItem('spellingQuizLanguage', this.language);
         this.render();
-    }
-
-    public nextWord(): void {
-        if (this.currentIndex < this.wordList.length - 1) {
-            this.currentIndex++;
-            this.currentWordCorrect = false;
-            this.pronounceWord(this.wordList[this.currentIndex]);
-            this.render();
-        } else {
-            this.showPractice = false;
-            this.render();
-        }
     }
 }
 

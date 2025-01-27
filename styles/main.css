@@ -205,17 +205,45 @@ body {
     width: 10px;
     height: 10px;
     opacity: 0;
-    animation: confettiFall 3s ease-in forwards;
+    transform-origin: center;
+    animation: confettiFall 4s ease-in-out forwards;
     pointer-events: none;
+    z-index: 1000;
+}
+
+.confetti.square {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+}
+
+.confetti.triangle {
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.confetti.circle {
+    border-radius: 50%;
 }
 
 @keyframes confettiFall {
     0% {
-        transform: translateY(-100vh) rotate(0deg);
+        transform: translateY(-100vh) rotate(0deg) scale(0);
+        opacity: 1;
+    }
+    10% {
+        transform: translateY(-80vh) rotate(90deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(0) rotate(360deg) scale(1);
         opacity: 1;
     }
     100% {
-        transform: translateY(100vh) rotate(720deg);
+        transform: translateY(100vh) rotate(720deg) scale(0.5);
         opacity: 0;
     }
+}
+
+@keyframes confettiSway {
+    0% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    100% { transform: translateX(-5px); }
 }
