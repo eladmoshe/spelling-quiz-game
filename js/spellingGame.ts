@@ -34,6 +34,23 @@ class SpellingGame {
         this.app = appElement;
         this.wordMatcher = new WordMatcher();
         this.render();
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (!this.showPractice) return;
+            
+            if (e.code === 'Space' && !e.target?.matches('input')) {
+                e.preventDefault();
+                this.pronounceWord(this.wordList[this.currentIndex]);
+            } else if (e.code === 'Enter') {
+                e.preventDefault();
+                if (this.currentWordCorrect) {
+                    this.nextWord();
+                } else {
+                    this.checkAnswer();
+                }
+            }
+        });
     }
 
     private shuffleArray<T>(array: T[]): T[] {
@@ -103,19 +120,19 @@ class SpellingGame {
         let progress = '';
         if (result.firstWrongLetter === userAnswer.length) {
             // Missing letter at the end
-            progress = userAnswer + '<span class="wrong">_</span>';
+            progress = userAnswer + '<span class="text-red-500 font-bold">_</span>';
         } else {
             // Show letters up to the wrong one normally, then mark wrong letter in red
             // and grey out the rest as unchecked
             progress = userAnswer.slice(0, result.firstWrongLetter) +
-                      `<span class="wrong">${userAnswer[result.firstWrongLetter]}</span>` +
+                      `<span class="text-red-500">${userAnswer[result.firstWrongLetter]}</span>` +
                       (result.firstWrongLetter + 1 < userAnswer.length ? 
-                       `<span class="unchecked">${userAnswer.slice(result.firstWrongLetter + 1)}</span>` : '');
+                       `<span class="text-gray-400">${userAnswer.slice(result.firstWrongLetter + 1)}</span>` : '');
         }
         
         return {
             correct: false,
-            message: 'Check your answer.',
+            message: translations[this.language].checkAnswer || 'Check your answer.',
             progress
         };
     }
@@ -188,22 +205,15 @@ class SpellingGame {
     }
 
     private showSuccess(): void {
-        const resultDiv = document.querySelector('#result');
-        if (!resultDiv) return;
-
-        resultDiv.innerHTML = `
-            <div class="space-y-4">
-                <div class="flex items-center justify-center gap-2 text-green-500">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span class="text-lg font-medium">${translations[this.language].correct}</span>
-                </div>
-                ${this.getWordPatterns(this.wordList[this.currentIndex])}
-            </div>
-        `;
-
+        this.currentWordCorrect = true;
         this.createConfetti();
+        this.render();
+        
+        // Focus the next button
+        const nextButton = document.querySelector('.btn-primary') as HTMLButtonElement;
+        if (nextButton) {
+            nextButton.focus();
+        }
     }
 
     private createConfetti(): void {
@@ -223,12 +233,12 @@ class SpellingGame {
         if (previousSets.length === 0) return '';
 
         return `
-            <div class="mt-4">
-                <p class="text-sm text-gray-600 mb-2">${translations[this.language].previousSets || 'Previous Sets'}:</p>
+            <div class="space-y-2">
+                <h2 class="text-sm font-medium text-gray-700">${translations[this.language].previousSets}</h2>
                 <div class="space-y-2">
                     ${previousSets.map((set, index) => `
                         <button 
-                            class="w-full text-left px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                            class="btn btn-outline w-full text-left px-4 py-2"
                             onclick="window.game.loadPreviousSet(${index})"
                         >
                             ${set.join(', ')}
@@ -248,6 +258,94 @@ class SpellingGame {
         }
     }
 
+    private renderPracticeSection(): string {
+        const currentWord = this.wordList[this.currentIndex];
+        const progress = ((this.currentIndex) / this.wordList.length) * 100;
+        
+        return `
+            <div class="card">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-medium">Word ${this.currentIndex + 1}/${this.wordList.length}</h2>
+                            <div class="word-status">
+                                ${this.wordList.map((_, index) => `
+                                    <span class="word-status-dot ${
+                                        index < this.currentIndex ? 'correct' :
+                                        index === this.currentIndex ? (this.currentWordCorrect ? 'correct' : 'pending') :
+                                        'pending'
+                                    }"></span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" onclick="game.pronounceWord('${currentWord}')" title="${translations[this.language].listen} (Press Space)">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: ${progress}%"></div>
+                    </div>
+
+                    <div class="relative">
+                        <input type="text" 
+                            id="answerInput" 
+                            class="input text-center text-2xl" 
+                            placeholder="${translations[this.language].typePlaceholder || 'Type the word...'}"
+                            ${this.currentWordCorrect ? 'disabled' : ''}
+                            autocomplete="off"
+                            autocorrect="off"
+                            spellcheck="false"
+                            value="${this.currentWordCorrect ? currentWord : ''}"
+                        >
+                        ${!this.currentWordCorrect ? `
+                            <div class="hint text-center">
+                                ${translations[this.language].pressEnter || 'Press Enter to check'}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="space-x-4 flex">
+                        ${!this.currentWordCorrect ? `
+                            <button class="btn btn-primary flex-1" onclick="game.checkAnswer()" 
+                                title="${translations[this.language].check} (Press Enter)">
+                                ${translations[this.language].check}
+                            </button>
+                        ` : `
+                            <button class="btn btn-primary flex-1" onclick="game.nextWord()"
+                                title="${translations[this.language].next} (Press Enter)">
+                                ${translations[this.language].next}
+                            </button>
+                        `}
+                    </div>
+
+                    ${this.currentWordCorrect ? `
+                        <div class="success-feedback">
+                            <div class="flex items-center justify-center gap-2">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-lg font-medium">${translations[this.language].correct}</span>
+                            </div>
+                            ${this.attempts[this.currentIndex] > 1 ? 
+                                `<p class="text-sm mt-2">${translations[this.language].attemptsMessage?.replace('{count}', this.attempts[this.currentIndex].toString()) || 
+                                `It took ${this.attempts[this.currentIndex]} attempts`}</p>` : 
+                                ''
+                            }
+                            ${this.getWordPatterns(this.wordList[this.currentIndex])}
+                        </div>
+                    ` : `
+                        <div id="result" class="transition-all duration-300"></div>
+                    `}
+                </div>
+            </div>
+        `;
+    }
+
     private render(): void {
         const practiceSection = this.showPractice ? this.renderPracticeSection() : '';
         
@@ -256,69 +354,47 @@ class SpellingGame {
                 <div class="flex justify-end mb-4">
                     <button 
                         onclick="window.game.toggleLanguage()"
-                        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+                        class="btn btn-outline lang-toggle"
                     >
                         ${this.language === 'en' ? 'עברית' : 'English'}
                     </button>
                 </div>
                 ${!this.showPractice ? `
-                    <div class="space-y-4">
-                        <h1 class="text-3xl font-bold text-center mb-8">
-                            ${translations[this.language].title}
-                        </h1>
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">
-                                ${translations[this.language].enterWords}
-                            </label>
-                            <input 
-                                type="text" 
-                                id="wordInput" 
-                                class="w-full p-2 border rounded" 
-                                placeholder="${translations[this.language].wordsPlaceholder}"
-                            >
-                            <p class="text-sm text-gray-500">
-                                ${translations[this.language].instructions}
-                            </p>
+                    <div class="card">
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h1 class="title">
+                                    ${translations[this.language].title}
+                                </h1>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        ${translations[this.language].enterWords}
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="wordInput" 
+                                        class="input" 
+                                        placeholder="${translations[this.language].wordsPlaceholder}"
+                                        autocomplete="off"
+                                        spellcheck="false"
+                                    >
+                                    <p class="hint">
+                                        ${translations[this.language].instructions}
+                                    </p>
+                                </div>
+                                <button 
+                                    onclick="window.game.handleStart()"
+                                    class="btn btn-primary"
+                                >
+                                    ${translations[this.language].start}
+                                </button>
+                            </div>
+                            ${this.renderPreviousSets()}
                         </div>
-                        <button 
-                            onclick="window.game.handleStart()"
-                            class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
-                        >
-                            ${translations[this.language].start}
-                        </button>
-                        ${this.renderPreviousSets()}
                     </div>
                 ` : practiceSection}
-            </div>
-        `;
-    }
-
-    private renderPracticeSection(): string {
-        const currentWord = this.wordList[this.currentIndex];
-        return `
-            <div class="card">
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-lg font-medium">Word ${this.currentIndex + 1}/${this.wordList.length}</h2>
-                        <button class="btn btn-outline" onclick="game.pronounceWord('${currentWord}')">
-                            ${translations[this.language].listen}
-                        </button>
-                    </div>
-                    <input type="text" id="answerInput" class="input text-center text-2xl" 
-                        placeholder="Type the word..." ${this.currentWordCorrect ? 'disabled' : ''}>
-                    <div class="space-x-4 flex">
-                        ${!this.currentWordCorrect ? `
-                            <button class="btn btn-primary flex-1" onclick="game.checkAnswer()">
-                                ${translations[this.language].check}
-                            </button>
-                        ` : `
-                            <button class="btn btn-primary flex-1" onclick="game.nextWord()">
-                                ${translations[this.language].next}
-                            </button>
-                        `}
-                    </div>
-                    <div id="result"></div>
-                </div>
             </div>
         `;
     }

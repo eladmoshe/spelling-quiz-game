@@ -20,6 +20,10 @@ interface Translation {
     practiceComplete: string;
     startOver: string;
     checkLetter: string;
+    typePlaceholder: string;
+    pressEnter: string;
+    attemptsMessage: string;
+    checkAnswer: string;
 }
 
 interface Translations {
@@ -49,7 +53,11 @@ export const translations: Translations = {
         switchToHebrew: "עברית",
         practiceComplete: "Practice Complete!",
         startOver: "Start Over",
-        checkLetter: "Check letter"
+        checkLetter: "Check letter",
+        typePlaceholder: "Type the word...",
+        pressEnter: "Press Enter to check",
+        attemptsMessage: "It took {count} attempts",
+        checkAnswer: "Check your answer"
     },
     he: {
         title: "תרגול איות",
@@ -72,6 +80,10 @@ export const translations: Translations = {
         switchToHebrew: "English",
         practiceComplete: "התרגול הושלם!",
         startOver: "התחל מחדש",
-        checkLetter: "בדוק אות"
+        checkLetter: "בדוק אות",
+        typePlaceholder: "הקלד את המילה...",
+        pressEnter: "לחץ Enter לבדיקה",
+        attemptsMessage: "לקח {count} נסיונות",
+        checkAnswer: "בדוק את התשובה שלך"
     }
 };
