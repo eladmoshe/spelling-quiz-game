@@ -1,4 +1,29 @@
-export const translations = {
+interface Translation {
+    enterWords: string;
+    start: string;
+    listen: string;
+    check: string;
+    next: string;
+    tryAgain: string;
+    correct: string;
+    patterns: {
+        consonantBlends: string;
+        vowelPairs: string;
+        doubleLetters: string;
+        singleVowels: string;
+    };
+    switchToHebrew: string;
+    practiceComplete: string;
+    startOver: string;
+    checkLetter: string;
+}
+
+interface Translations {
+    en: Translation;
+    he: Translation;
+}
+
+export const translations: Translations = {
     en: {
         enterWords: "Enter words for practice (comma-separated)",
         start: "Start Practice",
@@ -27,7 +52,7 @@ export const translations = {
         tryAgain: "נסה שוב",
         correct: "נכון!",
         patterns: {
-            consonantBlends: "צירופי עיצורים (כמו 'sh', 'th')",
+            consonantBlends: "צירופי עיצורים",
             vowelPairs: "זוגות תנועות",
             doubleLetters: "אותיות כפולות",
             singleVowels: "תנועות בודדות"
