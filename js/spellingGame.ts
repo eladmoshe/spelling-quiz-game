@@ -1,16 +1,7 @@
-import WordMatcher from './wordMatcher.js';
-import { translations } from './translations.js';
+import WordMatcher from './wordMatcher';
+import { translations } from './translations';
 
 type Language = 'en' | 'he';
-
-interface GameState {
-    wordList: string[];
-    currentIndex: number;
-    showPractice: boolean;
-    attempts: Record<number, number>;
-    currentWordCorrect: boolean;
-    language: Language;
-}
 
 class SpellingGame {
     private wordList: string[] = [];
@@ -63,45 +54,20 @@ class SpellingGame {
     }
 
     private pronounceWord(word: string): void {
-        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(word);
-        utterance.rate = 0.5;
-        utterance.pitch = 1;
-        utterance.volume = 1.0;
+        utterance.rate = 0.8;
         window.speechSynthesis.speak(utterance);
     }
 
     private getPreviousWordSets(): string[][] {
-        const stored = localStorage.getItem(this.PREVIOUS_SETS_KEY);
-        return stored ? JSON.parse(stored) : [];
+        const savedSets = localStorage.getItem(this.PREVIOUS_SETS_KEY);
+        return savedSets ? JSON.parse(savedSets) : [];
     }
 
     private savePreviousWordSet(words: string[]): void {
         const previousSets = this.getPreviousWordSets();
-        // Only add if it's different from the most recent set
-        if (previousSets.length === 0 || JSON.stringify(words) !== JSON.stringify(previousSets[0])) {
-            previousSets.unshift(words);
-            if (previousSets.length > this.MAX_STORED_SETS) {
-                previousSets.pop();
-            }
-            localStorage.setItem(this.PREVIOUS_SETS_KEY, JSON.stringify(previousSets));
-        }
-    }
-
-    private handleStart(): void {
-        const input = document.querySelector('#wordInput') as HTMLInputElement;
-        if (!input) return;
-
-        const words = input.value.split(',').map(word => word.trim()).filter(word => word);
-        if (words.length > 0) {
-            this.savePreviousWordSet(words);
-            this.wordList = this.shuffleArray(words);
-            this.currentIndex = 0;
-            this.attempts = {};
-            this.showPractice = true;
-            this.pronounceWord(this.wordList[0]);
-            this.render();
-        }
+        const newSets = [words, ...previousSets].slice(0, this.MAX_STORED_SETS);
+        localStorage.setItem(this.PREVIOUS_SETS_KEY, JSON.stringify(newSets));
     }
 
     private getNextLetterHint(userAnswer: string): { correct: boolean; message: string; progress: string } {
@@ -455,7 +421,7 @@ class SpellingGame {
                                 </p>
                             </div>
                             <button 
-                                onclick="window.game.handleStart()"
+                                onclick="window.game.startGame()"
                                 class="btn btn-primary"
                             >
                                 ${translations[this.language].start}
@@ -489,6 +455,22 @@ class SpellingGame {
         this.language = this.language === 'en' ? 'he' : 'en';
         localStorage.setItem('spellingQuizLanguage', this.language);
         this.render();
+    }
+
+    public startGame(): void {
+        const input = document.querySelector('#wordInput') as HTMLInputElement;
+        if (!input) return;
+
+        const words = input.value.split(',').map(word => word.trim()).filter(word => word);
+        if (words.length > 0) {
+            this.savePreviousWordSet(words);
+            this.wordList = this.shuffleArray(words);
+            this.currentIndex = 0;
+            this.attempts = {};
+            this.showPractice = true;
+            this.pronounceWord(this.wordList[0]);
+            this.render();
+        }
     }
 }
 
