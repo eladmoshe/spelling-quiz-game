@@ -8,6 +8,7 @@ class SpellingGame {
     private currentIndex: number = 0;
     private showPractice: boolean = false;
     private attempts: Record<number, number> = {};
+    private wrongAttempts: Record<number, string[]> = {};
     private currentWordCorrect: boolean = false;
     private language: Language;
     private app: HTMLElement;
@@ -84,8 +85,8 @@ class SpellingGame {
         if (result.isCorrect) {
             return {
                 correct: true,
-                message: 'Correct!',
-                progress: userAnswer
+                message: translations[this.language].correct,
+                progress: currentWord
             };
         }
 
@@ -98,28 +99,16 @@ class SpellingGame {
             // Show letters up to the wrong one normally, then mark wrong letter in red
             // and grey out the rest as unchecked
             progress = userAnswer.slice(0, result.firstWrongLetter) +
-                      `<span class="text-red-500">${userAnswer[result.firstWrongLetter]}</span>` +
+                      `<span class="text-red-500">${userAnswer[result.firstWrongLetter] || '_'}</span>` +
                       (result.firstWrongLetter + 1 < userAnswer.length ? 
                        `<span class="text-gray-400">${userAnswer.slice(result.firstWrongLetter + 1)}</span>` : '');
         }
-        
+
         return {
             correct: false,
-            message: translations[this.language].checkAnswer || 'Check your answer.',
+            message: translations[this.language].incorrect,
             progress
         };
-    }
-
-    private showSuccess(): void {
-        this.currentWordCorrect = true;
-        this.createConfetti();
-        this.render();
-        
-        // Focus the next button
-        const nextButton = document.querySelector('.btn-primary') as HTMLButtonElement;
-        if (nextButton) {
-            nextButton.focus();
-        }
     }
 
     private createConfetti(): void {
@@ -148,6 +137,23 @@ class SpellingGame {
         const stats = this.getCompletionStats();
         const accuracy = Math.round((stats.perfectWords / this.wordList.length) * 100);
         
+        // Generate mistakes report
+        let mistakesReport = '';
+        this.wordList.forEach((word, index) => {
+            if (this.wrongAttempts[index] && this.wrongAttempts[index].length > 0) {
+                mistakesReport += `
+                    <div class="text-left mb-2">
+                        <div class="font-medium">${word}</div>
+                        <div class="text-sm text-gray-600 ml-4">
+                            ${this.wrongAttempts[index].map(attempt => 
+                                `<div>❌ ${attempt}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
         return `
             <div class="card text-center">
                 <div class="space-y-8">
@@ -176,6 +182,19 @@ class SpellingGame {
                         </div>
                     </div>
 
+                    ${mistakesReport ? `
+                        <div class="text-left">
+                            <details class="bg-white rounded-lg shadow p-4">
+                                <summary class="cursor-pointer font-medium text-gray-900">
+                                    ${translations[this.language].showMistakes || 'Show Mistakes'}
+                                </summary>
+                                <div class="mt-4 space-y-2">
+                                    ${mistakesReport}
+                                </div>
+                            </details>
+                        </div>
+                    ` : ''}
+
                     <div class="space-y-4">
                         <button onclick="window.game.startOver()" class="btn btn-primary">
                             ${translations[this.language].startOver}
@@ -191,6 +210,7 @@ class SpellingGame {
         this.wordList = [];
         this.currentIndex = 0;
         this.attempts = {};
+        this.wrongAttempts = {};
         this.currentWordCorrect = false;
         this.render();
     }
@@ -320,7 +340,14 @@ class SpellingGame {
                             ${this.getWordPatterns(this.wordList[this.currentIndex])}
                         </div>
                     ` : `
-                        <div id="result" class="transition-all duration-300"></div>
+                        <div id="result" class="transition-all duration-300">
+                            ${this.attempts[this.currentIndex] > 0 ? `
+                                <div class="mt-4 space-y-4">
+                                    <p class="text-red-500 text-center">${translations[this.language].incorrect}</p>
+                                    <p class="text-2xl font-mono tracking-wide text-center">${this.getNextLetterHint(this.wrongAttempts[this.currentIndex]?.slice(-1)[0] || '').progress}</p>
+                                </div>
+                            ` : ''}
+                        </div>
                     `}
                 </div>
             </div>
@@ -369,29 +396,28 @@ class SpellingGame {
         const input = document.querySelector('#answerInput') as HTMLInputElement;
         if (!input) return;
 
-        const userAnswer = input.value.trim().toLowerCase();
-        const currentWord = this.wordList[this.currentIndex].toLowerCase();
-        
+        const currentWord = this.wordList[this.currentIndex];
+        const userAnswer = input.value.trim();
+
         if (!this.attempts[this.currentIndex]) {
             this.attempts[this.currentIndex] = 0;
+            this.wrongAttempts[this.currentIndex] = [];
         }
         this.attempts[this.currentIndex]++;
-        
-        if (userAnswer === currentWord) {
+
+        const result = this.wordMatcher.checkWord(currentWord, userAnswer);
+        if (result.isCorrect) {
             this.currentWordCorrect = true;
-            this.showSuccess();
+            input.value = currentWord;
         } else {
-            const hint = this.getNextLetterHint(userAnswer);
-            const resultDiv = document.querySelector('#result');
-            if (resultDiv) {
-                resultDiv.innerHTML = `
-                    <div class="mt-4 space-y-4">
-                        <p class="text-red-500">${hint.message}</p>
-                        <p class="text-2xl font-mono tracking-wide text-center">${hint.progress}</p>
-                    </div>
-                `;
+            if (!this.wrongAttempts[this.currentIndex].includes(userAnswer)) {
+                this.wrongAttempts[this.currentIndex].push(userAnswer);
             }
+            const hint = this.getNextLetterHint(userAnswer);
+            input.value = '';
+            input.placeholder = hint.message;
         }
+        this.render();
     }
 
     private render(): void {
@@ -474,6 +500,7 @@ class SpellingGame {
             this.wordList = this.shuffleArray(words);
             this.currentIndex = 0;
             this.attempts = {};
+            this.wrongAttempts = {};
             this.showPractice = true;
             this.pronounceWord(this.wordList[0]);
             this.render();

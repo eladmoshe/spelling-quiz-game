@@ -31,6 +31,7 @@ interface Translation {
     totalWords: string;
     perfectWords: string;
     accuracy: string;
+    showMistakes: string;
 }
 
 interface Translations {
@@ -69,7 +70,8 @@ export const translations: Translations = {
             vowelPairs: "Vowel pairs",
             doubleLetters: "Double letters",
             singleVowels: "Single vowels"
-        }
+        },
+        showMistakes: 'Show Mistakes Report'
     },
     he: {
         title: 'תרגול איות',
@@ -101,6 +103,7 @@ export const translations: Translations = {
             vowelPairs: "זוגות תנועות",
             doubleLetters: "אותיות כפולות",
             singleVowels: "תנועות בודדות"
-        }
+        },
+        showMistakes: 'הצג דוח טעויות'
     }
 };
