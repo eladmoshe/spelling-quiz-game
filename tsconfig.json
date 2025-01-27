@@ -8,7 +8,7 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "rootDir": "./js",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "declaration": true,
     "sourceMap": true,
     "allowJs": false,
@@ -18,7 +18,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["js/*"]
+    }
   },
   "include": ["js/**/*"],
   "exclude": ["node_modules", "dist"]
