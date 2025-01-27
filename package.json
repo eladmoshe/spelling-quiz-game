@@ -8,6 +8,8 @@
   "scripts": {
     "start": "http-server . -c-1",
     "test": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "build": "tsc",
     "watch": "tsc --watch",
     "dev": "concurrently \"npm run watch\" \"npm start\""
@@ -16,6 +18,7 @@
     "http-server": "^14.1.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.50.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "concurrently": "^9.1.2",
