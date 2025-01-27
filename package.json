@@ -4,10 +4,11 @@
   "description": "A spelling quiz game",
   "main": "index.html",
   "type": "module",
+  "homepage": "https://eladmoshe.github.io/spelling-quiz-game/",
   "scripts": {
     "start": "http-server -c-1",
     "test": "jest",
-    "build": "tsc",
+    "build": "tsc && cp index.html dist/ && cp -r styles/ dist/styles/",
     "watch": "tsc --watch",
     "dev": "concurrently \"npm run watch\" \"npm start\""
   },
