@@ -46,6 +46,34 @@ class WordMatcher {
       firstWrongLetter: minLength,
     };
   }
+
+  /**
+   * Provides a hint string showing correct and incorrect letters
+   * @param {string} userAnswer - The user's attempted spelling
+   * @param {string} correctWord - The correct spelling of the word
+   * @returns {string} A string where correct letters are shown and incorrect ones are replaced with _
+   */
+  getHint(userAnswer: string, correctWord: string): string {
+    userAnswer = userAnswer.toLowerCase();
+    correctWord = correctWord.toLowerCase();
+    
+    let hint = '';
+    const maxLength = Math.max(userAnswer.length, correctWord.length);
+    
+    for (let i = 0; i < maxLength; i++) {
+      if (i >= userAnswer.length) {
+        hint += '_';
+      } else if (i >= correctWord.length) {
+        hint += '_';
+      } else if (userAnswer[i] === correctWord[i]) {
+        hint += correctWord[i];
+      } else {
+        hint += '_';
+      }
+    }
+    
+    return hint;
+  }
 }
 
 // Export the WordMatcher class
