@@ -8,7 +8,7 @@
   "scripts": {
     "start": "http-server -c-1",
     "test": "jest",
-    "build": "tsc && cp index.html dist/ && cp -r styles/ dist/styles/",
+    "build": "tsc",
     "watch": "tsc --watch",
     "dev": "concurrently \"npm run watch\" \"npm start\""
   },
