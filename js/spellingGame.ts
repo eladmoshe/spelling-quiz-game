@@ -412,7 +412,6 @@ class SpellingGame {
                 this.wrongAttempts[this.currentIndex].push(userAnswer);
             }
             const hint = this.getNextLetterHint(userAnswer);
-            input.value = '';
             input.placeholder = hint.message;
         }
         this.render();
