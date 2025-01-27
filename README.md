@@ -1,5 +1,7 @@
 # Spelling Quiz Game 🎯
 
+Try it now: [Spelling Quiz Game](https://eladmoshe.github.io/spelling-quiz-game/) 🎮
+
 Welcome to Spelling Quiz - an interactive and engaging way to improve your spelling skills! Whether you're learning English or Hebrew, this game makes practicing spelling fun and effective.
 
 ## Why Use Spelling Quiz? ✨
