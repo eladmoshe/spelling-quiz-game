@@ -1,5 +1,6 @@
 import WordMatcher from './wordMatcher.js';
 import { translations } from './translations.js';
+import { Analytics } from './analytics.js';
 
 type Language = 'en' | 'he';
 
@@ -256,6 +257,8 @@ class SpellingGame {
             if (input) {
                 input.value = previousSets[index].join(', ');
             }
+            Analytics.trackPreviousSetLoad(index);
+            this.startGame();
         }
     }
 
@@ -413,10 +416,12 @@ class SpellingGame {
         if (result.isCorrect) {
             this.currentWordCorrect = true;
             input.value = currentWord;
+            Analytics.trackWordAttempt(currentWord, userAnswer, true, this.attempts[this.currentIndex]);
         } else {
             if (!this.wrongAttempts[this.currentIndex].includes(userAnswer)) {
                 this.wrongAttempts[this.currentIndex].push(userAnswer);
             }
+            Analytics.trackWordAttempt(currentWord, userAnswer, false, this.attempts[this.currentIndex]);
             const hint = this.getNextLetterHint(userAnswer);
             input.placeholder = hint.message;
         }
@@ -502,6 +507,7 @@ class SpellingGame {
     public toggleLanguage(): void {
         this.language = this.language === 'en' ? 'he' : 'en';
         localStorage.setItem('spellingQuizLanguage', this.language);
+        Analytics.trackLanguageChange(this.language);
         this.render();
     }
 
@@ -517,6 +523,7 @@ class SpellingGame {
             this.attempts = {};
             this.wrongAttempts = {};
             this.showPractice = true;
+            Analytics.trackGameStart(this.wordList.length);
             this.pronounceWord(this.wordList[0]);
             this.render();
         }
