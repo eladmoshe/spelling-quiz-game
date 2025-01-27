@@ -1,7 +1,7 @@
-import WordMatcher from './wordMatcher.js';
+import WordMatcher from './wordMatcher';
 
 describe('WordMatcher', () => {
-    let wordMatcher;
+    let wordMatcher: WordMatcher;
 
     beforeEach(() => {
         wordMatcher = new WordMatcher();

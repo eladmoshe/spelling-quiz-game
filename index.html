@@ -123,8 +123,8 @@
     <div id="app"></div>
     
     <script type="module">
-        import WordMatcher from './js/wordMatcher.js';
-        import { translations } from './js/translations.js';
+        import WordMatcher from './dist/wordMatcher.js';
+        import { translations } from './dist/translations.js';
         
         class SpellingGame {
             constructor() {
@@ -253,6 +253,11 @@
                 const input = document.querySelector('#answerInput');
                 const userAnswer = input.value.trim().toLowerCase();
                 const currentWord = this.wordList[this.currentIndex].toLowerCase();
+                
+                // Don't accept empty answers
+                if (!userAnswer) {
+                    return;
+                }
                 
                 if (userAnswer === currentWord) {
                     this.currentWordCorrect = true;

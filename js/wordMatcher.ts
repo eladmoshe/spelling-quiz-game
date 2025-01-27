@@ -1,4 +1,12 @@
 /**
+ * Interface defining the return type for word comparison
+ */
+interface WordComparisonResult {
+  isCorrect: boolean;
+  firstWrongLetter: number;
+}
+
+/**
  * A class that handles word comparison and provides feedback on spelling mistakes
  */
 class WordMatcher {
@@ -6,9 +14,9 @@ class WordMatcher {
    * Compares a user's answer with the correct word and provides feedback
    * @param {string} userAnswer - The user's attempted spelling
    * @param {string} correctWord - The correct spelling of the word
-   * @returns {{isCorrect: boolean, firstWrongLetter: number}} Object containing whether the word is correct and the index of first wrong letter
+   * @returns {WordComparisonResult} Object containing whether the word is correct and the index of first wrong letter
    */
-  checkWord(userAnswer, correctWord) {
+  checkWord(userAnswer: string, correctWord: string): WordComparisonResult {
     userAnswer = userAnswer.toLowerCase();
     correctWord = correctWord.toLowerCase();
 
@@ -21,7 +29,7 @@ class WordMatcher {
     }
 
     // Find the first difference between the words
-    const minLength = Math.min(userAnswer.length, correctWord.length);
+    const minLength: number = Math.min(userAnswer.length, correctWord.length);
     for (let i = 0; i < minLength; i++) {
       if (userAnswer[i] !== correctWord[i]) {
         return {
