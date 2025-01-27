@@ -33,6 +33,13 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
+      # Force add dist directory even though it's in .gitignore
+      - name: Add dist to deployment
+        run: |
+          git add dist -f
+          cp -r dist/* .
+          rm -rf dist/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
