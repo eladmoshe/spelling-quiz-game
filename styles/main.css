@@ -1,8 +1,26 @@
+:root {
+    --primary: #40CDB2;
+    --primary-dark: #35B69C;
+    --primary-light: #A5EEE0;
+    --secondary: #FF69B4;
+    --secondary-dark: #FF1493;
+    --secondary-light: #FFB6C1;
+    --accent: #FFD93D;
+    --accent-light: #FFE978;
+    --background: #F0FFFC;
+    --text: #2C3E50;
+    --text-light: #5D7A8C;
+    --success: #40CD94;
+    --error: #FF6B6B;
+    --white: #FFFFFF;
+}
+
 body {
-    background: linear-gradient(135deg, #f6f8fc 0%, #e9edf5 100%);
+    background: linear-gradient(135deg, var(--background) 0%, var(--primary-light) 100%);
     min-height: 100vh;
     padding: 1rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
 }
 
 #app {
@@ -11,16 +29,17 @@ body {
 }
 
 .card {
-    background: white;
-    border-radius: 1.25rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background: var(--white);
+    border-radius: 2rem;
+    box-shadow: 0 8px 20px -4px rgba(64, 205, 178, 0.15);
     padding: 2rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 3px solid var(--primary);
 }
 
 .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.1), 0 3px 6px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(64, 205, 178, 0.25);
 }
 
 .header-container {
@@ -29,60 +48,70 @@ body {
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #f3f4f6;
+    border-bottom: 3px dashed var(--primary-light);
 }
 
 .title {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: #1f2937;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary);
     letter-spacing: -0.025em;
+    text-shadow: 2px 2px 0px var(--primary-light);
 }
 
 .btn {
     padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    font-weight: 500;
+    border-radius: 1rem;
+    font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     border: none;
     outline: none;
+    font-size: 1.1rem;
 }
 
 .btn:focus {
-    outline: 2px solid #3b82f6;
+    outline: 3px solid var(--primary);
     outline-offset: 2px;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
+    background: var(--secondary);
+    color: var(--white);
     width: 100%;
     padding: 1rem;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: 0.025em;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 4px 0 var(--secondary-dark);
+    transform: translateY(-2px);
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 0 var(--secondary-dark);
+    background: var(--secondary-dark);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 0 var(--secondary-dark);
 }
 
 .btn-outline {
-    border: 2px solid #e5e7eb;
-    background-color: white;
-    color: #1f2937;
-    font-weight: 500;
+    border: 3px solid var(--primary);
+    background-color: var(--white);
+    color: var(--primary);
+    font-weight: 600;
 }
 
 .btn-outline:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
+    border-color: var(--primary-dark);
+    background-color: var(--primary-light);
+    transform: scale(1.05);
 }
 
 .btn:disabled {
@@ -93,111 +122,140 @@ body {
 
 .input {
     width: 100%;
-    padding: 0.875rem 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.75rem;
-    font-size: 1rem;
+    padding: 1rem 1.25rem;
+    border: 3px solid var(--primary-light);
+    border-radius: 1rem;
+    font-size: 1.1rem;
     margin-bottom: 1.5rem;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+    color: var(--text);
 }
 
 .input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(64, 205, 178, 0.2);
 }
 
 .lang-toggle {
     min-width: 120px;
     text-align: center;
-    background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    padding: 0.5rem 1rem;
-    transition: all 0.2s ease;
+    background: var(--accent);
+    border-radius: 1rem;
+    box-shadow: 0 4px 0 var(--accent-light);
+    padding: 0.75rem 1.25rem;
+    transition: all 0.3s ease;
+    border: none;
+    color: var(--text);
+    font-weight: 600;
 }
 
 .lang-toggle:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--accent-light);
+    background: var(--accent-light);
+}
+
+.lang-toggle:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 0 var(--accent-light);
 }
 
 @keyframes celebrate {
     0% { transform: scale(1) rotate(0); }
-    25% { transform: scale(1.2) rotate(-5deg); }
-    75% { transform: scale(1.2) rotate(5deg); }
+    25% { transform: scale(1.3) rotate(-10deg); }
+    75% { transform: scale(1.3) rotate(10deg); }
     100% { transform: scale(1) rotate(0); }
 }
 
 .celebration {
-    animation: celebrate 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: celebrate 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .success-feedback {
-    color: #047857;  /* Darker green for better contrast */
+    color: var(--success);
     font-weight: 600;
     text-align: center;
     margin-top: 1.5rem;
-    padding: 1rem;
-    background: #ecfdf5;
-    border-radius: 0.75rem;
+    padding: 1.25rem;
+    background: var(--primary-light);
+    border-radius: 1rem;
+    border: 2px dashed var(--success);
     opacity: 0;
     transform: translateY(10px);
-    animation: fadeInUp 0.3s forwards;
+    animation: fadeInUp 0.5s forwards;
 }
 
 @keyframes fadeInUp {
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1.02);
     }
 }
 
 .progress-bar {
     width: 100%;
-    height: 0.5rem;
-    background: #e5e7eb;
+    height: 1rem;
+    background: var(--primary-light);
     border-radius: 999px;
     margin: 1.5rem 0;
     overflow: hidden;
+    border: 2px solid var(--primary);
 }
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    transition: width 0.3s ease;
+    background: var(--primary);
+    transition: width 0.5s ease;
 }
 
 .hint {
-    color: #6b7280;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
+    color: var(--text-light);
+    font-size: 1rem;
+    margin-top: 0.75rem;
     opacity: 0.9;
+    font-style: italic;
 }
 
 .word-status {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    font-size: 0.875rem;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    font-size: 1rem;
 }
 
 .word-status-dot {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.word-status-dot:hover {
+    transform: scale(1.2);
 }
 
 .word-status-dot.correct {
-    background-color: #059669;
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(64, 205, 148, 0.4);
 }
 
 .word-status-dot.incorrect {
-    background-color: #dc2626;
+    background: var(--error);
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
 }
 
 .word-status-dot.pending {
-    background-color: #9ca3af;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(255, 217, 61, 0.4);
+}
+
+@keyframes confettiSway {
+    0% { transform: translateX(-8px) rotate(-5deg); }
+    50% { transform: translateX(8px) rotate(5deg); }
+    100% { transform: translateX(-8px) rotate(-5deg); }
 }
 
 .confetti {
@@ -240,10 +298,4 @@ body {
         transform: translateY(100vh) rotate(720deg) scale(0.5);
         opacity: 0;
     }
-}
-
-@keyframes confettiSway {
-    0% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    100% { transform: translateX(-5px); }
 }
