@@ -64,9 +64,16 @@ class SpellingGame {
         return savedSets ? JSON.parse(savedSets) : [];
     }
 
+    private areWordSetsEqual(set1: string[], set2: string[]): boolean {
+        if (set1.length !== set2.length) return false;
+        return set1.join(',') === set2.join(',');
+    }
+
     private savePreviousWordSet(words: string[]): void {
         const previousSets = this.getPreviousWordSets();
-        const newSets = [words, ...previousSets].slice(0, this.MAX_STORED_SETS);
+        // Filter out any sets that are identical to the new one
+        const uniqueSets = previousSets.filter(set => !this.areWordSetsEqual(set, words));
+        const newSets = [words, ...uniqueSets].slice(0, this.MAX_STORED_SETS);
         localStorage.setItem(this.PREVIOUS_SETS_KEY, JSON.stringify(newSets));
     }
 
