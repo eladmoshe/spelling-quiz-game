@@ -60,6 +60,10 @@ export const translations: Translations = {
         perfectWords: 'Perfect Words',
         accuracy: 'Accuracy',
         startOver: 'Practice New Words',
+        tryAgain: 'Try Again',
+        switchToHebrew: 'עברית',
+        checkLetter: 'Check Letter',
+        checkAnswer: 'Check Answer',
         patterns: {
             consonantBlends: "Consonant blends (like 'sh', 'th')",
             vowelPairs: "Vowel pairs",
@@ -88,6 +92,10 @@ export const translations: Translations = {
         perfectWords: 'מילים מושלמות',
         accuracy: 'דיוק',
         startOver: 'תרגל מילים חדשות',
+        tryAgain: 'נסה שוב',
+        switchToHebrew: 'English',
+        checkLetter: 'בדוק אות',
+        checkAnswer: 'בדוק תשובה',
         patterns: {
             consonantBlends: "צירופי עיצורים (כמו 'sh', 'th')",
             vowelPairs: "זוגות תנועות",

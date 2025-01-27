@@ -39,7 +39,7 @@ class SpellingGame {
         document.addEventListener('keydown', (e) => {
             if (!this.showPractice) return;
             
-            if (e.code === 'Space' && !e.target?.matches('input')) {
+            if (e.code === 'Space' && !(e.target instanceof HTMLInputElement)) {
                 e.preventDefault();
                 this.pronounceWord(this.wordList[this.currentIndex]);
             } else if (e.code === 'Enter') {
@@ -135,73 +135,6 @@ class SpellingGame {
             message: translations[this.language].checkAnswer || 'Check your answer.',
             progress
         };
-    }
-
-    private getWordPatterns(word: string): string {
-        let html = '<div class="space-y-2"><p class="text-2xl font-mono tracking-wide text-center">';
-        
-        const blends = ['bl','br','ch','cl','cr','dr','fl','fr','gl','gr','pl','pr','sc','sh','sk','sl','sm','sn','sp','st','sw','th','tr','tw','wh'];
-        const vowelPairs = ['ai','ay','ea','ee','ei','ey','ie','oa','oe','oi','oo','ou','ow','oy'];
-        
-        for (let i = 0; i < word.length; i++) {
-            const char = word[i];
-            let isBlend = false;
-            let isVowelPair = false;
-            
-            if (i < word.length - 1) {
-                const pair = word.slice(i, i + 2).toLowerCase();
-                if (blends.includes(pair)) {
-                    html += `<span class="text-blue-500">${word.slice(i, i + 2)}</span>`;
-                    isBlend = true;
-                    i++;
-                } else if (vowelPairs.includes(pair)) {
-                    html += `<span class="text-green-500">${word.slice(i, i + 2)}</span>`;
-                    isVowelPair = true;
-                    i++;
-                }
-            }
-            
-            if (!isBlend && !isVowelPair) {
-                html += char;
-            }
-        }
-        
-        html += '</p>';
-        html += `<div class="text-sm space-y-1">
-            <p><span class="text-blue-500">■</span> ${translations[this.language].patterns.consonantBlends}</p>
-            <p><span class="text-green-500">■</span> ${translations[this.language].patterns.vowelPairs}</p>
-        </div></div>`;
-        
-        return html;
-    }
-
-    private checkAnswer(): void {
-        const input = document.querySelector('#answerInput') as HTMLInputElement;
-        if (!input) return;
-
-        const userAnswer = input.value.trim().toLowerCase();
-        const currentWord = this.wordList[this.currentIndex].toLowerCase();
-        
-        if (!this.attempts[this.currentIndex]) {
-            this.attempts[this.currentIndex] = 0;
-        }
-        this.attempts[this.currentIndex]++;
-        
-        if (userAnswer === currentWord) {
-            this.currentWordCorrect = true;
-            this.showSuccess();
-        } else {
-            const hint = this.getNextLetterHint(userAnswer);
-            const resultDiv = document.querySelector('#result');
-            if (resultDiv) {
-                resultDiv.innerHTML = `
-                    <div class="mt-4 space-y-4">
-                        <p class="text-red-500">${hint.message}</p>
-                        <p class="text-2xl font-mono tracking-wide text-center">${hint.progress}</p>
-                    </div>
-                `;
-            }
-        }
     }
 
     private showSuccess(): void {
@@ -419,6 +352,73 @@ class SpellingGame {
                 </div>
             </div>
         `;
+    }
+
+    private getWordPatterns(word: string): string {
+        let html = '<div class="space-y-2"><p class="text-2xl font-mono tracking-wide text-center">';
+        
+        const blends = ['bl','br','ch','cl','cr','dr','fl','fr','gl','gr','pl','pr','sc','sh','sk','sl','sm','sn','sp','st','sw','th','tr','tw','wh'];
+        const vowelPairs = ['ai','ay','ea','ee','ei','ey','ie','oa','oe','oi','oo','ou','ow','oy'];
+        
+        for (let i = 0; i < word.length; i++) {
+            const char = word[i];
+            let isBlend = false;
+            let isVowelPair = false;
+            
+            if (i < word.length - 1) {
+                const pair = word.slice(i, i + 2).toLowerCase();
+                if (blends.includes(pair)) {
+                    html += `<span class="text-blue-500">${word.slice(i, i + 2)}</span>`;
+                    isBlend = true;
+                    i++;
+                } else if (vowelPairs.includes(pair)) {
+                    html += `<span class="text-green-500">${word.slice(i, i + 2)}</span>`;
+                    isVowelPair = true;
+                    i++;
+                }
+            }
+            
+            if (!isBlend && !isVowelPair) {
+                html += char;
+            }
+        }
+        
+        html += '</p>';
+        html += `<div class="text-sm space-y-1">
+            <p><span class="text-blue-500">■</span> ${translations[this.language].patterns.consonantBlends}</p>
+            <p><span class="text-green-500">■</span> ${translations[this.language].patterns.vowelPairs}</p>
+        </div></div>`;
+        
+        return html;
+    }
+
+    private checkAnswer(): void {
+        const input = document.querySelector('#answerInput') as HTMLInputElement;
+        if (!input) return;
+
+        const userAnswer = input.value.trim().toLowerCase();
+        const currentWord = this.wordList[this.currentIndex].toLowerCase();
+        
+        if (!this.attempts[this.currentIndex]) {
+            this.attempts[this.currentIndex] = 0;
+        }
+        this.attempts[this.currentIndex]++;
+        
+        if (userAnswer === currentWord) {
+            this.currentWordCorrect = true;
+            this.showSuccess();
+        } else {
+            const hint = this.getNextLetterHint(userAnswer);
+            const resultDiv = document.querySelector('#result');
+            if (resultDiv) {
+                resultDiv.innerHTML = `
+                    <div class="mt-4 space-y-4">
+                        <p class="text-red-500">${hint.message}</p>
+                        <p class="text-2xl font-mono tracking-wide text-center">${hint.progress}</p>
+                    </div>
+                `;
+            }
+        }
     }
 
     private render(): void {
