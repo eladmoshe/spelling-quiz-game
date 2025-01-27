@@ -234,7 +234,7 @@ class SpellingGame {
 
     private renderPracticeSection(): string {
         const currentWord = this.wordList[this.currentIndex];
-        const progress = ((this.currentIndex) / this.wordList.length) * 100;
+        const progress = ((this.currentIndex + 1) / this.wordList.length) * 100;
         
         return `
             <div class="card">
