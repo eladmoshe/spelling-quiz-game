@@ -18,7 +18,7 @@ class SpellingGame {
 
     constructor() {
         const savedLanguage = localStorage.getItem('spellingQuizLanguage');
-        this.language = (savedLanguage === 'en' || savedLanguage === 'he') ? savedLanguage : 'en';
+        this.language = (savedLanguage === 'en' || savedLanguage === 'he') ? savedLanguage : 'he';
         const appElement = document.getElementById('app');
         if (!appElement) {
             throw new Error('App element not found');
