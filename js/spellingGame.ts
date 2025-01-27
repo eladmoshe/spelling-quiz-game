@@ -1,5 +1,5 @@
-import WordMatcher from './wordMatcher';
-import { translations } from './translations';
+import WordMatcher from './wordMatcher.js';
+import { translations } from './translations.js';
 
 type Language = 'en' | 'he';
 

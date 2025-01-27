@@ -6,7 +6,7 @@
   "type": "module",
   "homepage": "https://eladmoshe.github.io/spelling-quiz-game/",
   "scripts": {
-    "start": "http-server -c-1",
+    "start": "http-server . -c-1",
     "test": "jest",
     "build": "tsc",
     "watch": "tsc --watch",
