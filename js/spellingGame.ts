@@ -69,21 +69,34 @@ class SpellingGame {
 
     private getNextLetterHint(userAnswer: string): { correct: boolean; message: string; progress: string } {
         const currentWord = this.wordList[this.currentIndex];
-        const hint = this.wordMatcher.getHint(userAnswer, currentWord);
-        const firstUnderscoreIndex = hint.indexOf('_');
+        const result = this.wordMatcher.checkWord(userAnswer, currentWord);
         
-        if (firstUnderscoreIndex === -1) {
+        if (result.isCorrect) {
             return {
                 correct: true,
                 message: 'Correct!',
-                progress: hint
+                progress: userAnswer
             };
+        }
+
+        // Format the display string based on the first wrong letter
+        let progress = '';
+        if (result.firstWrongLetter === userAnswer.length) {
+            // Missing letter at the end
+            progress = userAnswer + '<span class="wrong">_</span>';
+        } else {
+            // Show letters up to the wrong one normally, then mark wrong letter in red
+            // and grey out the rest as unchecked
+            progress = userAnswer.slice(0, result.firstWrongLetter) +
+                      `<span class="wrong">${userAnswer[result.firstWrongLetter]}</span>` +
+                      (result.firstWrongLetter + 1 < userAnswer.length ? 
+                       `<span class="unchecked">${userAnswer.slice(result.firstWrongLetter + 1)}</span>` : '');
         }
         
         return {
             correct: false,
-            message: `Check letter #${firstUnderscoreIndex + 1}. Should be: "${currentWord[firstUnderscoreIndex]}"`,
-            progress: hint
+            message: 'Check your answer.',
+            progress
         };
     }
 
@@ -148,7 +161,6 @@ class SpellingGame {
                     <div class="mt-4 space-y-4">
                         <p class="text-red-500">${hint.message}</p>
                         <p class="text-2xl font-mono tracking-wide text-center">${hint.progress}</p>
-                        ${this.getWordPatterns(currentWord)}
                     </div>
                 `;
             }

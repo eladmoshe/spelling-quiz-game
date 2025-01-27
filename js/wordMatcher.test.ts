@@ -8,139 +8,122 @@ describe('WordMatcher', () => {
     });
 
     describe('checkWord', () => {
-        test('correct spelling returns isCorrect true and no wrong letter', () => {
-            const result = wordMatcher.checkWord('driver', 'driver');
-            expect(result).toEqual({
+        test('correct word returns isCorrect true and no wrong letter', () => {
+            expect(wordMatcher.checkWord('driver', 'driver')).toEqual({
                 isCorrect: true,
                 firstWrongLetter: -1
             });
         });
 
-        test('case insensitive comparison works correctly', () => {
-            const result = wordMatcher.checkWord('DrIvEr', 'dRiVeR');
-            expect(result).toEqual({
+        test('case insensitive comparison works', () => {
+            expect(wordMatcher.checkWord('DrIvEr', 'dRiVeR')).toEqual({
                 isCorrect: true,
                 firstWrongLetter: -1
             });
         });
 
-        test('wrong letter in middle - cow/couw', () => {
-            const result = wordMatcher.checkWord('couw', 'cow');
-            expect(result).toEqual({
+        test('identifies first wrong letter in middle of word', () => {
+            expect(wordMatcher.checkWord('couw', 'cow')).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 2
             });
         });
 
-        test('missing letter - drvr/driver', () => {
-            const result = wordMatcher.checkWord('drvr', 'driver');
-            expect(result).toEqual({
+        test('identifies missing letter by returning word length', () => {
+            expect(wordMatcher.checkWord('co', 'cow')).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 2
             });
         });
 
-        test('extra letter at end - vet/vete', () => {
-            const result = wordMatcher.checkWord('vete', 'vet');
-            expect(result).toEqual({
+        test('identifies wrong letter at start', () => {
+            expect(wordMatcher.checkWord('bow', 'cow')).toEqual({
+                isCorrect: false,
+                firstWrongLetter: 0
+            });
+        });
+
+        test('identifies extra letter at end', () => {
+            expect(wordMatcher.checkWord('coww', 'cow')).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 3
             });
         });
 
-        test('completely different words', () => {
-            const result = wordMatcher.checkWord('cat', 'dog');
-            expect(result).toEqual({
+        test('empty user input returns first position as wrong', () => {
+            expect(wordMatcher.checkWord('', 'test')).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 0
             });
         });
 
-        test('empty user input', () => {
-            const result = wordMatcher.checkWord('', 'test');
-            expect(result).toEqual({
+        test('empty correct word returns first position as wrong', () => {
+            expect(wordMatcher.checkWord('test', '')).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 0
             });
         });
 
-        test('empty correct word', () => {
-            const result = wordMatcher.checkWord('test', '');
-            expect(result).toEqual({
-                isCorrect: false,
-                firstWrongLetter: 0
-            });
-        });
-
-        test('both inputs empty', () => {
-            const result = wordMatcher.checkWord('', '');
-            expect(result).toEqual({
+        test('both inputs empty returns correct result', () => {
+            expect(wordMatcher.checkWord('', '')).toEqual({
                 isCorrect: true,
                 firstWrongLetter: -1
             });
         });
 
-        test('spaces in words are considered characters', () => {
-            const result = wordMatcher.checkWord('ice cream', 'icecream');
-            expect(result).toEqual({
-                isCorrect: false,
-                firstWrongLetter: 3
-            });
-        });
-
-        test('leading spaces affect comparison', () => {
-            const result = wordMatcher.checkWord(' cat', 'cat');
-            expect(result).toEqual({
-                isCorrect: false,
-                firstWrongLetter: 0
-            });
-        });
-
-        test('trailing spaces affect comparison', () => {
-            const result = wordMatcher.checkWord('cat ', 'cat');
-            expect(result).toEqual({
-                isCorrect: false,
-                firstWrongLetter: 3
-            });
-        });
-
-        test('numbers are treated as characters', () => {
-            const result = wordMatcher.checkWord('word123', 'word456');
-            expect(result).toEqual({
+        test('identifies wrong letter in longer word', () => {
+            expect(wordMatcher.checkWord('testing', 'test')).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 4
             });
         });
 
-        test('special characters are treated as characters', () => {
-            const result = wordMatcher.checkWord('hello!', 'hello?');
-            expect(result).toEqual({
+        test('identifies first wrong letter in shorter word', () => {
+            expect(wordMatcher.checkWord('tast', 'test')).toEqual({
                 isCorrect: false,
-                firstWrongLetter: 5
+                firstWrongLetter: 1
             });
         });
 
-        test('unicode characters are compared correctly', () => {
-            const result = wordMatcher.checkWord('café', 'cafe');
-            expect(result).toEqual({
+        test('identifies space as wrong letter', () => {
+            expect(wordMatcher.checkWord('ice cream', 'icecream')).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 3
             });
         });
 
-        test('very long words are compared correctly', () => {
+        test('identifies wrong number as wrong letter', () => {
+            expect(wordMatcher.checkWord('word123', 'word456')).toEqual({
+                isCorrect: false,
+                firstWrongLetter: 4
+            });
+        });
+
+        test('identifies wrong special character', () => {
+            expect(wordMatcher.checkWord('hello!', 'hello?')).toEqual({
+                isCorrect: false,
+                firstWrongLetter: 5
+            });
+        });
+
+        test('identifies wrong unicode character', () => {
+            expect(wordMatcher.checkWord('café', 'cafe')).toEqual({
+                isCorrect: false,
+                firstWrongLetter: 3
+            });
+        });
+
+        test('identifies first wrong letter in very long word', () => {
             const longWord = 'pneumonoultramicroscopicsilicovolcanoconiosis';
             const wrongLongWord = 'pneumonoultramicroscopicsilicovolcanokoniosis';
-            const result = wordMatcher.checkWord(wrongLongWord, longWord);
-            expect(result).toEqual({
+            expect(wordMatcher.checkWord(wrongLongWord, longWord)).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 37
             });
         });
 
-        test('repeated characters are handled correctly', () => {
-            const result = wordMatcher.checkWord('bookkeeper', 'bookeeper');
-            expect(result).toEqual({
+        test('identifies first wrong letter with repeated characters', () => {
+            expect(wordMatcher.checkWord('bookkeeper', 'bookeeper')).toEqual({
                 isCorrect: false,
                 firstWrongLetter: 4
             });
