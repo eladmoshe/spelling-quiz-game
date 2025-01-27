@@ -479,6 +479,18 @@ class SpellingGame {
                 ${content}
             </div>
         `;
+
+        // Focus on the appropriate input box after rendering
+        setTimeout(() => {
+            const wordInput = document.querySelector('#wordInput') as HTMLInputElement;
+            const answerInput = document.querySelector('#answerInput') as HTMLInputElement;
+            
+            if (wordInput && !this.showPractice && this.wordList.length === 0) {
+                wordInput.focus();
+            } else if (answerInput && this.showPractice && !this.currentWordCorrect) {
+                answerInput.focus();
+            }
+        }, 0);
     }
 
     public toggleLanguage(): void {
