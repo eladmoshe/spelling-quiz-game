@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spelling Quiz</title>
+    <script>
+        // Set the base URL depending on the environment
+        const base = location.hostname === '127.0.0.1' || location.hostname === 'localhost'
+            ? '/'  // Local development
+            : '/spelling-quiz-game/';  // GitHub Pages
+        document.write(`<base href="${base}">`);
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="styles/main.css" rel="stylesheet">
 </head>
