@@ -327,7 +327,11 @@ class SpellingGame {
                     ${this.currentWordCorrect ? `
                         <div class="success-feedback">
                             <div class="flex items-center justify-center gap-2">
-                                <span class="success-medal">🏅</span>
+                                <span class="success-medal">${
+                                    this.attempts[this.currentIndex] === 1 ? '🥇' :
+                                    this.attempts[this.currentIndex] === 2 ? '🥈' :
+                                    '🥉'
+                                }</span>
                                 <span class="text-lg font-medium">${translations[this.language].correct}</span>
                             </div>
                             ${this.attempts[this.currentIndex] > 1 ? 
