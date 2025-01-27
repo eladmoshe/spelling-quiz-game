@@ -327,9 +327,7 @@ class SpellingGame {
                     ${this.currentWordCorrect ? `
                         <div class="success-feedback">
                             <div class="flex items-center justify-center gap-2">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
+                                <span class="success-medal">🏅</span>
                                 <span class="text-lg font-medium">${translations[this.language].correct}</span>
                             </div>
                             ${this.attempts[this.currentIndex] > 1 ? 
