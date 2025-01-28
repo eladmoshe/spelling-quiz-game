@@ -28,8 +28,14 @@ export class SpellingGame {
     private readonly MAX_STORED_SETS = 5;
 
     constructor() {
+        // Restore game settings from localStorage
         const savedLanguage = localStorage.getItem('spellingQuizLanguage');
         this.language = (savedLanguage === 'en' || savedLanguage === 'he') ? savedLanguage : 'he';
+
+        // Restore input mode
+        const savedInputMode = localStorage.getItem('spellingQuizInputMode') as InputMode;
+        this.inputMode = savedInputMode || 'manual';
+
         // Set initial document direction
         document.dir = this.language === 'he' ? 'rtl' : 'ltr';
         const appElement = document.getElementById('app');
@@ -43,8 +49,32 @@ export class SpellingGame {
         this.setupEventListeners();
     }
 
+    private saveGameSettings(): void {
+        // Save language
+        localStorage.setItem('spellingQuizLanguage', this.language);
+
+        // Save input mode
+        localStorage.setItem('spellingQuizInputMode', this.inputMode);
+
+        // If in random mode, save difficulty and word count
+        if (this.inputMode === 'random') {
+            const difficultySelect = document.getElementById('difficulty') as HTMLSelectElement;
+            const wordCountInput = document.getElementById('wordCount') as HTMLInputElement;
+
+            if (difficultySelect) {
+                localStorage.setItem('spellingQuizDifficulty', difficultySelect.value);
+            }
+            if (wordCountInput) {
+                localStorage.setItem('spellingQuizWordCount', wordCountInput.value);
+            }
+        }
+    }
+
     private async render(): Promise<void> {
         const t = translations[this.language];
+        const savedDifficulty = localStorage.getItem('spellingQuizDifficulty') || 'easy';
+        const savedWordCount = localStorage.getItem('spellingQuizWordCount') || '10';
+
         this.app.innerHTML = `
             <div class="container mx-auto px-4 py-8 max-w-2xl">
                 <div class="flex justify-end mb-4">
@@ -95,9 +125,9 @@ export class SpellingGame {
                                                     ${t.difficulty}
                                                 </label>
                                                 <select id="difficulty" class="input w-full" data-testid="difficulty-select">
-                                                    <option value="easy">${t.easy}</option>
-                                                    <option value="medium">${t.medium}</option>
-                                                    <option value="hard">${t.hard}</option>
+                                                    <option value="easy" ${savedDifficulty === 'easy' ? 'selected' : ''}>${t.easy}</option>
+                                                    <option value="medium" ${savedDifficulty === 'medium' ? 'selected' : ''}>${t.medium}</option>
+                                                    <option value="hard" ${savedDifficulty === 'hard' ? 'selected' : ''}>${t.hard}</option>
                                                 </select>
                                             </div>
                                             
@@ -105,7 +135,7 @@ export class SpellingGame {
                                                 <label class="block text-sm font-medium text-gray-700">
                                                     ${t.wordCount}
                                                 </label>
-                                                <input type="number" id="wordCount" min="1" max="20" value="10" 
+                                                <input type="number" id="wordCount" min="1" max="20" value="${savedWordCount}" 
                                                     class="input w-full" data-testid="word-count-input">
                                             </div>
                                         </div>
@@ -134,7 +164,10 @@ export class SpellingGame {
     private setupEventListeners(): void {
         const languageToggle = document.getElementById('languageToggle');
         if (languageToggle) {
-            languageToggle.addEventListener('click', () => this.toggleLanguage());
+            languageToggle.addEventListener('click', () => {
+                this.toggleLanguage();
+                this.saveGameSettings(); // Save settings when language changes
+            });
         }
 
         const startOver = document.getElementById('startOver');
@@ -157,11 +190,13 @@ export class SpellingGame {
 
             manualMode?.addEventListener('click', () => {
                 this.inputMode = 'manual';
+                this.saveGameSettings(); // Save input mode
                 this.render();
             });
 
             randomMode?.addEventListener('click', () => {
                 this.inputMode = 'random';
+                this.saveGameSettings(); // Save input mode
                 this.render();
             });
 
@@ -199,15 +234,18 @@ export class SpellingGame {
 
                     this.wordList = words;
                 } else {
-                    const options: WordOptions = {
-                        difficulty: difficultySelect.value as WordOptions['difficulty'],
-                        count: parseInt(wordCountInput.value, 10)
-                    };
+                    const difficulty = difficultySelect.value as 'easy' | 'medium' | 'hard';
+                    const wordCount = parseInt(wordCountInput.value, 10);
                     
-                    this.wordList = await this.wordGenerator.getRandomWords(options);
-                    if (this.wordList.length === 0) {
-                        return;
-                    }
+                    const wordOptions: WordOptions = {
+                        difficulty,
+                        count: wordCount
+                    };
+
+                    this.wordList = await this.wordGenerator.getRandomWords(wordOptions);
+                    
+                    // Save difficulty and word count for random mode
+                    this.saveGameSettings();
                 }
 
                 this.showPractice = true;
@@ -215,8 +253,7 @@ export class SpellingGame {
                 this.attempts = {};
                 this.wrongAttempts = {};
                 this.currentWordCorrect = false;
-                this.savePreviousWordSet(this.wordList);
-                await this.showNextWord();
+                this.render();
             });
 
             wordInput?.addEventListener('input', () => {
