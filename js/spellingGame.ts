@@ -126,6 +126,16 @@ class SpellingGame {
         const languageToggle = document.getElementById('languageToggle');
         languageToggle?.addEventListener('click', () => this.toggleLanguage());
 
+        const startOver = document.getElementById('startOver');
+        startOver?.addEventListener('click', () => {
+            this.showPractice = false;
+            this.currentIndex = 0;
+            this.attempts = {};
+            this.wrongAttempts = {};
+            this.currentWordCorrect = false;
+            this.render();
+        });
+
         if (!this.showPractice) {
             const startPractice = document.getElementById('startPractice');
             const manualMode = document.getElementById('manualMode');
@@ -519,12 +529,9 @@ class SpellingGame {
                         </div>
                     </div>
 
-                    <div class="space-x-4">
+                    <div>
                         <button id="startOver" class="btn btn-primary">
                             ${t.startOver}
-                        </button>
-                        <button id="retryMistakes" class="btn btn-secondary">
-                            ${t.tryAgain}
                         </button>
                     </div>
                 </div>
@@ -549,7 +556,7 @@ class SpellingGame {
             this.showNextWord();
         } else {
             // Show completion screen with confetti
-            this.showPractice = false;
+            this.currentIndex++; // Move past the last word to trigger completion screen
             this.createConfetti();
             this.render();
         }
