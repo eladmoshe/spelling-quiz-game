@@ -22,7 +22,8 @@
     "baseUrl": ".",
     "paths": {
       "*": ["js/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./js"]
   },
   "include": ["js/**/*"],
   "exclude": ["node_modules", "dist"]
