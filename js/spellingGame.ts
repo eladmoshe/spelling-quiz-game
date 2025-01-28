@@ -4,6 +4,7 @@ import { Analytics } from './analytics.js';
 import { WordGenerator, WordOptions } from './wordGenerator.js';
 
 type Language = 'en' | 'he';
+type InputMode = 'manual' | 'random';
 
 class SpellingGame {
     private wordList: string[] = [];
@@ -13,6 +14,7 @@ class SpellingGame {
     private wrongAttempts: Record<number, string[]> = {};
     private currentWordCorrect: boolean = false;
     private language: Language;
+    private inputMode: InputMode = 'manual';
     private app: HTMLElement;
     private wordMatcher: WordMatcher;
     private wordGenerator: WordGenerator;
@@ -31,23 +33,230 @@ class SpellingGame {
         this.wordGenerator = new WordGenerator();
         this.render();
         this.setupEventListeners();
+    }
+
+    private async render(): Promise<void> {
+        const t = translations[this.language];
+        this.app.innerHTML = `
+            <div class="container mx-auto px-4 py-8 max-w-2xl">
+                <div class="flex justify-end mb-4">
+                    <button id="languageToggle" class="btn btn-outline">
+                        ${this.language === 'he' ? 'English' : 'עברית'}
+                    </button>
+                </div>
+                
+                ${!this.showPractice ? `
+                    <div class="card">
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h1 class="title">
+                                    ${t.title}
+                                </h1>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        ${t.selectMode}
+                                    </label>
+                                    <div class="flex space-x-4 mb-4">
+                                        <button id="manualMode" class="btn ${this.inputMode === 'manual' ? 'btn-primary' : 'btn-outline'} flex-1">
+                                            ${t.manualEntry}
+                                        </button>
+                                        <button id="randomMode" class="btn ${this.inputMode === 'random' ? 'btn-primary' : 'btn-outline'} flex-1">
+                                            ${t.randomWords}
+                                        </button>
+                                    </div>
+                                    
+                                    ${this.inputMode === 'manual' ? `
+                                        <div class="space-y-2">
+                                            <label class="block text-sm font-medium text-gray-700">
+                                                ${t.enterWords}
+                                            </label>
+                                            <textarea id="wordInput" rows="5" 
+                                                class="input w-full" 
+                                                placeholder="${t.wordsPlaceholder}"
+                                                spellcheck="false"
+                                            ></textarea>
+                                        </div>
+                                    ` : `
+                                        <div class="space-y-4">
+                                            <div class="flex-1">
+                                                <label class="block text-sm font-medium text-gray-700">
+                                                    ${t.difficulty}
+                                                </label>
+                                                <select id="difficulty" class="input w-full">
+                                                    <option value="easy">${t.easy}</option>
+                                                    <option value="medium">${t.medium}</option>
+                                                    <option value="hard">${t.hard}</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="flex-1">
+                                                <label class="block text-sm font-medium text-gray-700">
+                                                    ${t.wordCount}
+                                                </label>
+                                                <input type="number" id="wordCount" min="1" max="20" value="10" 
+                                                    class="input w-full">
+                                            </div>
+                                        </div>
+                                    `}
+                                    
+                                    <button id="startPractice" class="btn btn-primary w-full mt-4">
+                                        ${t.startPractice}
+                                    </button>
+                                </div>
+                                
+                                <p class="hint">
+                                    ${t.instructions}
+                                </p>
+                            </div>
+                            
+                            ${this.renderPreviousWordSets()}
+                        </div>
+                    </div>
+                ` : this.renderPractice()}
+            </div>
+        `;
         
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (!this.showPractice) return;
-            
-            if (e.code === 'Space' && !(e.target instanceof HTMLInputElement)) {
-                e.preventDefault();
-                this.pronounceWord(this.wordList[this.currentIndex]);
-            } else if (e.code === 'Enter') {
-                e.preventDefault();
-                if (this.currentWordCorrect) {
-                    this.nextWord();
+        this.setupEventListeners();
+    }
+
+    private setupEventListeners(): void {
+        const languageToggle = document.getElementById('languageToggle');
+        languageToggle?.addEventListener('click', () => this.toggleLanguage());
+
+        if (!this.showPractice) {
+            const startPractice = document.getElementById('startPractice');
+            const manualMode = document.getElementById('manualMode');
+            const randomMode = document.getElementById('randomMode');
+            const wordInput = document.getElementById('wordInput') as HTMLTextAreaElement;
+            const difficultySelect = document.getElementById('difficulty') as HTMLSelectElement;
+            const wordCountInput = document.getElementById('wordCount') as HTMLInputElement;
+
+            manualMode?.addEventListener('click', () => {
+                this.inputMode = 'manual';
+                this.render();
+            });
+
+            randomMode?.addEventListener('click', () => {
+                this.inputMode = 'random';
+                this.render();
+            });
+
+            startPractice?.addEventListener('click', async () => {
+                if (this.inputMode === 'manual') {
+                    const words = wordInput.value
+                        .split(/[\n,]/)
+                        .map(word => word.trim())
+                        .filter(word => word && /^[a-zA-Z]+$/.test(word));
+
+                    if (words.length === 0) {
+                        wordInput.classList.add('error');
+                        wordInput.value = '';
+                        wordInput.placeholder = translations[this.language].onlyEnglishLetters;
+                        
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-red-500 text-sm mt-1';
+                        errorDiv.textContent = translations[this.language].onlyEnglishLetters;
+                        
+                        const existingError = wordInput.parentElement?.querySelector('.text-red-500');
+                        if (existingError) {
+                            existingError.remove();
+                        }
+                        
+                        wordInput.parentElement?.appendChild(errorDiv);
+                        
+                        setTimeout(() => {
+                            wordInput.classList.remove('error');
+                            errorDiv.remove();
+                            wordInput.placeholder = translations[this.language].wordsPlaceholder;
+                        }, 3000);
+                        
+                        return;
+                    }
+
+                    this.wordList = words;
                 } else {
-                    this.checkAnswer();
+                    const options: WordOptions = {
+                        difficulty: difficultySelect.value as WordOptions['difficulty'],
+                        count: parseInt(wordCountInput.value, 10)
+                    };
+                    
+                    this.wordList = await this.wordGenerator.getRandomWords(options);
+                    if (this.wordList.length === 0) {
+                        return;
+                    }
                 }
+
+                this.showPractice = true;
+                this.currentIndex = 0;
+                this.attempts = {};
+                this.wrongAttempts = {};
+                this.currentWordCorrect = false;
+                this.savePreviousWordSet(this.wordList);
+                await this.showNextWord();
+            });
+
+            wordInput?.addEventListener('input', () => {
+                wordInput.classList.remove('error');
+            });
+        } else {
+            const listenButton = document.getElementById('listenButton');
+            const checkButton = document.getElementById('checkButton');
+            const nextButton = document.getElementById('nextButton');
+            const answerInput = document.getElementById('answerInput') as HTMLInputElement;
+
+            listenButton?.addEventListener('click', () => {
+                this.playCurrentWord();
+            });
+
+            checkButton?.addEventListener('click', () => {
+                this.checkAnswer();
+            });
+
+            nextButton?.addEventListener('click', () => {
+                this.nextWord();
+            });
+
+            answerInput?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this.currentWordCorrect) {
+                        this.nextWord();
+                    } else {
+                        this.checkAnswer();
+                    }
+                }
+            });
+        }
+    }
+
+    private async showNextWord(): Promise<void> {
+        if (this.currentIndex < this.wordList.length) {
+            const input = document.querySelector('#answerInput') as HTMLInputElement;
+            if (input) {
+                input.value = '';
+                input.placeholder = translations[this.language].typePlaceholder;
+                input.focus();
             }
-        });
+            this.currentWordCorrect = false;
+            await this.playCurrentWord();
+        }
+        this.render();
+    }
+
+    private async playCurrentWord(): Promise<void> {
+        const currentWord = this.wordList[this.currentIndex];
+        if (!currentWord) return;
+
+        try {
+            const utterance = new SpeechSynthesisUtterance(currentWord);
+            utterance.lang = this.language;
+            window.speechSynthesis.speak(utterance);
+        } catch (error) {
+            console.error('Error playing word:', error);
+        }
     }
 
     private shuffleArray<T>(array: T[]): T[] {
@@ -57,12 +266,6 @@ class SpellingGame {
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         return shuffled;
-    }
-
-    private pronounceWord(word: string): void {
-        const utterance = new SpeechSynthesisUtterance(word);
-        utterance.rate = 0.8;
-        window.speechSynthesis.speak(utterance);
     }
 
     private getPreviousWordSets(): string[][] {
@@ -85,7 +288,7 @@ class SpellingGame {
 
     private getNextLetterHint(userAnswer: string): { correct: boolean; message: string; progress: string } {
         const currentWord = this.wordList[this.currentIndex];
-        const result = this.wordMatcher.checkWord(userAnswer, currentWord);
+        const result = this.wordMatcher.checkWord(currentWord, userAnswer);
         
         if (result.isCorrect) {
             return {
@@ -162,82 +365,6 @@ class SpellingGame {
             Analytics.trackPreviousSetLoad(index);
             this.startGame();
         }
-    }
-
-    private async render(): Promise<void> {
-        const t = translations[this.language];
-        this.app.innerHTML = `
-            <div class="container mx-auto px-4 py-8 max-w-2xl">
-                <div class="flex justify-end mb-4">
-                    <button id="languageToggle" class="btn btn-outline">
-                        ${this.language === 'he' ? 'English' : 'עברית'}
-                    </button>
-                </div>
-                
-                ${!this.showPractice ? `
-                    <div class="card">
-                        <div class="space-y-6">
-                            <div class="text-center">
-                                <h1 class="title">
-                                    ${t.title}
-                                </h1>
-                            </div>
-                            
-                            <div class="space-y-4">
-                                <div class="space-y-2">
-                                    <label class="block text-sm font-medium text-gray-700">
-                                        ${t.enterWords}
-                                    </label>
-                                    <textarea id="wordInput" rows="5" 
-                                        class="input w-full" 
-                                        placeholder="${t.wordsPlaceholder}"
-                                        spellcheck="false"
-                                    ></textarea>
-                                    
-                                    <div class="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
-                                        <div class="flex-1">
-                                            <label class="block text-sm font-medium text-gray-700">
-                                                ${t.difficulty}
-                                            </label>
-                                            <select id="difficulty" class="input w-full">
-                                                <option value="easy">${t.easy}</option>
-                                                <option value="medium">${t.medium}</option>
-                                                <option value="hard">${t.hard}</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="flex-1">
-                                            <label class="block text-sm font-medium text-gray-700">
-                                                ${t.wordCount}
-                                            </label>
-                                            <input type="number" id="wordCount" min="1" max="20" value="10" 
-                                                class="input w-full">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex space-x-4">
-                                        <button id="generateWords" class="btn btn-secondary">
-                                            ${t.generateWords}
-                                        </button>
-                                        <button id="startPractice" class="btn btn-primary">
-                                            ${t.startPractice}
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <p class="hint">
-                                    ${t.instructions}
-                                </p>
-                            </div>
-                            
-                            ${this.renderPreviousWordSets()}
-                        </div>
-                    </div>
-                ` : this.renderPractice()}
-            </div>
-        `;
-        
-        this.setupEventListeners();
     }
 
     private renderPractice(): string {
@@ -388,8 +515,7 @@ class SpellingGame {
         if (this.currentIndex < this.wordList.length - 1) {
             this.currentIndex++;
             this.currentWordCorrect = false;
-            this.pronounceWord(this.wordList[this.currentIndex]);
-            this.render();
+            this.showNextWord();
         } else {
             // Show completion screen with confetti
             this.showPractice = false;
@@ -398,168 +524,29 @@ class SpellingGame {
         }
     }
 
-    private setupEventListeners(): void {
-        const languageToggle = document.getElementById('languageToggle');
-        languageToggle?.addEventListener('click', () => this.toggleLanguage());
-
-        if (!this.showPractice) {
-            const startPractice = document.getElementById('startPractice');
-            const generateWords = document.getElementById('generateWords');
-            const wordInput = document.getElementById('wordInput') as HTMLTextAreaElement;
-            const difficultySelect = document.getElementById('difficulty') as HTMLSelectElement;
-            const wordCountInput = document.getElementById('wordCount') as HTMLInputElement;
-
-            startPractice?.addEventListener('click', () => {
-                // Split by both newlines and commas to support both input methods
-                const words = wordInput.value
-                    .split(/[\n,]/)
-                    .map(word => word.trim())
-                    .filter(word => word && /^[a-zA-Z]+$/.test(word));
-
-                if (words.length === 0) {
-                    wordInput.classList.add('error');
-                    // Clear the input value and set error message
-                    wordInput.value = '';
-                    wordInput.placeholder = translations[this.language].onlyEnglishLetters;
-                    
-                    // Add error message below the input
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'text-red-500 text-sm mt-1';
-                    errorDiv.textContent = translations[this.language].onlyEnglishLetters;
-                    
-                    // Remove any existing error message
-                    const existingError = wordInput.parentElement?.querySelector('.text-red-500');
-                    if (existingError) {
-                        existingError.remove();
-                    }
-                    
-                    // Add new error message
-                    wordInput.parentElement?.appendChild(errorDiv);
-                    
-                    // Remove error state after 3 seconds
-                    setTimeout(() => {
-                        wordInput.classList.remove('error');
-                        errorDiv.remove();
-                        wordInput.placeholder = translations[this.language].wordsPlaceholder;
-                    }, 3000);
-                    
-                    return;
-                }
-
-                this.wordList = words;
-                this.showPractice = true;
-                this.currentIndex = 0;
-                this.attempts = {};
-                this.wrongAttempts = {};
-                this.currentWordCorrect = false;
-                this.savePreviousWordSet(words);
-                this.render();
-            });
-
-            generateWords?.addEventListener('click', async () => {
-                const options: WordOptions = {
-                    difficulty: difficultySelect.value as WordOptions['difficulty'],
-                    count: parseInt(wordCountInput.value, 10)
-                };
-                
-                const words = await this.wordGenerator.getRandomWords(options);
-                if (words.length > 0) {
-                    wordInput.value = words.join('\n');
-                }
-            });
-
-            wordInput?.addEventListener('input', () => {
-                wordInput.classList.remove('error');
-            });
-        } else {
-            const listenButton = document.getElementById('listenButton');
-            const checkButton = document.getElementById('checkButton');
-            const nextButton = document.getElementById('nextButton');
-            const answerInput = document.getElementById('answerInput') as HTMLInputElement;
-
-            listenButton?.addEventListener('click', () => {
-                this.pronounceWord(this.wordList[this.currentIndex]);
-            });
-
-            checkButton?.addEventListener('click', () => {
-                this.checkAnswer();
-            });
-
-            nextButton?.addEventListener('click', () => {
-                this.nextWord();
-            });
-
-            answerInput?.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (this.currentWordCorrect) {
-                        this.nextWord();
-                    } else {
-                        this.checkAnswer();
-                    }
-                }
-            });
-        }
-    }
-
-    private checkAnswer(): void {
-        const input = document.querySelector('#answerInput') as HTMLInputElement;
-        if (!input) return;
-
-        const currentWord = this.wordList[this.currentIndex];
-        const userAnswer = input.value.trim();
-
-        if (!this.attempts[this.currentIndex]) {
-            this.attempts[this.currentIndex] = 0;
-            this.wrongAttempts[this.currentIndex] = [];
-        }
-        this.attempts[this.currentIndex]++;
-
-        const result = this.wordMatcher.checkWord(currentWord, userAnswer);
-        if (result.isCorrect) {
-            this.currentWordCorrect = true;
-            input.value = currentWord;
-            Analytics.trackWordAttempt(currentWord, userAnswer, true, this.attempts[this.currentIndex]);
-        } else {
-            if (!this.wrongAttempts[this.currentIndex].includes(userAnswer)) {
-                this.wrongAttempts[this.currentIndex].push(userAnswer);
-            }
-            Analytics.trackWordAttempt(currentWord, userAnswer, false, this.attempts[this.currentIndex]);
-            const hint = this.getNextLetterHint(userAnswer);
-            input.placeholder = hint.message;
-        }
-        this.render();
-    }
-
     public startGame(): void {
         const input = document.querySelector('#wordInput') as HTMLTextAreaElement;
         if (!input) return;
 
-        // Add input validation
         const inputValue = input.value;
         const isValidInput = /^[a-zA-Z,\s\n]+$/.test(inputValue);
         
         if (!isValidInput) {
             input.classList.add('error');
-            // Clear the input value and set error message
             input.value = '';
             input.placeholder = translations[this.language].onlyEnglishLetters;
             
-            // Add error message below the input
             const errorDiv = document.createElement('div');
             errorDiv.className = 'text-red-500 text-sm mt-1';
             errorDiv.textContent = translations[this.language].onlyEnglishLetters;
             
-            // Remove any existing error message
             const existingError = input.parentElement?.querySelector('.text-red-500');
             if (existingError) {
                 existingError.remove();
             }
             
-            // Add new error message
             input.parentElement?.appendChild(errorDiv);
             
-            // Remove error state after 3 seconds
             setTimeout(() => {
                 input.classList.remove('error');
                 errorDiv.remove();
@@ -581,8 +568,7 @@ class SpellingGame {
             this.wrongAttempts = {};
             this.showPractice = true;
             Analytics.trackGameStart(this.wordList.length);
-            this.pronounceWord(this.wordList[0]);
-            this.render();
+            this.showNextWord();
         }
     }
 
@@ -590,6 +576,35 @@ class SpellingGame {
         this.language = this.language === 'en' ? 'he' : 'en';
         localStorage.setItem('spellingQuizLanguage', this.language);
         Analytics.trackLanguageChange(this.language);
+        this.render();
+    }
+
+    private checkAnswer(): void {
+        const input = document.querySelector('#answerInput') as HTMLInputElement;
+        if (!input) return;
+
+        const currentWord = this.wordList[this.currentIndex];
+        const userAnswer = input.value.trim();
+
+        if (!this.attempts[this.currentIndex]) {
+            this.attempts[this.currentIndex] = 0;
+            this.wrongAttempts[this.currentIndex] = [];
+        }
+        this.attempts[this.currentIndex]++;
+
+        const result = this.wordMatcher.checkWord(userAnswer, currentWord);
+        if (result.isCorrect) {
+            this.currentWordCorrect = true;
+            input.value = currentWord;
+            Analytics.trackWordAttempt(currentWord, userAnswer, true, this.attempts[this.currentIndex]);
+        } else {
+            if (!this.wrongAttempts[this.currentIndex].includes(userAnswer)) {
+                this.wrongAttempts[this.currentIndex].push(userAnswer);
+            }
+            Analytics.trackWordAttempt(currentWord, userAnswer, false, this.attempts[this.currentIndex]);
+            const hint = this.getNextLetterHint(userAnswer);
+            input.placeholder = hint.message;
+        }
         this.render();
     }
 }

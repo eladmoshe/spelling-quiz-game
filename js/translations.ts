@@ -27,7 +27,6 @@ interface Translation {
     medium: string;
     hard: string;
     wordCount: string;
-    generateWords: string;
     startPractice: string;
     word: string;
     listen: string;
@@ -45,6 +44,9 @@ interface Translation {
     checkLetter?: string;
     attemptsMessage?: string;
     checkAnswer?: string;
+    manualEntry: string;
+    randomWords: string;
+    selectMode: string;
 }
 
 interface Translations {
@@ -55,7 +57,7 @@ interface Translations {
 export const translations: Translations = {
     en: {
         title: 'Spelling Quiz',
-        enterWords: 'Enter words or generate random ones',
+        enterWords: 'Enter your own words',
         wordsPlaceholder: 'Enter words, one per line',
         instructions: 'Press space to hear the word, enter to check your answer',
         start: 'Start Practice',
@@ -75,7 +77,6 @@ export const translations: Translations = {
         medium: 'Medium (7-9 letters)',
         hard: 'Hard (10+ letters)',
         wordCount: 'Number of Words',
-        generateWords: 'Generate Words',
         startPractice: 'Start Practice',
         word: 'Word',
         listen: 'Listen',
@@ -97,11 +98,14 @@ export const translations: Translations = {
         switchToHebrew: 'עברית',
         checkLetter: 'Check Letter',
         attemptsMessage: 'It took {count} attempts',
-        checkAnswer: 'Check Answer'
+        checkAnswer: 'Check Answer',
+        manualEntry: 'Enter My Own Words',
+        randomWords: 'Generate Random Words',
+        selectMode: 'Select Mode'
     },
     he: {
         title: 'מבחן איות',
-        enterWords: 'הכנס מילים או צור מילים אקראיות',
+        enterWords: 'הכנס את המילים שלך',
         wordsPlaceholder: 'הכנס מילים, מילה בכל שורה',
         instructions: 'לחץ על רווח כדי לשמוע את המילה, אנטר כדי לבדוק את התשובה',
         start: 'התחל אימון',
@@ -121,7 +125,6 @@ export const translations: Translations = {
         medium: 'בינוני (7-9 אותיות)',
         hard: 'קשה (10+ אותיות)',
         wordCount: 'מספר מילים',
-        generateWords: 'צור מילים',
         startPractice: 'התחל אימון',
         word: 'מילה',
         listen: 'האזן',
@@ -143,6 +146,9 @@ export const translations: Translations = {
         switchToHebrew: 'English',
         checkLetter: 'בדוק אות',
         attemptsMessage: 'לקח {count} נסיונות',
-        checkAnswer: 'בדוק תשובה'
+        checkAnswer: 'בדוק תשובה',
+        manualEntry: 'הכנס מילים משלי',
+        randomWords: 'צור מילים אקראיות',
+        selectMode: 'בחר מצב'
     }
 };

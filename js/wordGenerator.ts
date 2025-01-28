@@ -6,29 +6,81 @@ export interface WordOptions {
 export class WordGenerator {
     private readonly wordLists = {
         easy: [
-            // Common 4-6 letter words that children learn early
-            'book', 'cat', 'dog', 'fish', 'hat',
-            'home', 'jump', 'like', 'love', 'milk',
-            'play', 'read', 'run', 'sing', 'sit',
-            'sun', 'time', 'walk', 'water', 'blue',
-            'green', 'red', 'school', 'happy', 'smile'
+            // 3-4 letters
+            'act', 'add', 'age', 'air', 'ant', 'arm', 'art', 'bag', 'bat',
+            'bed', 'bee', 'box', 'boy', 'bus', 'cap', 'car', 'cat', 'cow',
+            'cry', 'cup', 'cut', 'dad', 'day', 'dog', 'dot', 'dry', 'ear',
+            'eat', 'egg', 'end', 'eye', 'fan', 'far', 'fat', 'fit', 'fix',
+            'fly', 'fog', 'fun', 'gas', 'get', 'god', 'hat', 'hay', 'hen',
+            'hot', 'ice', 'ink', 'jar', 'joy', 'key', 'kid', 'leg', 'let',
+            'lid', 'lie', 'lip', 'lot', 'low', 'map', 'mat', 'may', 'mix',
+            // 5-6 letters
+            'about', 'above', 'after', 'again', 'apple', 'beach', 'bread',
+            'brick', 'bring', 'brush', 'candy', 'carry', 'chair', 'chalk',
+            'clean', 'clock', 'cloud', 'color', 'dance', 'drink', 'earth',
+            'every', 'field', 'first', 'floor', 'flower', 'found', 'fresh',
+            'front', 'funny', 'ghost', 'glass', 'grape', 'grass', 'green',
+            'happy', 'heart', 'horse', 'house', 'juice', 'laugh', 'learn',
+            'light', 'lunch', 'magic', 'money', 'month', 'mouse', 'mouth',
+            'music', 'night', 'noise', 'ocean', 'paint', 'paper', 'party',
+            'peace', 'phone', 'plant', 'prize', 'quiet', 'radio', 'river',
+            'round', 'sheep', 'shoes', 'short', 'sleep', 'small', 'smile',
+            'snake', 'space', 'speak', 'spoon', 'spring', 'stamp', 'stand',
+            'star', 'start', 'story', 'sweet', 'table', 'thank', 'think',
+            'tiger', 'train', 'tree', 'truck', 'under', 'water', 'white',
+            'world', 'write', 'young'
         ],
         medium: [
-            // Common 7-9 letter words from everyday life
-            'birthday', 'brother', 'chicken', 'children',
-            'computer', 'daughter', 'elephant', 'favorite',
-            'football', 'hospital', 'kitchen', 'morning',
-            'mountain', 'painting', 'rainbow', 'student',
-            'teacher', 'weather', 'weekend', 'writing'
+            // 7-9 letters
+            'airplane', 'alphabet', 'baseball', 'bathroom', 'birthday',
+            'blanket', 'breakfast', 'building', 'butterfly', 'calendar',
+            'camera', 'camping', 'candle', 'captain', 'careful', 'carnival',
+            'carpet', 'carrot', 'cartoon', 'castle', 'ceiling', 'center',
+            'channel', 'chapter', 'chicken', 'children', 'chimney', 'chocolate',
+            'circle', 'climate', 'college', 'comfort', 'company', 'complete',
+            'computer', 'concert', 'cookie', 'corner', 'cottage', 'country',
+            'crayon', 'creative', 'cricket', 'crystal', 'cucumber', 'curious',
+            'cushion', 'dancing', 'daughter', 'diamond', 'dinner', 'direction',
+            'dolphin', 'drawing', 'dream', 'elephant', 'envelope', 'evening',
+            'example', 'exercise', 'explore', 'family', 'favorite', 'feather',
+            'feeling', 'festival', 'finger', 'fireplace', 'fishing', 'flower',
+            'football', 'forest', 'forward', 'freedom', 'friendly', 'garden',
+            'general', 'giraffe', 'glasses', 'goodbye', 'grateful', 'grocery',
+            'guitar', 'hamster', 'handful', 'happy', 'harvest', 'healthy',
+            'hearing', 'helpful', 'history', 'holiday', 'honey', 'hospital',
+            'hundred', 'hungry', 'hunting', 'imagine', 'improve', 'insect',
+            'island', 'jacket', 'jelly', 'journey', 'jungle', 'kangaroo',
+            'kitchen', 'kitten', 'language', 'laughter', 'learning', 'library',
+            'lightning', 'listen', 'machine', 'magazine', 'magical', 'manager',
+            'marble', 'market', 'memory', 'message', 'miracle', 'monkey',
+            'morning', 'mountain', 'mystery', 'natural', 'necklace', 'needle'
         ],
         hard: [
-            // Challenging but recognizable 10+ letter words
-            'basketball', 'butterfly', 'chocolate',
-            'comfortable', 'dictionary', 'difference',
-            'everything', 'friendship', 'important',
-            'interested', 'playground', 'restaurant',
-            'scientific', 'technology', 'television',
-            'temperature', 'understand', 'vocabulary'
+            // 10+ letters
+            'absolutely', 'acceptable', 'accessible', 'accomplish', 'achievement',
+            'activities', 'adventure', 'afternoon', 'agreement', 'amazing',
+            'apartment', 'appreciate', 'attention', 'attractive', 'automobile',
+            'background', 'basketball', 'beautiful', 'beginning', 'believe',
+            'blackberry', 'blueberry', 'butterfly', 'calculator', 'california',
+            'carefully', 'celebrate', 'celebration', 'challenge', 'champion',
+            'character', 'chocolate', 'christmas', 'classroom', 'collection',
+            'comfortable', 'community', 'completely', 'computer', 'concentrate',
+            'condition', 'confidence', 'connection', 'consider', 'continue',
+            'contribute', 'controller', 'convenient', 'conversation', 'coordinate',
+            'correctly', 'dangerous', 'decoration', 'definitely', 'delicious',
+            'department', 'describe', 'description', 'determine', 'development',
+            'difference', 'difficult', 'direction', 'disappear', 'discover',
+            'discussion', 'education', 'electrical', 'elementary', 'elephant',
+            'encourage', 'engineering', 'environment', 'equipment', 'especially',
+            'everybody', 'everything', 'everywhere', 'excellent', 'excitement',
+            'exercise', 'experience', 'experiment', 'explain', 'expression',
+            'fantastic', 'favorite', 'friendship', 'furniture', 'generally',
+            'generation', 'government', 'grandfather', 'grandmother', 'grasshopper',
+            'grateful', 'happiness', 'helicopter', 'helpful', 'hospital',
+            'household', 'important', 'impossible', 'improve', 'incredible',
+            'independent', 'individual', 'information', 'ingredient', 'inside',
+            'instrument', 'intelligent', 'interested', 'interesting', 'international',
+            'interview', 'introduce', 'invention', 'invitation', 'keyboard'
         ]
     };
 
