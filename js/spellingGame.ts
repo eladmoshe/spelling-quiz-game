@@ -48,7 +48,7 @@ export class SpellingGame {
         this.app.innerHTML = `
             <div class="container mx-auto px-4 py-8 max-w-2xl">
                 <div class="flex justify-end mb-4">
-                    <button id="languageToggle" class="btn btn-outline">
+                    <button id="languageToggle" class="btn btn-outline" data-testid="language-toggle">
                         ${this.language === 'he' ? 'English' : 'עברית'}
                     </button>
                 </div>
@@ -68,10 +68,10 @@ export class SpellingGame {
                                         ${t.selectMode}
                                     </label>
                                     <div class="flex space-x-4 mb-4">
-                                        <button id="manualMode" class="btn ${this.inputMode === 'manual' ? 'btn-primary' : 'btn-outline'} flex-1">
+                                        <button id="manualMode" class="btn ${this.inputMode === 'manual' ? 'btn-primary' : 'btn-outline'} flex-1" data-testid="manual-mode-button">
                                             ${t.manualEntry}
                                         </button>
-                                        <button id="randomMode" class="btn ${this.inputMode === 'random' ? 'btn-primary' : 'btn-outline'} flex-1">
+                                        <button id="randomMode" class="btn ${this.inputMode === 'random' ? 'btn-primary' : 'btn-outline'} flex-1" data-testid="random-mode-button">
                                             ${t.randomWords}
                                         </button>
                                     </div>
@@ -93,7 +93,7 @@ export class SpellingGame {
                                                 <label class="block text-sm font-medium text-gray-700">
                                                     ${t.difficulty}
                                                 </label>
-                                                <select id="difficulty" class="input w-full">
+                                                <select id="difficulty" class="input w-full" data-testid="difficulty-select">
                                                     <option value="easy">${t.easy}</option>
                                                     <option value="medium">${t.medium}</option>
                                                     <option value="hard">${t.hard}</option>
@@ -105,12 +105,12 @@ export class SpellingGame {
                                                     ${t.wordCount}
                                                 </label>
                                                 <input type="number" id="wordCount" min="1" max="20" value="10" 
-                                                    class="input w-full">
+                                                    class="input w-full" data-testid="word-count-input">
                                             </div>
                                         </div>
                                     `}
                                     
-                                    <button id="startPractice" class="btn btn-primary w-full mt-4">
+                                    <button id="startPractice" class="btn btn-primary w-full mt-4" data-testid="start-practice-button">
                                         ${t.startPractice}
                                     </button>
                                 </div>
@@ -467,7 +467,7 @@ export class SpellingGame {
                         </div>
 
                         <div class="flex justify-center space-x-4">
-                            <button id="startOver" class="btn btn-primary">
+                            <button id="startOver" class="btn btn-primary" data-testid="start-over-button">
                                 ${t.startOver}
                             </button>
                         </div>
@@ -499,7 +499,7 @@ export class SpellingGame {
                                 `).join('')}
                             </div>
                         </div>
-                        <button id="listenButton" class="btn btn-outline" title="${t.listen}">
+                        <button id="listenButton" class="btn btn-outline" title="${t.listen}" data-testid="listen-button">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                     d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z">
@@ -521,6 +521,7 @@ export class SpellingGame {
                             autocomplete="off"
                             spellcheck="false"
                             value="${this.currentWordCorrect ? currentWord : ''}"
+                            data-testid="answer-input"
                         >
                         
                         ${!this.currentWordCorrect ? `
@@ -532,11 +533,11 @@ export class SpellingGame {
 
                     <div class="space-x-4 flex justify-center">
                         ${this.currentWordCorrect ? `
-                            <button id="nextButton" class="btn btn-primary">
+                            <button id="nextButton" class="btn btn-primary" data-testid="next-button">
                                 ${this.currentIndex === this.wordList.length - 1 ? t.finish : t.next}
                             </button>
                         ` : `
-                            <button id="checkButton" class="btn btn-primary">
+                            <button id="checkButton" class="btn btn-primary" data-testid="check-button">
                                 ${t.check}
                             </button>
                         `}
@@ -611,6 +612,9 @@ export class SpellingGame {
     public startGame(): void {
         const input = document.querySelector('#wordInput') as HTMLTextAreaElement;
         if (!input) return;
+
+        // Add data-testid to the input
+        input.setAttribute('data-testid', 'word-input');
 
         const inputValue = input.value;
         const isValidInput = /^[a-zA-Z,\s\n]+$/.test(inputValue);

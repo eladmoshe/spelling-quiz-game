@@ -9,33 +9,33 @@ test.describe('Spelling Quiz Game', () => {
 
   test('should load the game interface', async ({ page }) => {
     // Wait for and verify the title is visible
-    await expect(page.locator('.title')).toBeVisible();
+    await expect(page.getByTestId('game-title')).toBeVisible();
     
     // Wait for and verify essential game controls are present
-    await expect(page.locator('#wordInput')).toBeVisible();
-    await expect(page.locator('.btn-primary')).toBeVisible();
-    await expect(page.locator('.lang-toggle')).toBeVisible();
+    await expect(page.getByTestId('word-input')).toBeVisible();
+    await expect(page.getByTestId('start-button')).toBeVisible();
+    await expect(page.getByTestId('language-toggle')).toBeVisible();
   });
 
   test('should start a new game', async ({ page }) => {
     // Enter some words
-    await page.locator('#wordInput').fill('hello,world');
+    await page.getByTestId('word-input').fill('hello,world');
     
-    // Click the start button (using class since text is translated)
-    await page.locator('.btn-primary').click();
+    // Click the start button
+    await page.getByTestId('start-button').click();
     
     // Verify game elements are visible
-    await expect(page.locator('#answerInput')).toBeVisible();
+    await expect(page.getByTestId('answer-input')).toBeVisible();
   });
 
   test('should handle correct answer submission', async ({ page }) => {
     // Start the game with a known word
     const testWord = 'test';
-    await page.locator('#wordInput').fill(testWord);
-    await page.locator('.btn-primary').click();
+    await page.getByTestId('word-input').fill(testWord);
+    await page.getByTestId('start-button').click();
     
     // Wait for the game interface
-    const answerInput = page.locator('#answerInput');
+    const answerInput = page.getByTestId('answer-input');
     await answerInput.waitFor();
     
     // Type the correct answer and submit
@@ -46,17 +46,17 @@ test.describe('Spelling Quiz Game', () => {
     await expect(answerInput).toHaveValue(testWord);
     
     // The word status dot should show as correct
-    await expect(page.locator('.word-status-dot.correct')).toBeVisible();
+    await expect(page.getByTestId('word-status-correct')).toBeVisible();
   });
 
   test('should handle incorrect answer submission', async ({ page }) => {
     // Start the game with a known word
     const testWord = 'test';
-    await page.locator('#wordInput').fill(testWord);
-    await page.locator('.btn-primary').click();
+    await page.getByTestId('word-input').fill(testWord);
+    await page.getByTestId('start-button').click();
     
     // Wait for the game interface
-    const answerInput = page.locator('#answerInput');
+    const answerInput = page.getByTestId('answer-input');
     await answerInput.waitFor();
     
     // Type an incorrect answer and submit
