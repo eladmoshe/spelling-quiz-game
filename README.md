@@ -2,25 +2,24 @@
 
 Try it now: [Spelling Quiz Game](https://eladmoshe.github.io/spelling-quiz-game/) 🎮
 
-Welcome to Spelling Quiz - an interactive and engaging way to improve your spelling skills! Whether you're learning English or Hebrew, this game makes practicing spelling fun and effective.
+Welcome to Spelling Quiz - an interactive and engaging way to improve your spelling skills! This game makes practicing English spelling fun and effective.
 
 ## Why Use Spelling Quiz? ✨
 
 - **Learn at Your Own Pace**: Practice spelling with words that matter to you
-- **Bilingual Support**: Available in both English and Hebrew
+- **Bilingual Support**: Available in both English and Hebrew interface
 - **Interactive Learning**: Hear the words pronounced and type them out
 - **Immediate Feedback**: Know instantly if your spelling is correct
 - **Track Your Progress**: See how well you're doing with each practice session
-- **Pattern Recognition**: Focus on specific spelling patterns like consonant blends, vowel pairs, and more
 
 ## How to Use 🎮
 
 1. **Start a New Quiz**:
-   - Enter your practice words
+   - Enter your practice words separated by commas. 
    - Click "Start" to begin
    
 2. **During the Quiz**:
-   - Click "Listen" to hear the word
+   - The word will be played. Click "Listen" to hear the word again
    - Type your answer
    - Press Enter or click "Check" to verify your spelling
    - Use "Next" to move to the next word
