@@ -410,10 +410,11 @@ class SpellingGame {
             const wordCountInput = document.getElementById('wordCount') as HTMLInputElement;
 
             startPractice?.addEventListener('click', () => {
+                // Split by both newlines and commas to support both input methods
                 const words = wordInput.value
-                    .split('\n')
+                    .split(/[\n,]/)
                     .map(word => word.trim())
-                    .filter(word => word && /^[a-zA-Z\s]+$/.test(word));
+                    .filter(word => word && /^[a-zA-Z]+$/.test(word));
 
                 if (words.length === 0) {
                     wordInput.classList.add('error');
@@ -568,9 +569,9 @@ class SpellingGame {
             return;
         }
 
-        const words = inputValue.split('\n')
+        const words = inputValue.split(/[\n,]/)
             .map(word => word.trim())
-            .filter(word => word && /^[a-zA-Z\s]+$/.test(word));
+            .filter(word => word && /^[a-zA-Z]+$/.test(word));
 
         if (words.length > 0) {
             this.savePreviousWordSet(words);

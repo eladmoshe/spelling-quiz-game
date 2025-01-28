@@ -4,36 +4,42 @@ export interface WordOptions {
 }
 
 export class WordGenerator {
-    private readonly API_URL = 'https://random-word-api.herokuapp.com/word';
-    
+    private readonly wordLists = {
+        easy: [
+            // Common 4-6 letter words that children learn early
+            'book', 'cat', 'dog', 'fish', 'hat',
+            'home', 'jump', 'like', 'love', 'milk',
+            'play', 'read', 'run', 'sing', 'sit',
+            'sun', 'time', 'walk', 'water', 'blue',
+            'green', 'red', 'school', 'happy', 'smile'
+        ],
+        medium: [
+            // Common 7-9 letter words from everyday life
+            'birthday', 'brother', 'chicken', 'children',
+            'computer', 'daughter', 'elephant', 'favorite',
+            'football', 'hospital', 'kitchen', 'morning',
+            'mountain', 'painting', 'rainbow', 'student',
+            'teacher', 'weather', 'weekend', 'writing'
+        ],
+        hard: [
+            // Challenging but recognizable 10+ letter words
+            'basketball', 'butterfly', 'chocolate',
+            'comfortable', 'dictionary', 'difference',
+            'everything', 'friendship', 'important',
+            'interested', 'playground', 'restaurant',
+            'scientific', 'technology', 'television',
+            'temperature', 'understand', 'vocabulary'
+        ]
+    };
+
     async getRandomWords(options: WordOptions): Promise<string[]> {
         try {
-            // The length of the word determines its difficulty
-            const minLength = this.getDifficultyLength(options.difficulty);
-            const response = await fetch(`${this.API_URL}?number=${options.count}&length=${minLength}`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch words');
-            }
-            
-            const words = await response.json();
-            return words;
+            const availableWords = this.wordLists[options.difficulty];
+            const shuffled = [...availableWords].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, options.count);
         } catch (error) {
-            console.error('Error fetching random words:', error);
+            console.error('Error getting random words:', error);
             return [];
-        }
-    }
-    
-    private getDifficultyLength(difficulty: WordOptions['difficulty']): number {
-        switch (difficulty) {
-            case 'easy':
-                return 4; // 4-6 letters
-            case 'medium':
-                return 7; // 7-9 letters
-            case 'hard':
-                return 10; // 10+ letters
-            default:
-                return 4;
         }
     }
 }
