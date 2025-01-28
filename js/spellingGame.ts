@@ -57,7 +57,7 @@ export class SpellingGame {
                     <div class="card">
                         <div class="space-y-6">
                             <div class="text-center">
-                                <h1 class="title">
+                                <h1 class="title" data-testid="game-title">
                                     ${t.title}
                                 </h1>
                             </div>
@@ -81,9 +81,10 @@ export class SpellingGame {
                                             <label class="block text-sm font-medium text-gray-700">
                                                 ${t.enterWords}
                                             </label>
-                                            <textarea id="wordInput" rows="5" 
+                                            <textarea id="wordInput" 
                                                 class="input w-full" 
                                                 placeholder="${t.wordsPlaceholder}"
+                                                data-testid="word-input"
                                                 spellcheck="false"
                                             ></textarea>
                                         </div>
@@ -110,7 +111,7 @@ export class SpellingGame {
                                         </div>
                                     `}
                                     
-                                    <button id="startPractice" class="btn btn-primary w-full mt-4" data-testid="start-practice-button">
+                                    <button id="startPractice" class="btn btn-primary w-full mt-4" data-testid="start-button">
                                         ${t.startPractice}
                                     </button>
                                 </div>
@@ -491,11 +492,10 @@ export class SpellingGame {
                             </h2>
                             <div class="word-status">
                                 ${this.wordList.map((_, index) => `
-                                    <span class="word-status-dot ${
-                                        index < this.currentIndex ? 'correct' :
-                                        index === this.currentIndex ? (this.currentWordCorrect ? 'correct' : 'pending') :
-                                        'pending'
-                                    }"></span>
+                                    <div 
+                                        class="w-2 h-2 rounded-full ${index < this.currentIndex ? 'bg-green-500' : index === this.currentIndex ? (this.currentWordCorrect ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-400'}" 
+                                        data-testid="word-status-${index < this.currentIndex ? 'correct' : index === this.currentIndex ? (this.currentWordCorrect ? 'correct' : 'incorrect') : 'pending'}"
+                                    ></div>
                                 `).join('')}
                             </div>
                         </div>
