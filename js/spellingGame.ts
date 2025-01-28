@@ -441,6 +441,17 @@ class SpellingGame {
                         <div class="success-feedback">
                             <div class="flex items-center justify-center gap-2">
                                 <span class="text-lg font-medium text-green-600">${t.correct}</span>
+                                ${(() => {
+                                    let medal = '';
+                                    if (this.attempts[this.currentIndex] === 1) {
+                                        medal = '🥇';
+                                    } else if (this.attempts[this.currentIndex] === 2) {
+                                        medal = '🥈';
+                                    } else if (this.attempts[this.currentIndex] === 3) {
+                                        medal = '🥉';
+                                    }
+                                    return medal ? `<span class="text-4xl animate-bounce">${medal}</span>` : '';
+                                })()}
                             </div>
                         </div>
                     ` : `
@@ -459,6 +470,11 @@ class SpellingGame {
         const t = translations[this.language];
         const perfectWords = Object.values(this.attempts).filter(count => count === 1).length;
         const accuracy = Math.round((perfectWords / this.wordList.length) * 100);
+        
+        // Calculate medals
+        const goldMedals = Object.values(this.attempts).filter(count => count === 1).length;
+        const silverMedals = Object.values(this.attempts).filter(count => count === 2).length;
+        const bronzeMedals = Object.values(this.attempts).filter(count => count === 3).length;
         
         return `
             <div class="card text-center">
@@ -485,6 +501,21 @@ class SpellingGame {
                         <div class="bg-yellow-50 p-4 rounded-lg">
                             <div class="text-2xl font-bold text-yellow-600">${accuracy}%</div>
                             <div class="text-sm text-gray-600">${t.accuracy}</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <div class="text-2xl">🥇 ${goldMedals}</div>
+                            <div class="text-sm text-gray-600">Gold Medals</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="text-2xl">🥈 ${silverMedals}</div>
+                            <div class="text-sm text-gray-600">Silver Medals</div>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <div class="text-2xl">🥉 ${bronzeMedals}</div>
+                            <div class="text-sm text-gray-600">Bronze Medals</div>
                         </div>
                     </div>
 
