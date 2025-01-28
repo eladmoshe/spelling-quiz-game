@@ -244,16 +244,20 @@ class SpellingGame {
 
     private async showNextWord(): Promise<void> {
         if (this.currentIndex < this.wordList.length) {
+            this.currentWordCorrect = false;
+            await this.render();
+            
             const input = document.querySelector('#answerInput') as HTMLInputElement;
             if (input) {
                 input.value = '';
                 input.placeholder = translations[this.language].typePlaceholder;
                 input.focus();
             }
-            this.currentWordCorrect = false;
+            
             await this.playCurrentWord();
+        } else {
+            await this.render();
         }
-        this.render();
     }
 
     private async playCurrentWord(): Promise<void> {
@@ -296,7 +300,7 @@ class SpellingGame {
         localStorage.setItem(this.PREVIOUS_SETS_KEY, JSON.stringify(newSets));
     }
 
-    private getNextLetterHint(userAnswer: string): { correct: boolean; message: string; progress: string } {
+    private getNextLetterHint(userAnswer: string): { correct: boolean; message: string; progress: string; wrongLetterPosition: number } {
         const currentWord = this.wordList[this.currentIndex];
         const result = this.wordMatcher.checkWord(currentWord, userAnswer);
         
@@ -304,7 +308,8 @@ class SpellingGame {
             return {
                 correct: true,
                 message: translations[this.language].correct,
-                progress: currentWord
+                progress: currentWord,
+                wrongLetterPosition: -1
             };
         }
 
@@ -312,11 +317,11 @@ class SpellingGame {
         let progress = '';
         if (result.firstWrongLetter === userAnswer.length) {
             // Missing letter at the end
-            progress = userAnswer + '<span class="text-red-500 font-bold">_</span>';
+            progress = `<span class="text-green-600">${userAnswer}</span><span class="text-red-500 font-bold">_</span>`;
         } else {
-            // Show letters up to the wrong one normally, then mark wrong letter in red
+            // Show letters up to the wrong one in green, then mark wrong letter in red
             // and grey out the rest as unchecked
-            progress = userAnswer.slice(0, result.firstWrongLetter) +
+            progress = `<span class="text-green-600">${userAnswer.slice(0, result.firstWrongLetter)}</span>` +
                       `<span class="text-red-500">${userAnswer[result.firstWrongLetter] || '_'}</span>` +
                       (result.firstWrongLetter + 1 < userAnswer.length ? 
                        `<span class="text-gray-400">${userAnswer.slice(result.firstWrongLetter + 1)}</span>` : '');
@@ -325,7 +330,8 @@ class SpellingGame {
         return {
             correct: false,
             message: translations[this.language].incorrect,
-            progress
+            progress,
+            wrongLetterPosition: result.firstWrongLetter
         };
     }
 
@@ -385,6 +391,10 @@ class SpellingGame {
         if (!currentWord) {
             return this.renderCompletionScreen();
         }
+        
+        const input = document.querySelector('#answerInput') as HTMLInputElement;
+        const lastAttempt = input?.value.trim() || '';
+        const hint = this.attempts[this.currentIndex] > 0 ? this.getNextLetterHint(lastAttempt) : null;
         
         return `
             <div class="card">
@@ -465,75 +475,26 @@ class SpellingGame {
                             </div>
                         </div>
                     ` : `
-                        <div id="result" class="text-center">
+                        <div id="result" class="text-center space-y-4">
                             ${this.attempts[this.currentIndex] > 0 ? `
                                 <p class="text-red-500">${t.incorrect}</p>
+                                <div class="relative inline-block">
+                                    <p class="text-2xl mt-2">${hint?.progress}</p>
+                                    ${hint && hint.wrongLetterPosition >= 0 ? `
+                                        <div class="absolute" style="left: calc(${hint.wrongLetterPosition}ch + ${hint.wrongLetterPosition * 0.1}em); top: -1.5em">
+                                            <span class="text-red-500 text-2xl">↓</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div class="mt-4 text-sm space-y-1">
+                                    <p class="font-medium">${t.feedbackLegend}</p>
+                                    <p><span class="text-green-600">■</span> ${t.correctLetters}</p>
+                                    <p><span class="text-red-500">■</span> ${t.wrongLetter}</p>
+                                    <p><span class="text-gray-400">■</span> ${t.uncheckedLetters}</p>
+                                </div>
                             ` : ''}
                         </div>
                     `}
-                </div>
-            </div>
-        `;
-    }
-
-    private renderCompletionScreen(): string {
-        const t = translations[this.language];
-        const perfectWords = Object.values(this.attempts).filter(count => count === 1).length;
-        const accuracy = Math.round((perfectWords / this.wordList.length) * 100);
-        
-        // Calculate medals
-        const goldMedals = Object.values(this.attempts).filter(count => count === 1).length;
-        const silverMedals = Object.values(this.attempts).filter(count => count === 2).length;
-        const bronzeMedals = Object.values(this.attempts).filter(count => count === 3).length;
-        
-        return `
-            <div class="card text-center">
-                <div class="space-y-8">
-                    <div class="space-y-4">
-                        <div class="text-6xl mb-4">🎉</div>
-                        <h1 class="text-3xl font-bold text-gray-900">
-                            ${t.practiceComplete}
-                        </h1>
-                        <p class="text-lg text-gray-600">
-                            ${t.greatJob}
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-600">${this.wordList.length}</div>
-                            <div class="text-sm text-gray-600">${t.totalWords}</div>
-                        </div>
-                        <div class="bg-green-50 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-green-600">${perfectWords}</div>
-                            <div class="text-sm text-gray-600">${t.perfectWords}</div>
-                        </div>
-                        <div class="bg-yellow-50 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-yellow-600">${accuracy}%</div>
-                            <div class="text-sm text-gray-600">${t.accuracy}</div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-amber-50 p-4 rounded-lg">
-                            <div class="text-2xl">🥇 ${goldMedals}</div>
-                            <div class="text-sm text-gray-600">Gold Medals</div>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <div class="text-2xl">🥈 ${silverMedals}</div>
-                            <div class="text-sm text-gray-600">Silver Medals</div>
-                        </div>
-                        <div class="bg-orange-50 p-4 rounded-lg">
-                            <div class="text-2xl">🥉 ${bronzeMedals}</div>
-                            <div class="text-sm text-gray-600">Bronze Medals</div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <button id="startOver" class="btn btn-primary">
-                            ${t.startOver}
-                        </button>
-                    </div>
                 </div>
             </div>
         `;
@@ -630,7 +591,7 @@ class SpellingGame {
         }
         this.attempts[this.currentIndex]++;
 
-        const result = this.wordMatcher.checkWord(userAnswer, currentWord);
+        const result = this.wordMatcher.checkWord(currentWord, userAnswer);
         if (result.isCorrect) {
             this.currentWordCorrect = true;
             input.value = currentWord;
