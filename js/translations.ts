@@ -51,6 +51,7 @@ interface Translation {
     randomWords: string;
     selectMode: string;
     patterns?: Pattern;
+    wordAttemptBreakdown: string;
 }
 
 interface Translations {
@@ -104,6 +105,7 @@ export const translations: Translations = {
         manualEntry: 'Enter Words',
         randomWords: 'Random Words',
         selectMode: 'Select Mode',
+        wordAttemptBreakdown: 'Word Attempt Breakdown',
         patterns: {
             consonantBlends: "Consonant blends (like 'sh', 'th')",
             vowelPairs: "Vowel pairs",
@@ -156,6 +158,7 @@ export const translations: Translations = {
         manualEntry: 'הכנס מילים',
         randomWords: 'מילים אקראיות',
         selectMode: 'בחר מצב',
+        wordAttemptBreakdown: 'פירוט נסיונות למילים',
         patterns: {
             consonantBlends: "צירופי עיצורים (כמו 'sh', 'th')",
             vowelPairs: "זוגות תנועות",

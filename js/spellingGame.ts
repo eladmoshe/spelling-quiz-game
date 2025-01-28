@@ -402,24 +402,67 @@ export class SpellingGame {
             const perfectWords = Object.entries(this.attempts).filter(([_, attempts]) => attempts === 1).length;
             const accuracy = Math.round((perfectWords / totalWords) * 100);
             
+            // Ensure no undefined values
+            const getMedal = () => {
+                if (isNaN(accuracy)) return '🌱 Start Practicing! 🌈';
+                if (accuracy >= 90) return '🏆 Excellent! 🥇';
+                if (accuracy >= 70) return '🎉 Great Job! 🥈';
+                if (accuracy >= 50) return '👏 Good Effort! 🥉';
+                return '🌱 Keep Practicing! 🌈';
+            };
+
+            const medalDetails = {
+                perfectWords: Object.entries(this.attempts || {}).filter(([_, attempts]) => attempts === 1).length,
+                oneAttemptWords: Object.entries(this.attempts || {}).filter(([_, attempts]) => attempts === 1).length,
+                twoAttemptWords: Object.entries(this.attempts || {}).filter(([_, attempts]) => attempts === 2).length,
+                threeAttemptWords: Object.entries(this.attempts || {}).filter(([_, attempts]) => attempts === 3).length,
+            };
+
             return `
-                <div class="card">
+                <div class="card summary-card">
                     <div class="space-y-6">
-                        <h2 class="text-2xl font-bold text-center">${t.practiceComplete}</h2>
-                        <p class="text-center">${t.greatJob}</p>
+                        <h2 class="text-3xl font-bold text-center text-primary">${t.practiceComplete}</h2>
+                        <p class="text-center text-xl text-text-light">${t.greatJob}</p>
                         
-                        <div class="stats">
-                            <div class="stat-item">
-                                <div class="stat-value">${totalWords}</div>
-                                <div class="stat-label">${t.totalWords}</div>
+                        <div class="medal-banner">
+                            <div class="medal-display">
+                                ${getMedal()}
                             </div>
-                            <div class="stat-item">
-                                <div class="stat-value">${perfectWords}</div>
-                                <div class="stat-label">${t.perfectWords}</div>
+                        </div>
+
+                        <div class="stats grid grid-cols-3 gap-4">
+                            <div class="stat-item text-center">
+                                <div class="stat-value text-3xl text-primary">${totalWords || 0}</div>
+                                <div class="stat-label text-text-light">${t.totalWords}</div>
                             </div>
-                            <div class="stat-item">
-                                <div class="stat-value">${accuracy}%</div>
-                                <div class="stat-label">${t.accuracy}</div>
+                            <div class="stat-item text-center">
+                                <div class="stat-value text-3xl text-success">${medalDetails.perfectWords || 0}</div>
+                                <div class="stat-label text-text-light">${t.perfectWords}</div>
+                            </div>
+                            <div class="stat-item text-center">
+                                <div class="stat-value text-3xl text-secondary">${!isNaN(accuracy) ? `${accuracy}%` : '0%'}</div>
+                                <div class="stat-label text-text-light">${t.accuracy}</div>
+                            </div>
+                        </div>
+
+                        <div class="medal-breakdown">
+                            <h3 class="text-xl font-semibold text-center mb-4">${t.wordAttemptBreakdown}</h3>
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div>
+                                    <span class="text-3xl">🥇</span>
+                                    <div class="text-lg">${medalDetails.oneAttemptWords || 0}</div>
+                                    <div class="text-sm text-text-light">First Try</div>
+                                </div>
+                                <div>
+                                    <span class="text-3xl">🥈</span>
+                                    <div class="text-lg">${medalDetails.twoAttemptWords || 0}</div>
+                                    <div class="text-sm text-text-light">Second Try</div>
+                                </div>
+                                <div>
+                                    <span class="text-3xl">🥉</span>
+                                    <div class="text-lg">${medalDetails.threeAttemptWords || 0}</div>
+                                    <div class="text-sm text-text-light">Third Try</div>
+                                </div>
                             </div>
                         </div>
 
