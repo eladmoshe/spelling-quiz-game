@@ -1,6 +1,7 @@
 import WordMatcher from './wordMatcher.js';
 import { translations } from './translations.js';
 import { Analytics } from './analytics.js';
+import { WordGenerator, WordOptions } from './wordGenerator.js';
 
 type Language = 'en' | 'he';
 
@@ -14,6 +15,7 @@ class SpellingGame {
     private language: Language;
     private app: HTMLElement;
     private wordMatcher: WordMatcher;
+    private wordGenerator: WordGenerator;
     private readonly PREVIOUS_SETS_KEY = 'previousWordSets';
     private readonly MAX_STORED_SETS = 5;
 
@@ -26,7 +28,9 @@ class SpellingGame {
         }
         this.app = appElement;
         this.wordMatcher = new WordMatcher();
+        this.wordGenerator = new WordGenerator();
         this.render();
+        this.setupEventListeners();
         
         // Add keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -128,109 +132,7 @@ class SpellingGame {
         }
     }
 
-    private getCompletionStats(): { totalAttempts: number; perfectWords: number } {
-        const totalAttempts = Object.values(this.attempts).reduce((sum, attempts) => sum + attempts, 0);
-        const perfectWords = Object.values(this.attempts).filter(attempts => attempts === 1).length;
-        return { totalAttempts, perfectWords };
-    }
-
-    private renderCompletionScreen(): string {
-        const stats = this.getCompletionStats();
-        const accuracy = Math.round((stats.perfectWords / this.wordList.length) * 100);
-        
-        // Generate mistakes report
-        let mistakesReport = '';
-        this.wordList.forEach((word, index) => {
-            if (this.wrongAttempts[index] && this.wrongAttempts[index].length > 0) {
-                mistakesReport += `
-                    <div class="text-left mb-2">
-                        <div class="font-medium">${word}</div>
-                        <div class="text-sm text-gray-600 ml-4">
-                            ${this.wrongAttempts[index].map(attempt => 
-                                `<div>❌ ${attempt}</div>`
-                            ).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-        });
-
-        return `
-            <div class="card text-center">
-                <div class="space-y-8">
-                    <div class="space-y-4">
-                        <div class="text-6xl mb-4">🎉</div>
-                        <h1 class="text-3xl font-bold text-gray-900">
-                            ${translations[this.language].practiceComplete}
-                        </h1>
-                        <p class="text-lg text-gray-600">
-                            ${translations[this.language].greatJob || 'Great job practicing your spelling!'}
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-600">${this.wordList.length}</div>
-                            <div class="text-sm text-gray-600">${translations[this.language].totalWords || 'Total Words'}</div>
-                        </div>
-                        <div class="bg-green-50 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-green-600">${stats.perfectWords}</div>
-                            <div class="text-sm text-gray-600">${translations[this.language].perfectWords || 'Perfect Words'}</div>
-                        </div>
-                        <div class="bg-yellow-50 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-yellow-600">${accuracy}%</div>
-                            <div class="text-sm text-gray-600">${translations[this.language].accuracy || 'Accuracy'}</div>
-                        </div>
-                    </div>
-
-                    ${mistakesReport ? `
-                        <div class="text-left">
-                            <details class="bg-white rounded-lg shadow p-4">
-                                <summary class="cursor-pointer font-medium text-gray-900">
-                                    ${translations[this.language].showMistakes || 'Show Mistakes'}
-                                </summary>
-                                <div class="mt-4 space-y-2">
-                                    ${mistakesReport}
-                                </div>
-                            </details>
-                        </div>
-                    ` : ''}
-
-                    <div class="space-y-4">
-                        <button onclick="window.game.startOver()" class="btn btn-primary">
-                            ${translations[this.language].startOver}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    public startOver(): void {
-        this.showPractice = false;
-        this.wordList = [];
-        this.currentIndex = 0;
-        this.attempts = {};
-        this.wrongAttempts = {};
-        this.currentWordCorrect = false;
-        this.render();
-    }
-
-    public nextWord(): void {
-        if (this.currentIndex < this.wordList.length - 1) {
-            this.currentIndex++;
-            this.currentWordCorrect = false;
-            this.pronounceWord(this.wordList[this.currentIndex]);
-            this.render();
-        } else {
-            // Show completion screen with confetti
-            this.showPractice = false;
-            this.createConfetti();
-            this.render();
-        }
-    }
-
-    private renderPreviousSets(): string {
+    private renderPreviousWordSets(): string {
         const previousSets = this.getPreviousWordSets();
         if (previousSets.length === 0) return '';
 
@@ -262,16 +164,99 @@ class SpellingGame {
         }
     }
 
-    private renderPracticeSection(): string {
+    private async render(): Promise<void> {
+        const t = translations[this.language];
+        this.app.innerHTML = `
+            <div class="container mx-auto px-4 py-8 max-w-2xl">
+                <div class="flex justify-end mb-4">
+                    <button id="languageToggle" class="btn btn-outline">
+                        ${this.language === 'he' ? 'English' : 'עברית'}
+                    </button>
+                </div>
+                
+                ${!this.showPractice ? `
+                    <div class="card">
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h1 class="title">
+                                    ${t.title}
+                                </h1>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        ${t.enterWords}
+                                    </label>
+                                    <textarea id="wordInput" rows="5" 
+                                        class="input w-full" 
+                                        placeholder="${t.wordsPlaceholder}"
+                                        spellcheck="false"
+                                    ></textarea>
+                                    
+                                    <div class="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">
+                                                ${t.difficulty}
+                                            </label>
+                                            <select id="difficulty" class="input w-full">
+                                                <option value="easy">${t.easy}</option>
+                                                <option value="medium">${t.medium}</option>
+                                                <option value="hard">${t.hard}</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">
+                                                ${t.wordCount}
+                                            </label>
+                                            <input type="number" id="wordCount" min="1" max="20" value="10" 
+                                                class="input w-full">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex space-x-4">
+                                        <button id="generateWords" class="btn btn-secondary">
+                                            ${t.generateWords}
+                                        </button>
+                                        <button id="startPractice" class="btn btn-primary">
+                                            ${t.startPractice}
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <p class="hint">
+                                    ${t.instructions}
+                                </p>
+                            </div>
+                            
+                            ${this.renderPreviousWordSets()}
+                        </div>
+                    </div>
+                ` : this.renderPractice()}
+            </div>
+        `;
+        
+        this.setupEventListeners();
+    }
+
+    private renderPractice(): string {
         const currentWord = this.wordList[this.currentIndex];
         const progress = ((this.currentIndex + 1) / this.wordList.length) * 100;
+        const t = translations[this.language];
+        
+        if (!currentWord) {
+            return this.renderCompletionScreen();
+        }
         
         return `
             <div class="card">
                 <div class="space-y-6">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h2 class="text-lg font-medium">Word ${this.currentIndex + 1}/${this.wordList.length}</h2>
+                            <h2 class="text-lg font-medium">
+                                ${t.word} ${this.currentIndex + 1}/${this.wordList.length}
+                            </h2>
                             <div class="word-status">
                                 ${this.wordList.map((_, index) => `
                                     <span class="word-status-dot ${
@@ -282,7 +267,7 @@ class SpellingGame {
                                 `).join('')}
                             </div>
                         </div>
-                        <button class="btn btn-outline" onclick="game.pronounceWord('${currentWord}')" title="${translations[this.language].listen} (Press Space)">
+                        <button id="listenButton" class="btn btn-outline" title="${t.listen}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                     d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z">
@@ -298,31 +283,29 @@ class SpellingGame {
                     <div class="relative">
                         <input type="text" 
                             id="answerInput" 
-                            class="input text-center text-2xl" 
-                            placeholder="${translations[this.language].typePlaceholder || 'Type the word...'}"
+                            class="input text-center text-2xl ${this.currentWordCorrect ? 'bg-green-50' : ''}" 
+                            placeholder="${t.typePlaceholder}"
                             ${this.currentWordCorrect ? 'disabled' : ''}
                             autocomplete="off"
-                            autocorrect="off"
                             spellcheck="false"
                             value="${this.currentWordCorrect ? currentWord : ''}"
                         >
+                        
                         ${!this.currentWordCorrect ? `
                             <div class="hint text-center">
-                                ${translations[this.language].pressEnter || 'Press Enter to check'}
+                                ${t.pressEnter}
                             </div>
                         ` : ''}
                     </div>
 
-                    <div class="space-x-4 flex">
-                        ${!this.currentWordCorrect ? `
-                            <button class="btn btn-primary flex-1" onclick="game.checkAnswer()" 
-                                title="${translations[this.language].check} (Press Enter)">
-                                ${translations[this.language].check}
+                    <div class="space-x-4 flex justify-center">
+                        ${this.currentWordCorrect ? `
+                            <button id="nextButton" class="btn btn-primary">
+                                ${this.currentIndex === this.wordList.length - 1 ? t.finish : t.next}
                             </button>
                         ` : `
-                            <button class="btn btn-primary flex-1" onclick="game.nextWord()"
-                                title="${translations[this.language].next} (Press Enter)">
-                                ${translations[this.language].next}
+                            <button id="checkButton" class="btn btn-primary">
+                                ${t.check}
                             </button>
                         `}
                     </div>
@@ -330,29 +313,13 @@ class SpellingGame {
                     ${this.currentWordCorrect ? `
                         <div class="success-feedback">
                             <div class="flex items-center justify-center gap-2">
-                                ${this.attempts[this.currentIndex] <= 3 ? `
-                                    <span class="success-medal">${
-                                        this.attempts[this.currentIndex] === 1 ? '🥇' :
-                                        this.attempts[this.currentIndex] === 2 ? '🥈' :
-                                        '🥉'
-                                    }</span>
-                                ` : ''}
-                                <span class="text-lg font-medium">${translations[this.language].correct}</span>
+                                <span class="text-lg font-medium text-green-600">${t.correct}</span>
                             </div>
-                            ${this.attempts[this.currentIndex] > 1 ? 
-                                `<p class="text-sm mt-2">${translations[this.language].attemptsMessage?.replace('{count}', this.attempts[this.currentIndex].toString()) || 
-                                `It took ${this.attempts[this.currentIndex]} attempts`}</p>` : 
-                                ''
-                            }
-                            ${this.getWordPatterns(this.wordList[this.currentIndex])}
                         </div>
                     ` : `
-                        <div id="result" class="transition-all duration-300">
+                        <div id="result" class="text-center">
                             ${this.attempts[this.currentIndex] > 0 ? `
-                                <div class="mt-4 space-y-4">
-                                    <p class="text-red-500 text-center">${translations[this.language].incorrect}</p>
-                                    <p class="text-2xl font-mono tracking-wide text-center">${this.getNextLetterHint(this.wrongAttempts[this.currentIndex]?.slice(-1)[0] || '').progress}</p>
-                                </div>
+                                <p class="text-red-500">${t.incorrect}</p>
                             ` : ''}
                         </div>
                     `}
@@ -361,42 +328,177 @@ class SpellingGame {
         `;
     }
 
-    private getWordPatterns(word: string): string {
-        let html = '<div class="space-y-2"><p class="text-2xl font-mono tracking-wide text-center">';
+    private renderCompletionScreen(): string {
+        const t = translations[this.language];
+        const perfectWords = Object.values(this.attempts).filter(count => count === 1).length;
+        const accuracy = Math.round((perfectWords / this.wordList.length) * 100);
         
-        const blends = ['bl','br','ch','cl','cr','dr','fl','fr','gl','gr','pl','pr','sc','sh','sk','sl','sm','sn','sp','st','sw','th','tr','tw','wh'];
-        const vowelPairs = ['ai','ay','ea','ee','ei','ey','ie','oa','oe','oi','oo','ou','ow','oy'];
-        
-        for (let i = 0; i < word.length; i++) {
-            const char = word[i];
-            let isBlend = false;
-            let isVowelPair = false;
-            
-            if (i < word.length - 1) {
-                const pair = word.slice(i, i + 2).toLowerCase();
-                if (blends.includes(pair)) {
-                    html += `<span class="text-blue-500">${word.slice(i, i + 2)}</span>`;
-                    isBlend = true;
-                    i++;
-                } else if (vowelPairs.includes(pair)) {
-                    html += `<span class="text-green-500">${word.slice(i, i + 2)}</span>`;
-                    isVowelPair = true;
-                    i++;
-                }
-            }
-            
-            if (!isBlend && !isVowelPair) {
-                html += char;
-            }
+        return `
+            <div class="card text-center">
+                <div class="space-y-8">
+                    <div class="space-y-4">
+                        <div class="text-6xl mb-4">🎉</div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            ${t.practiceComplete}
+                        </h1>
+                        <p class="text-lg text-gray-600">
+                            ${t.greatJob}
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600">${this.wordList.length}</div>
+                            <div class="text-sm text-gray-600">${t.totalWords}</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600">${perfectWords}</div>
+                            <div class="text-sm text-gray-600">${t.perfectWords}</div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-yellow-600">${accuracy}%</div>
+                            <div class="text-sm text-gray-600">${t.accuracy}</div>
+                        </div>
+                    </div>
+
+                    <div class="space-x-4">
+                        <button id="startOver" class="btn btn-primary">
+                            ${t.startOver}
+                        </button>
+                        <button id="retryMistakes" class="btn btn-secondary">
+                            ${t.tryAgain}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    public startOver(): void {
+        this.showPractice = false;
+        this.wordList = [];
+        this.currentIndex = 0;
+        this.attempts = {};
+        this.wrongAttempts = {};
+        this.currentWordCorrect = false;
+        this.render();
+    }
+
+    public nextWord(): void {
+        if (this.currentIndex < this.wordList.length - 1) {
+            this.currentIndex++;
+            this.currentWordCorrect = false;
+            this.pronounceWord(this.wordList[this.currentIndex]);
+            this.render();
+        } else {
+            // Show completion screen with confetti
+            this.showPractice = false;
+            this.createConfetti();
+            this.render();
         }
-        
-        html += '</p>';
-        html += `<div class="text-sm space-y-1">
-            <p><span class="text-blue-500">■</span> ${translations[this.language].patterns.consonantBlends}</p>
-            <p><span class="text-green-500">■</span> ${translations[this.language].patterns.vowelPairs}</p>
-        </div></div>`;
-        
-        return html;
+    }
+
+    private setupEventListeners(): void {
+        const languageToggle = document.getElementById('languageToggle');
+        languageToggle?.addEventListener('click', () => this.toggleLanguage());
+
+        if (!this.showPractice) {
+            const startPractice = document.getElementById('startPractice');
+            const generateWords = document.getElementById('generateWords');
+            const wordInput = document.getElementById('wordInput') as HTMLTextAreaElement;
+            const difficultySelect = document.getElementById('difficulty') as HTMLSelectElement;
+            const wordCountInput = document.getElementById('wordCount') as HTMLInputElement;
+
+            startPractice?.addEventListener('click', () => {
+                const words = wordInput.value
+                    .split('\n')
+                    .map(word => word.trim())
+                    .filter(word => word && /^[a-zA-Z\s]+$/.test(word));
+
+                if (words.length === 0) {
+                    wordInput.classList.add('error');
+                    // Clear the input value and set error message
+                    wordInput.value = '';
+                    wordInput.placeholder = translations[this.language].onlyEnglishLetters;
+                    
+                    // Add error message below the input
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'text-red-500 text-sm mt-1';
+                    errorDiv.textContent = translations[this.language].onlyEnglishLetters;
+                    
+                    // Remove any existing error message
+                    const existingError = wordInput.parentElement?.querySelector('.text-red-500');
+                    if (existingError) {
+                        existingError.remove();
+                    }
+                    
+                    // Add new error message
+                    wordInput.parentElement?.appendChild(errorDiv);
+                    
+                    // Remove error state after 3 seconds
+                    setTimeout(() => {
+                        wordInput.classList.remove('error');
+                        errorDiv.remove();
+                        wordInput.placeholder = translations[this.language].wordsPlaceholder;
+                    }, 3000);
+                    
+                    return;
+                }
+
+                this.wordList = words;
+                this.showPractice = true;
+                this.currentIndex = 0;
+                this.attempts = {};
+                this.wrongAttempts = {};
+                this.currentWordCorrect = false;
+                this.savePreviousWordSet(words);
+                this.render();
+            });
+
+            generateWords?.addEventListener('click', async () => {
+                const options: WordOptions = {
+                    difficulty: difficultySelect.value as WordOptions['difficulty'],
+                    count: parseInt(wordCountInput.value, 10)
+                };
+                
+                const words = await this.wordGenerator.getRandomWords(options);
+                if (words.length > 0) {
+                    wordInput.value = words.join('\n');
+                }
+            });
+
+            wordInput?.addEventListener('input', () => {
+                wordInput.classList.remove('error');
+            });
+        } else {
+            const listenButton = document.getElementById('listenButton');
+            const checkButton = document.getElementById('checkButton');
+            const nextButton = document.getElementById('nextButton');
+            const answerInput = document.getElementById('answerInput') as HTMLInputElement;
+
+            listenButton?.addEventListener('click', () => {
+                this.pronounceWord(this.wordList[this.currentIndex]);
+            });
+
+            checkButton?.addEventListener('click', () => {
+                this.checkAnswer();
+            });
+
+            nextButton?.addEventListener('click', () => {
+                this.nextWord();
+            });
+
+            answerInput?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this.currentWordCorrect) {
+                        this.nextWord();
+                    } else {
+                        this.checkAnswer();
+                    }
+                }
+            });
+        }
     }
 
     private checkAnswer(): void {
@@ -428,96 +530,13 @@ class SpellingGame {
         this.render();
     }
 
-    private render(): void {
-        let content;
-        
-        if (!this.showPractice && this.wordList.length > 0) {
-            // Show completion screen
-            content = this.renderCompletionScreen();
-        } else if (!this.showPractice) {
-            // Show initial screen
-            content = `
-                <div class="card">
-                    <div class="space-y-6">
-                        <div class="text-center">
-                            <h1 class="title">
-                                ${translations[this.language].title}
-                            </h1>
-                        </div>
-                        <div class="space-y-4">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">
-                                    ${translations[this.language].enterWords}
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="wordInput" 
-                                    class="input" 
-                                    placeholder="${translations[this.language].wordsPlaceholder}"
-                                    autocomplete="off"
-                                    spellcheck="false"
-                                >
-                                <p class="hint">
-                                    ${translations[this.language].instructions}
-                                </p>
-                            </div>
-                            <button 
-                                onclick="window.game.startGame()"
-                                class="btn btn-primary"
-                            >
-                                ${translations[this.language].start}
-                            </button>
-                        </div>
-                        ${this.renderPreviousSets()}
-                    </div>
-                </div>
-            `;
-        } else {
-            // Show practice screen
-            content = this.renderPracticeSection();
-        }
-        
-        this.app.innerHTML = `
-            <div class="container mx-auto px-4 py-8 max-w-2xl">
-                <div class="flex justify-end mb-4">
-                    <button 
-                        onclick="window.game.toggleLanguage()"
-                        class="btn btn-outline lang-toggle"
-                    >
-                        ${this.language === 'en' ? 'עברית' : 'English'}
-                    </button>
-                </div>
-                ${content}
-            </div>
-        `;
-
-        // Focus on the appropriate input box after rendering
-        setTimeout(() => {
-            const wordInput = document.querySelector('#wordInput') as HTMLInputElement;
-            const answerInput = document.querySelector('#answerInput') as HTMLInputElement;
-            
-            if (wordInput && !this.showPractice && this.wordList.length === 0) {
-                wordInput.focus();
-            } else if (answerInput && this.showPractice && !this.currentWordCorrect) {
-                answerInput.focus();
-            }
-        }, 0);
-    }
-
-    public toggleLanguage(): void {
-        this.language = this.language === 'en' ? 'he' : 'en';
-        localStorage.setItem('spellingQuizLanguage', this.language);
-        Analytics.trackLanguageChange(this.language);
-        this.render();
-    }
-
     public startGame(): void {
-        const input = document.querySelector('#wordInput') as HTMLInputElement;
+        const input = document.querySelector('#wordInput') as HTMLTextAreaElement;
         if (!input) return;
 
         // Add input validation
         const inputValue = input.value;
-        const isValidInput = /^[a-zA-Z,\s]+$/.test(inputValue);
+        const isValidInput = /^[a-zA-Z,\s\n]+$/.test(inputValue);
         
         if (!isValidInput) {
             input.classList.add('error');
@@ -549,7 +568,7 @@ class SpellingGame {
             return;
         }
 
-        const words = inputValue.split(',')
+        const words = inputValue.split('\n')
             .map(word => word.trim())
             .filter(word => word && /^[a-zA-Z\s]+$/.test(word));
 
@@ -564,6 +583,13 @@ class SpellingGame {
             this.pronounceWord(this.wordList[0]);
             this.render();
         }
+    }
+
+    public toggleLanguage(): void {
+        this.language = this.language === 'en' ? 'he' : 'en';
+        localStorage.setItem('spellingQuizLanguage', this.language);
+        Analytics.trackLanguageChange(this.language);
+        this.render();
     }
 }
 

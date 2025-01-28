@@ -11,28 +11,40 @@ interface Translation {
     wordsPlaceholder: string;
     instructions: string;
     start: string;
-    listen: string;
-    check: string;
-    next: string;
-    tryAgain: string;
     correct: string;
     incorrect: string;
+    next: string;
+    finish: string;
+    summary: string;
+    totalWords: string;
+    attempts: string;
+    accuracy: string;
+    retry: string;
+    newWords: string;
     previousSets: string;
-    patterns: Pattern;
-    switchToHebrew: string;
-    practiceComplete: string;
-    startOver: string;
-    checkLetter: string;
+    difficulty: string;
+    easy: string;
+    medium: string;
+    hard: string;
+    wordCount: string;
+    generateWords: string;
+    startPractice: string;
+    word: string;
+    listen: string;
+    check: string;
     typePlaceholder: string;
     pressEnter: string;
-    attemptsMessage: string;
-    checkAnswer: string;
+    practiceComplete: string;
     greatJob: string;
-    totalWords: string;
     perfectWords: string;
-    accuracy: string;
-    showMistakes: string;
+    startOver: string;
+    tryAgain: string;
     onlyEnglishLetters: string;
+    patterns?: Pattern;
+    switchToHebrew?: string;
+    checkLetter?: string;
+    attemptsMessage?: string;
+    checkAnswer?: string;
 }
 
 interface Translations {
@@ -43,70 +55,94 @@ interface Translations {
 export const translations: Translations = {
     en: {
         title: 'Spelling Quiz',
-        enterWords: 'Enter words to practice',
-        wordsPlaceholder: 'Type or paste words, separated by commas',
-        instructions: 'Enter multiple words separated by commas',
+        enterWords: 'Enter words or generate random ones',
+        wordsPlaceholder: 'Enter words, one per line',
+        instructions: 'Press space to hear the word, enter to check your answer',
         start: 'Start Practice',
-        check: 'Check',
-        next: 'Next',
         correct: 'Correct!',
         incorrect: 'Try again',
+        next: 'Next Word',
+        finish: 'Finish',
+        summary: 'Practice Summary',
+        totalWords: 'Total Words',
+        attempts: 'Attempts',
+        accuracy: 'Accuracy',
+        retry: 'Retry',
+        newWords: 'New Words',
+        previousSets: 'Previous Word Sets',
+        difficulty: 'Difficulty Level',
+        easy: 'Easy (4-6 letters)',
+        medium: 'Medium (7-9 letters)',
+        hard: 'Hard (10+ letters)',
+        wordCount: 'Number of Words',
+        generateWords: 'Generate Words',
+        startPractice: 'Start Practice',
+        word: 'Word',
         listen: 'Listen',
+        check: 'Check',
         typePlaceholder: 'Type the word...',
         pressEnter: 'Press Enter to check',
-        previousSets: 'Previous Sets',
-        attemptsMessage: 'It took {count} attempts',
-        practiceComplete: 'Practice Complete! 🌟',
+        practiceComplete: 'Practice Complete! ',
         greatJob: 'Great job practicing your spelling!',
-        totalWords: 'Total Words',
         perfectWords: 'Perfect Words',
-        accuracy: 'Accuracy',
-        startOver: 'Practice New Words',
+        startOver: 'New Words',
         tryAgain: 'Try Again',
-        switchToHebrew: 'עברית',
-        checkLetter: 'Check Letter',
-        checkAnswer: 'Check Answer',
+        onlyEnglishLetters: 'Only English letters allowed',
         patterns: {
             consonantBlends: "Consonant blends (like 'sh', 'th')",
             vowelPairs: "Vowel pairs",
             doubleLetters: "Double letters",
             singleVowels: "Single vowels"
         },
-        showMistakes: 'Show Mistakes Report',
-        onlyEnglishLetters: 'Only English letters allowed'
+        switchToHebrew: 'עברית',
+        checkLetter: 'Check Letter',
+        attemptsMessage: 'It took {count} attempts',
+        checkAnswer: 'Check Answer'
     },
     he: {
-        title: 'תרגול איות',
-        enterWords: 'הכנס מילים לתרגול',
-        wordsPlaceholder: 'הקלד או הדבק מילים, מופרדות בפסיקים',
-        instructions: 'הכנס מספר מילים מופרדות בפסיקים',
-        start: 'התחל תרגול',
-        check: 'בדוק',
-        next: 'הבא',
+        title: 'מבחן איות',
+        enterWords: 'הכנס מילים או צור מילים אקראיות',
+        wordsPlaceholder: 'הכנס מילים, מילה בכל שורה',
+        instructions: 'לחץ על רווח כדי לשמוע את המילה, אנטר כדי לבדוק את התשובה',
+        start: 'התחל אימון',
         correct: 'נכון!',
         incorrect: 'נסה שוב',
+        next: 'המילה הבאה',
+        finish: 'סיים',
+        summary: 'סיכום אימון',
+        totalWords: 'סך הכל מילים',
+        attempts: 'נסיונות',
+        accuracy: 'דיוק',
+        retry: 'נסה שוב',
+        newWords: 'מילים חדשות',
+        previousSets: 'סטים קודמים',
+        difficulty: 'רמת קושי',
+        easy: 'קל (4-6 אותיות)',
+        medium: 'בינוני (7-9 אותיות)',
+        hard: 'קשה (10+ אותיות)',
+        wordCount: 'מספר מילים',
+        generateWords: 'צור מילים',
+        startPractice: 'התחל אימון',
+        word: 'מילה',
         listen: 'האזן',
+        check: 'בדוק',
         typePlaceholder: 'הקלד את המילה...',
         pressEnter: 'הקש Enter לבדיקה',
-        previousSets: 'סטים קודמים',
-        attemptsMessage: 'לקח {count} נסיונות',
-        practiceComplete: 'התרגול הושלם! 🌟',
+        practiceComplete: 'התרגול הושלם! ',
         greatJob: 'כל הכבוד על תרגול האיות!',
-        totalWords: 'סך הכל מילים',
         perfectWords: 'מילים מושלמות',
-        accuracy: 'דיוק',
-        startOver: 'תרגל מילים חדשות',
+        startOver: 'מילים חדשות',
         tryAgain: 'נסה שוב',
-        switchToHebrew: 'English',
-        checkLetter: 'בדוק אות',
-        checkAnswer: 'בדוק תשובה',
+        onlyEnglishLetters: 'רק אותיות באנגלית מותרות',
         patterns: {
             consonantBlends: "צירופי עיצורים (כמו 'sh', 'th')",
             vowelPairs: "זוגות תנועות",
             doubleLetters: "אותיות כפולות",
             singleVowels: "תנועות בודדות"
         },
-        showMistakes: 'הצג דוח טעויות',
-        onlyEnglishLetters: 'רק אותיות באנגלית מותרות'
+        switchToHebrew: 'English',
+        checkLetter: 'בדוק אות',
+        attemptsMessage: 'לקח {count} נסיונות',
+        checkAnswer: 'בדוק תשובה'
     }
 };
