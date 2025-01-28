@@ -3,10 +3,16 @@ import { translations } from './translations.js';
 import { Analytics } from './analytics.js';
 import { WordGenerator, WordOptions } from './wordGenerator.js';
 
+declare global {
+    interface Window {
+        game: SpellingGame;
+    }
+}
+
 type Language = 'en' | 'he';
 type InputMode = 'manual' | 'random';
 
-class SpellingGame {
+export class SpellingGame {
     private wordList: string[] = [];
     private currentIndex: number = 0;
     private showPractice: boolean = false;
@@ -24,6 +30,8 @@ class SpellingGame {
     constructor() {
         const savedLanguage = localStorage.getItem('spellingQuizLanguage');
         this.language = (savedLanguage === 'en' || savedLanguage === 'he') ? savedLanguage : 'he';
+        // Set initial document direction
+        document.dir = this.language === 'he' ? 'rtl' : 'ltr';
         const appElement = document.getElementById('app');
         if (!appElement) {
             throw new Error('App element not found');
@@ -124,7 +132,9 @@ class SpellingGame {
 
     private setupEventListeners(): void {
         const languageToggle = document.getElementById('languageToggle');
-        languageToggle?.addEventListener('click', () => this.toggleLanguage());
+        if (languageToggle) {
+            languageToggle.addEventListener('click', () => this.toggleLanguage());
+        }
 
         const startOver = document.getElementById('startOver');
         startOver?.addEventListener('click', () => {
@@ -385,13 +395,45 @@ class SpellingGame {
 
     private renderPractice(): string {
         const currentWord = this.wordList[this.currentIndex];
-        const progress = ((this.currentIndex + 1) / this.wordList.length) * 100;
         const t = translations[this.language];
         
         if (!currentWord) {
-            return this.renderCompletionScreen();
+            const totalWords = this.wordList.length;
+            const perfectWords = Object.entries(this.attempts).filter(([_, attempts]) => attempts === 1).length;
+            const accuracy = Math.round((perfectWords / totalWords) * 100);
+            
+            return `
+                <div class="card">
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-bold text-center">${t.practiceComplete}</h2>
+                        <p class="text-center">${t.greatJob}</p>
+                        
+                        <div class="stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${totalWords}</div>
+                                <div class="stat-label">${t.totalWords}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${perfectWords}</div>
+                                <div class="stat-label">${t.perfectWords}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${accuracy}%</div>
+                                <div class="stat-label">${t.accuracy}</div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center space-x-4">
+                            <button id="startOver" class="btn btn-primary">
+                                ${t.startOver}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
         
+        const progress = ((this.currentIndex + 1) / this.wordList.length) * 100;
         const input = document.querySelector('#answerInput') as HTMLInputElement;
         const lastAttempt = input?.value.trim() || '';
         const hint = this.attempts[this.currentIndex] > 0 ? this.getNextLetterHint(lastAttempt) : null;
@@ -574,6 +616,8 @@ class SpellingGame {
     public toggleLanguage(): void {
         this.language = this.language === 'en' ? 'he' : 'en';
         localStorage.setItem('spellingQuizLanguage', this.language);
+        // Set document direction based on language
+        document.dir = this.language === 'he' ? 'rtl' : 'ltr';
         Analytics.trackLanguageChange(this.language);
         this.render();
     }
@@ -608,11 +652,7 @@ class SpellingGame {
     }
 }
 
-// Create and initialize the game instance
-declare global {
-    interface Window {
-        game: SpellingGame;
-    }
+// Create and initialize the game instance only in browser environment
+if (typeof window !== 'undefined' && typeof process === 'undefined') {
+    window.game = new SpellingGame();
 }
-
-window.game = new SpellingGame();
