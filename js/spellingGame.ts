@@ -45,8 +45,11 @@ export class SpellingGame {
         this.app = appElement;
         this.wordMatcher = new WordMatcher();
         this.wordGenerator = new WordGenerator();
-        this.render();
-        this.setupEventListeners();
+        
+        // Ensure the initial render and event listeners are set up correctly
+        this.render().then(() => {
+            this.setupEventListeners();
+        });
     }
 
     private saveGameSettings(): void {
@@ -162,12 +165,20 @@ export class SpellingGame {
     }
 
     private setupEventListeners(): void {
+        // Remove any existing event listeners first
+        const existingLanguageToggle = document.getElementById('languageToggle');
+        if (existingLanguageToggle) {
+            const oldToggle = existingLanguageToggle.cloneNode(true);
+            existingLanguageToggle.parentNode?.replaceChild(oldToggle, existingLanguageToggle);
+        }
+
         const languageToggle = document.getElementById('languageToggle');
         if (languageToggle) {
-            languageToggle.addEventListener('click', () => {
+            languageToggle.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent event bubbling
                 this.toggleLanguage();
                 this.saveGameSettings(); // Save settings when language changes
-            });
+            }, { once: false }); // Ensure the listener can be called multiple times
         }
 
         const startOver = document.getElementById('startOver');
@@ -319,7 +330,7 @@ export class SpellingGame {
             utterance.lang = this.language;
             window.speechSynthesis.speak(utterance);
         } catch (error) {
-            console.error('Error playing word:', error);
+            // Removed console.error
         }
     }
 
