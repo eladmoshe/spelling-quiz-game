@@ -232,6 +232,8 @@ export class SpellingGame {
                         return;
                     }
 
+                    // Save the word set when starting a manual game
+                    this.savePreviousWordSet(words);
                     this.wordList = words;
                 } else {
                     const difficulty = difficultySelect.value as 'easy' | 'medium' | 'hard';
@@ -342,9 +344,12 @@ export class SpellingGame {
 
     private savePreviousWordSet(words: string[]): void {
         const previousSets = this.getPreviousWordSets();
+        
         // Filter out any sets that are identical to the new one
         const uniqueSets = previousSets.filter(set => !this.areWordSetsEqual(set, words));
+        
         const newSets = [words, ...uniqueSets].slice(0, this.MAX_STORED_SETS);
+        
         localStorage.setItem(this.PREVIOUS_SETS_KEY, JSON.stringify(newSets));
     }
 
@@ -647,37 +652,13 @@ export class SpellingGame {
     }
 
     public startGame(): void {
-        const input = document.querySelector('#wordInput') as HTMLTextAreaElement;
-        if (!input) return;
+        const input = document.querySelector('#wordInput') as HTMLInputElement;
+        if (!input) {
+            return;
+        }
 
-        // Add data-testid to the input
-        input.setAttribute('data-testid', 'word-input');
-
-        const inputValue = input.value;
-        const isValidInput = /^[a-zA-Z,\s\n]+$/.test(inputValue);
-        
-        if (!isValidInput) {
-            input.classList.add('error');
-            input.value = '';
-            input.placeholder = translations[this.language].onlyEnglishLetters;
-            
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'text-red-500 text-sm mt-1';
-            errorDiv.textContent = translations[this.language].onlyEnglishLetters;
-            
-            const existingError = input.parentElement?.querySelector('.text-red-500');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            input.parentElement?.appendChild(errorDiv);
-            
-            setTimeout(() => {
-                input.classList.remove('error');
-                errorDiv.remove();
-                input.placeholder = translations[this.language].wordsPlaceholder;
-            }, 3000);
-            
+        const inputValue = input.value.trim();
+        if (inputValue.length === 0) {
             return;
         }
 
