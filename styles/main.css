@@ -414,3 +414,101 @@ body {
 .stats .stat-item:hover .stat-value {
     transform: scale(1.1);
 }
+
+.feedback-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: var(--secondary);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.feedback-button:hover {
+    background-color: var(--secondary-dark);
+    transform: scale(1.1);
+}
+
+@keyframes rotate-360 {
+    from {
+        transform: rotate(0deg) scale(1);
+    }
+    to {
+        transform: rotate(360deg) scale(1.1);
+    }
+}
+
+.feedback-button.rotate {
+    animation: rotate-360 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.feedback-panel {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 250px;
+    background-color: var(--white);
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px -4px rgba(64, 205, 178, 0.15);
+    border: 3px solid var(--primary);
+    padding: 1.5rem;
+    z-index: 1000;
+    text-align: center;
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+}
+
+.feedback-panel.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.feedback-panel h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.feedback-panel a {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--secondary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.feedback-panel a:hover {
+    color: var(--secondary-dark);
+}
+
+@media (max-width: 600px) {
+    .feedback-button {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        bottom: 15px;
+        right: 15px;
+    }
+
+    .feedback-panel {
+        width: calc(100% - 40px);
+        max-width: 300px;
+        bottom: 70px;
+        right: 20px;
+        padding: 1rem;
+    }
+}

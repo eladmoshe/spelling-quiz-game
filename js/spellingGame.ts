@@ -698,6 +698,10 @@ export class SpellingGame {
         this.render();
     }
 
+    public getLanguage(): Language {
+        return this.language;
+    }
+
     private checkAnswer(): void {
         const input = document.querySelector('#answerInput') as HTMLInputElement;
         if (!input) return;
@@ -732,3 +736,57 @@ export class SpellingGame {
 if (typeof window !== 'undefined' && typeof process === 'undefined') {
     window.game = new SpellingGame();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const feedbackButton = document.getElementById('feedbackButton');
+    const feedbackPanel = document.getElementById('feedbackPanel');
+
+    if (feedbackButton && feedbackPanel) {
+        // Update feedback panel content based on current language
+        const updateFeedbackPanel = () => {
+            // Safely access the current language
+            const currentLanguage = window.game && window.game.getLanguage() ? window.game.getLanguage() : 'en';
+            const t = translations[currentLanguage];
+            feedbackPanel.innerHTML = `
+                <h3>${t.title}</h3>
+                <p>Written by Elad Moshe</p>
+                <a href="mailto:eladmoshe@gmail.com">${t.sendFeedback || 'Send Feedback'}</a>
+            `;
+        };
+
+        // Initial setup
+        updateFeedbackPanel();
+
+        // Add click event listener with rotation
+        feedbackButton.addEventListener('click', () => {
+            // Add rotate class
+            feedbackButton.classList.add('rotate');
+            
+            // Toggle panel visibility
+            feedbackPanel.classList.toggle('visible');
+
+            // Remove rotate class after animation completes
+            setTimeout(() => {
+                feedbackButton.classList.remove('rotate');
+            }, 500); // Match the animation duration
+        });
+
+        // Close panel when clicking outside
+        document.addEventListener('click', (event) => {
+            if (
+                feedbackPanel.classList.contains('visible') && 
+                !feedbackButton.contains(event.target as Node) && 
+                !feedbackPanel.contains(event.target as Node)
+            ) {
+                feedbackPanel.classList.remove('visible');
+            }
+        });
+
+        // Listen for language changes
+        const originalToggleLanguage = window.game.toggleLanguage;
+        window.game.toggleLanguage = function() {
+            originalToggleLanguage.call(window.game);
+            updateFeedbackPanel();
+        };
+    }
+});
