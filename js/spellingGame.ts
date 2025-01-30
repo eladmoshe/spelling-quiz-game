@@ -100,7 +100,7 @@ export class SpellingGame {
                                     <label class="block text-sm font-medium text-gray-700">
                                         ${t.selectMode}
                                     </label>
-                                    <div class="flex space-x-4 mb-4">
+                                    <div class="mode-toggle-container flex space-x-4 mb-4">
                                         <button id="manualMode" class="btn ${this.inputMode === 'manual' ? 'btn-primary' : 'btn-outline'} flex-1" data-testid="manual-mode-button">
                                             ${t.manualEntry}
                                         </button>
