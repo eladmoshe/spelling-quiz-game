@@ -1,0 +1,4 @@
+This project contains both Jest and Playwright tests. 
+Make sure to never delete existing functionality.
+Be very careful when working with tests, not to change the functionality of the app.
+when writing tests, first inspect other tests to maintain consistency. 
