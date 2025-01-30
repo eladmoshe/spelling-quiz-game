@@ -88,3 +88,55 @@ test.describe('Spelling Quiz Game', () => {
     await expect(page.getByTestId('check-button')).toBeVisible();
   });
 });
+
+test.describe('Language Toggle', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    // Wait for the app to be fully rendered
+    await page.waitForSelector('#app');
+  });
+
+  test('should toggle language correctly on first and subsequent clicks', async ({ page }) => {
+    // Find the language toggle button
+    const languageToggle = page.getByTestId('language-toggle');
+    
+    // Check initial language button text
+    const initialText = await languageToggle.textContent();
+    expect(initialText).toMatch(/English|עברית/);
+
+    // First click
+    await languageToggle.click();
+    
+    // Check that the language button text has changed
+    const firstClickText = await languageToggle.textContent();
+    expect(firstClickText).not.toBe(initialText);
+
+    // Second click
+    await languageToggle.click();
+    
+    // Check that the language button text is back to the initial state
+    const secondClickText = await languageToggle.textContent();
+    expect(secondClickText).toBe(initialText);
+  });
+
+  test('should persist language selection across page reloads', async ({ page }) => {
+    // Find the language toggle button
+    const languageToggle = page.getByTestId('language-toggle');
+    
+    // Get initial language
+    const initialText = await languageToggle.textContent();
+
+    // Click to change language
+    await languageToggle.click();
+    
+    // Reload the page
+    await page.reload();
+    
+    // Wait for the app to be fully rendered
+    await page.waitForSelector('#app');
+
+    // Check that the language persists
+    const reloadedText = await page.getByTestId('language-toggle').textContent();
+    expect(reloadedText).not.toBe(initialText);
+  });
+});
