@@ -2,19 +2,36 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Spelling Quiz Game', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    // Wait for the app to be fully rendered
-    await page.waitForSelector('#app');
+    // Navigate to the page
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    // Wait for the app to be fully rendered with multiple strategies
+    await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
+    
+    // Additional wait to ensure JavaScript has fully loaded
+    await page.evaluate(() => {
+      return new Promise((resolve) => {
+        if (document.readyState === 'complete') {
+          resolve(true);
+        } else {
+          window.addEventListener('load', () => resolve(true), { once: true });
+        }
+      });
+    });
+
+    // Log page content for debugging
+    const pageContent = await page.content();
+    console.log('Page content:', pageContent.slice(0, 500)); // Log first 500 characters
   });
 
   test('should load the game interface', async ({ page }) => {
-    // Wait for and verify the title is visible
-    await expect(page.getByTestId('game-title')).toBeVisible();
+    // Wait for and verify the title is visible with extended timeout
+    await expect(page.getByTestId('game-title')).toBeVisible({ timeout: 10000 });
 
     // Wait for and verify essential game controls are present
-    await expect(page.getByTestId('word-input')).toBeVisible();
-    await expect(page.getByTestId('start-button')).toBeVisible();
-    await expect(page.getByTestId('language-toggle')).toBeVisible();
+    await expect(page.getByTestId('word-input')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('start-button')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('language-toggle')).toBeVisible({ timeout: 10000 });
   });
 
   test('should start a new game', async ({ page }) => {
@@ -25,7 +42,7 @@ test.describe('Spelling Quiz Game', () => {
     await page.getByTestId('start-button').click();
 
     // Verify game elements are visible
-    await expect(page.getByTestId('answer-input')).toBeVisible();
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
   });
 
   test('should handle correct answer submission', async ({ page }) => {
@@ -36,7 +53,7 @@ test.describe('Spelling Quiz Game', () => {
 
     // Wait for the game interface
     const answerInput = page.getByTestId('answer-input');
-    await answerInput.waitFor();
+    await answerInput.waitFor({ timeout: 10000 });
 
     // Type the correct answer and submit
     await answerInput.fill(testWord);
@@ -46,7 +63,7 @@ test.describe('Spelling Quiz Game', () => {
     await expect(answerInput).toHaveValue(testWord);
 
     // The word status dot should show as correct
-    await expect(page.getByTestId('word-status-correct')).toBeVisible();
+    await expect(page.getByTestId('word-status-correct')).toBeVisible({ timeout: 10000 });
   });
 
   test('should handle incorrect answer submission', async ({ page }) => {
@@ -57,7 +74,7 @@ test.describe('Spelling Quiz Game', () => {
 
     // Wait for the game interface
     const answerInput = page.getByTestId('answer-input');
-    await answerInput.waitFor();
+    await answerInput.waitFor({ timeout: 10000 });
 
     // Type an incorrect answer and submit
     await answerInput.fill('tset');
@@ -75,25 +92,42 @@ test.describe('Spelling Quiz Game', () => {
 
     // Refresh the page to simulate a new session
     await page.reload();
-    await page.waitForSelector('#app');
+    await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
 
     // Verify that previous word set is visible and contains our words
     const previousWordsButton = page.getByRole('button', { name: initialWords });
-    await expect(previousWordsButton).toBeVisible();
+    await expect(previousWordsButton).toBeVisible({ timeout: 10000 });
 
     // Click on the previous words set
     await previousWordsButton.click();
 
     // Verify that the words are loaded into the input
-    await expect(page.getByTestId('check-button')).toBeVisible();
+    await expect(page.getByTestId('check-button')).toBeVisible({ timeout: 10000 });
   });
 });
 
 test.describe('Language Toggle', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    // Wait for the app to be fully rendered
-    await page.waitForSelector('#app');
+    // Navigate to the page
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    // Wait for the app to be fully rendered with multiple strategies
+    await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
+    
+    // Additional wait to ensure JavaScript has fully loaded
+    await page.evaluate(() => {
+      return new Promise((resolve) => {
+        if (document.readyState === 'complete') {
+          resolve(true);
+        } else {
+          window.addEventListener('load', () => resolve(true), { once: true });
+        }
+      });
+    });
+
+    // Log page content for debugging
+    const pageContent = await page.content();
+    console.log('Page content:', pageContent.slice(0, 500)); // Log first 500 characters
   });
 
   test('should toggle language correctly on first and subsequent clicks', async ({ page }) => {
@@ -133,7 +167,7 @@ test.describe('Language Toggle', () => {
     await page.reload();
     
     // Wait for the app to be fully rendered
-    await page.waitForSelector('#app');
+    await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
 
     // Check that the language persists
     const reloadedText = await page.getByTestId('language-toggle').textContent();
