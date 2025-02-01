@@ -768,7 +768,14 @@ export class SpellingGame {
             const hint = this.getNextLetterHint(userAnswer);
             input.placeholder = hint.message;
         }
-        this.render();
+
+        // Render and reset input
+        this.render().then(() => {
+            const resetInput = document.querySelector('#answerInput') as HTMLInputElement;
+            if (resetInput) {
+                resetInput.focus();
+            }
+        });
     }
 }
 
