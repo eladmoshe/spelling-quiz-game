@@ -17,17 +17,9 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { 
-        ...devices['Desktop Chrome'],
-        launchOptions: {
-          // Add logging for debugging
-          logger: {
-            isEnabled: (name, severity) => true,
-            log: (name, severity, message, args) => {
-              console.log(`[${name}][${severity}] ${message}`, args);
-            }
-          }
-        }
+      use: {
+        ...devices['Desktop Chrome']
+
       },
     },
   ],

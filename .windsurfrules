@@ -1,4 +1,4 @@
-This project contains both Jest and Playwright tests. 
+This project contains both Jest and Playwright tests (/Users/elad.moshe/my-code/SpellingQuiz/tests/). 
 Make sure to never delete existing functionality.
 Be very careful when working with tests, not to change the functionality of the app.
 when writing tests, first inspect other tests to maintain consistency. 
@@ -7,3 +7,4 @@ Avoid over complicating things if not absolutely necessary. Try to find a minima
 Be mindful for Typescript errors and types. 
 Make sure all Typescript source codes are under the js/ as the root folder.
 We are deploying to GitHub Pages, so the base URL is /spelling-quiz-game/. We are using Github Actions to build and deploy. Make sure you take that into account in parallel to making the app work locally.
+When deleting code, ensure you have not removed any functionality.

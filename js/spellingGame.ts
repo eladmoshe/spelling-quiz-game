@@ -26,6 +26,7 @@ export class SpellingGame {
     private wordGenerator: WordGenerator;
     private readonly PREVIOUS_SETS_KEY = 'previousWordSets';
     private readonly MAX_STORED_SETS = 5;
+    private readonly CURRENT_WORD_KEY = 'currentWord';
 
     constructor() {
         // Restore game settings from localStorage
@@ -160,6 +161,15 @@ export class SpellingGame {
                 ` : this.renderPractice()}
             </div>
         `;
+        
+        // Load current word from localStorage if it exists
+        const storedCurrentWord = this.getCurrentWordFromStorage();
+        if (storedCurrentWord) {
+            const input = document.querySelector('#answerInput') as HTMLInputElement;
+            if (input) {
+                input.value = storedCurrentWord;
+            }
+        }
         
         this.setupEventListeners();
     }
@@ -712,12 +722,27 @@ export class SpellingGame {
         return this.language;
     }
 
+    private saveCurrentWord(word: string): void {
+        localStorage.setItem(this.CURRENT_WORD_KEY, word);
+    }
+
+    private getCurrentWordFromStorage(): string | null {
+        return localStorage.getItem(this.CURRENT_WORD_KEY);
+    }
+
+    private clearCurrentWord(): void {
+        localStorage.removeItem(this.CURRENT_WORD_KEY);
+    }
+
     private checkAnswer(): void {
         const input = document.querySelector('#answerInput') as HTMLInputElement;
         if (!input) return;
 
         const currentWord = this.wordList[this.currentIndex];
         const userAnswer = input.value.trim();
+
+        // Save current word to localStorage before checking
+        this.saveCurrentWord(userAnswer);
 
         if (!this.attempts[this.currentIndex]) {
             this.attempts[this.currentIndex] = 0;
@@ -726,11 +751,16 @@ export class SpellingGame {
         this.attempts[this.currentIndex]++;
 
         const result = this.wordMatcher.checkWord(currentWord, userAnswer);
+        
         if (result.isCorrect) {
+            // Clear localStorage when word is correct
+            this.clearCurrentWord();
             this.currentWordCorrect = true;
             input.value = currentWord;
             Analytics.trackWordAttempt(currentWord, userAnswer, true, this.attempts[this.currentIndex]);
         } else {
+            // Keep the word in localStorage if incorrect
+            this.currentWordCorrect = false;
             if (!this.wrongAttempts[this.currentIndex].includes(userAnswer)) {
                 this.wrongAttempts[this.currentIndex].push(userAnswer);
             }
