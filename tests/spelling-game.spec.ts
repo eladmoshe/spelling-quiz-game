@@ -7,7 +7,7 @@ test.describe('Spelling Quiz Game', () => {
 
     // Wait for the app to be fully rendered with multiple strategies
     await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
-    
+
     // Additional wait to ensure JavaScript has fully loaded
     await page.evaluate(() => {
       return new Promise((resolve) => {
@@ -19,9 +19,7 @@ test.describe('Spelling Quiz Game', () => {
       });
     });
 
-    // Log page content for debugging
-    const pageContent = await page.content();
-    console.log('Page content:', pageContent.slice(0, 500)); // Log first 500 characters
+
   });
 
   test('should load the game interface', async ({ page }) => {
@@ -113,7 +111,7 @@ test.describe('Language Toggle', () => {
 
     // Wait for the app to be fully rendered with multiple strategies
     await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
-    
+
     // Additional wait to ensure JavaScript has fully loaded
     await page.evaluate(() => {
       return new Promise((resolve) => {
@@ -125,29 +123,27 @@ test.describe('Language Toggle', () => {
       });
     });
 
-    // Log page content for debugging
-    const pageContent = await page.content();
-    console.log('Page content:', pageContent.slice(0, 500)); // Log first 500 characters
+
   });
 
   test('should toggle language correctly on first and subsequent clicks', async ({ page }) => {
     // Find the language toggle button
     const languageToggle = page.getByTestId('language-toggle');
-    
+
     // Check initial language button text
     const initialText = await languageToggle.textContent();
     expect(initialText).toMatch(/English|עברית/);
 
     // First click
     await languageToggle.click();
-    
+
     // Check that the language button text has changed
     const firstClickText = await languageToggle.textContent();
     expect(firstClickText).not.toBe(initialText);
 
     // Second click
     await languageToggle.click();
-    
+
     // Check that the language button text is back to the initial state
     const secondClickText = await languageToggle.textContent();
     expect(secondClickText).toBe(initialText);
@@ -156,16 +152,16 @@ test.describe('Language Toggle', () => {
   test('should persist language selection across page reloads', async ({ page }) => {
     // Find the language toggle button
     const languageToggle = page.getByTestId('language-toggle');
-    
+
     // Get initial language
     const initialText = await languageToggle.textContent();
 
     // Click to change language
     await languageToggle.click();
-    
+
     // Reload the page
     await page.reload();
-    
+
     // Wait for the app to be fully rendered
     await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
 
