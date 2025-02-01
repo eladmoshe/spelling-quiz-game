@@ -326,11 +326,21 @@ export class SpellingGame {
         if (!currentWord) return;
 
         try {
+            console.log('Attempting Azure TTS for word:', currentWord);
+            // Import the speak function dynamically
+            const { speak } = await import('./services/speech.js');
+            
+            // Always use en-US since we block Hebrew words in the UI
+            await speak(currentWord, 'en-US');
+            console.log('Azure TTS played successfully');
+        } catch (error) {
+            console.error('Azure TTS failed:', error);
+            
+            // Fallback to browser speech synthesis
             const utterance = new SpeechSynthesisUtterance(currentWord);
             utterance.lang = this.language;
             window.speechSynthesis.speak(utterance);
-        } catch (error) {
-            // Removed console.error
+            console.log('Fallback to browser TTS');
         }
     }
 

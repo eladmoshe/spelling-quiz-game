@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="favicon.png">
     <title>Spelling Quiz</title>
+    <base href="/spelling-quiz-game/">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/confetti.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="styles/main.css" rel="stylesheet">
+    <script src="https://unpkg.com/microsoft-cognitiveservices-speech-sdk@1.42.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JDYT47RXP1"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -13,15 +19,6 @@
         gtag('js', new Date());
         gtag('config', 'G-JDYT47RXP1');
     </script>
-    <script>
-        // Set the base URL depending on the environment
-        const base = location.hostname === '127.0.0.1' || location.hostname === 'localhost'
-            ? '/'  // Local development
-            : '/spelling-quiz-game/';  // GitHub Pages
-        document.write(`<base href="${base}">`);
-    </script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link href="styles/main.css" rel="stylesheet">
 </head>
 
 <body>
@@ -34,7 +31,7 @@
         <p>Written by Elad Moshe</p>
         <a href="mailto:eladmoshe@gmail.com">Send Feedback</a>
     </div>
-    <script type="module" src="dist/spellingGame.js"></script>
+    <script type="module" src="js/spellingGame.js"></script>
 </body>
 
 </html>
