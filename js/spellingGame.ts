@@ -638,7 +638,7 @@ export class SpellingGame {
                             ${this.attempts[this.currentIndex] > 0 ? `
                                 <p class="text-red-500">${t.incorrect}</p>
                                 <div class="relative inline-block">
-                                    <p class="text-2xl mt-2">${hint?.progress}</p>
+                                    <p class="text-2xl mt-2 ltr-input">${hint?.progress}</p>
                                     ${hint && hint.wrongLetterPosition >= 0 ? `
                                         <div class="absolute" style="left: calc(${hint.wrongLetterPosition}ch + ${hint.wrongLetterPosition * 0.1}em); top: -1.5em">
                                             <span class="text-red-500 text-2xl">↓</span>
