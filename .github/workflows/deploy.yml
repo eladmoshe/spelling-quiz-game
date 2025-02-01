@@ -36,11 +36,16 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
 
       - name: Run Playwright tests
         run: npm run test:e2e
         env:
           CI: true
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
 
       - name: Upload test results
         if: always()
