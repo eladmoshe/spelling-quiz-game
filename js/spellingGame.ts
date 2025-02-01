@@ -46,7 +46,7 @@ export class SpellingGame {
         this.app = appElement;
         this.wordMatcher = new WordMatcher();
         this.wordGenerator = new WordGenerator();
-        
+
         // Ensure the initial render and event listeners are set up correctly
         this.render().then(() => {
             this.setupEventListeners();
@@ -116,7 +116,7 @@ export class SpellingGame {
                                                 ${t.enterWords}
                                             </label>
                                             <textarea id="wordInput" 
-                                                class="input w-full" 
+                                                class="input w-full ltr-input" 
                                                 placeholder="${t.wordsPlaceholder}"
                                                 data-testid="word-input"
                                                 spellcheck="false"
@@ -161,7 +161,7 @@ export class SpellingGame {
                 ` : this.renderPractice()}
             </div>
         `;
-        
+
         // Load current word from localStorage if it exists
         const storedCurrentWord = this.getCurrentWordFromStorage();
         if (storedCurrentWord) {
@@ -170,7 +170,7 @@ export class SpellingGame {
                 input.value = storedCurrentWord;
             }
         }
-        
+
         this.setupEventListeners();
     }
 
@@ -232,24 +232,24 @@ export class SpellingGame {
                         wordInput.classList.add('error');
                         wordInput.value = '';
                         wordInput.placeholder = translations[this.language].onlyEnglishLetters;
-                        
+
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'text-red-500 text-sm mt-1';
                         errorDiv.textContent = translations[this.language].onlyEnglishLetters;
-                        
+
                         const existingError = wordInput.parentElement?.querySelector('.text-red-500');
                         if (existingError) {
                             existingError.remove();
                         }
-                        
+
                         wordInput.parentElement?.appendChild(errorDiv);
-                        
+
                         setTimeout(() => {
                             wordInput.classList.remove('error');
                             errorDiv.remove();
                             wordInput.placeholder = translations[this.language].wordsPlaceholder;
                         }, 3000);
-                        
+
                         return;
                     }
 
@@ -259,14 +259,14 @@ export class SpellingGame {
                 } else {
                     const difficulty = difficultySelect.value as 'easy' | 'medium' | 'hard';
                     const wordCount = parseInt(wordCountInput.value, 10);
-                    
+
                     const wordOptions: WordOptions = {
                         difficulty,
                         count: wordCount
                     };
 
                     this.wordList = await this.wordGenerator.getRandomWords(wordOptions);
-                    
+
                     // Save difficulty and word count for random mode
                     this.saveGameSettings();
                 }
@@ -317,14 +317,14 @@ export class SpellingGame {
         if (this.currentIndex < this.wordList.length) {
             this.currentWordCorrect = false;
             await this.render();
-            
+
             const input = document.querySelector('#answerInput') as HTMLInputElement;
             if (input) {
                 input.value = '';
                 input.placeholder = translations[this.language].typePlaceholder;
                 input.focus();
             }
-            
+
             await this.playCurrentWord();
         } else {
             await this.render();
@@ -339,13 +339,13 @@ export class SpellingGame {
             console.log('Attempting Azure TTS for word:', currentWord);
             // Import the speak function dynamically
             const { speak } = await import('./services/speech.js');
-            
+
             // Always use en-US since we block Hebrew words in the UI
             await speak(currentWord, 'en-US');
             console.log('Azure TTS played successfully');
         } catch (error) {
             console.error('Azure TTS failed:', error);
-            
+
             // Fallback to browser speech synthesis
             const utterance = new SpeechSynthesisUtterance(currentWord);
             utterance.lang = this.language;
@@ -375,19 +375,19 @@ export class SpellingGame {
 
     private savePreviousWordSet(words: string[]): void {
         const previousSets = this.getPreviousWordSets();
-        
+
         // Filter out any sets that are identical to the new one
         const uniqueSets = previousSets.filter(set => !this.areWordSetsEqual(set, words));
-        
+
         const newSets = [words, ...uniqueSets].slice(0, this.MAX_STORED_SETS);
-        
+
         localStorage.setItem(this.PREVIOUS_SETS_KEY, JSON.stringify(newSets));
     }
 
     private getNextLetterHint(userAnswer: string): { correct: boolean; message: string; progress: string; wrongLetterPosition: number } {
         const currentWord = this.wordList[this.currentIndex];
         const result = this.wordMatcher.checkWord(currentWord, userAnswer);
-        
+
         if (result.isCorrect) {
             return {
                 correct: true,
@@ -406,9 +406,9 @@ export class SpellingGame {
             // Show letters up to the wrong one in green, then mark wrong letter in red
             // and grey out the rest as unchecked
             progress = `<span class="text-green-600">${userAnswer.slice(0, result.firstWrongLetter)}</span>` +
-                      `<span class="text-red-500">${userAnswer[result.firstWrongLetter] || '_'}</span>` +
-                      (result.firstWrongLetter + 1 < userAnswer.length ? 
-                       `<span class="text-gray-400">${userAnswer.slice(result.firstWrongLetter + 1)}</span>` : '');
+                `<span class="text-red-500">${userAnswer[result.firstWrongLetter] || '_'}</span>` +
+                (result.firstWrongLetter + 1 < userAnswer.length ?
+                    `<span class="text-gray-400">${userAnswer.slice(result.firstWrongLetter + 1)}</span>` : '');
         }
 
         return {
@@ -422,7 +422,7 @@ export class SpellingGame {
     private createConfetti(): void {
         const shapes = ['square', 'triangle', 'circle'];
         const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-        
+
         for (let i = 0; i < 100; i++) {
             const confetti = document.createElement('div');
             confetti.className = `confetti ${shapes[Math.floor(Math.random() * shapes.length)]}`;
@@ -470,12 +470,12 @@ export class SpellingGame {
     private renderPractice(): string {
         const currentWord = this.wordList[this.currentIndex];
         const t = translations[this.language];
-        
+
         if (!currentWord) {
             const totalWords = this.wordList.length;
             const perfectWords = Object.entries(this.attempts).filter(([_, attempts]) => attempts === 1).length;
             const accuracy = Math.round((perfectWords / totalWords) * 100);
-            
+
             // Ensure no undefined values
             const getMedal = () => {
                 if (isNaN(accuracy)) return '🌱 Start Practicing! 🌈';
@@ -549,12 +549,12 @@ export class SpellingGame {
                 </div>
             `;
         }
-        
+
         const progress = ((this.currentIndex + 1) / this.wordList.length) * 100;
         const input = document.querySelector('#answerInput') as HTMLInputElement;
         const lastAttempt = input?.value.trim() || '';
         const hint = this.attempts[this.currentIndex] > 0 ? this.getNextLetterHint(lastAttempt) : null;
-        
+
         return `
             <div class="card">
                 <div class="space-y-6">
@@ -588,7 +588,7 @@ export class SpellingGame {
                     <div class="relative">
                         <input type="text" 
                             id="answerInput" 
-                            class="input text-center text-2xl ${this.currentWordCorrect ? 'bg-green-50' : ''}" 
+                            class="input ltr-input center-align text-center text-2xl ${this.currentWordCorrect ? 'bg-green-50' : ''}" 
                             placeholder="${t.typePlaceholder}"
                             ${this.currentWordCorrect ? 'disabled' : ''}
                             autocomplete="off"
@@ -621,16 +621,16 @@ export class SpellingGame {
                             <div class="flex items-center justify-center gap-2">
                                 <span class="text-lg font-medium text-green-600">${t.correct}</span>
                                 ${(() => {
-                                    let medal = '';
-                                    if (this.attempts[this.currentIndex] === 1) {
-                                        medal = '🥇';
-                                    } else if (this.attempts[this.currentIndex] === 2) {
-                                        medal = '🥈';
-                                    } else if (this.attempts[this.currentIndex] === 3) {
-                                        medal = '🥉';
-                                    }
-                                    return medal ? `<span class="text-4xl animate-bounce">${medal}</span>` : '';
-                                })()}
+                    let medal = '';
+                    if (this.attempts[this.currentIndex] === 1) {
+                        medal = '🥇';
+                    } else if (this.attempts[this.currentIndex] === 2) {
+                        medal = '🥈';
+                    } else if (this.attempts[this.currentIndex] === 3) {
+                        medal = '🥉';
+                    }
+                    return medal ? `<span class="text-4xl animate-bounce">${medal}</span>` : '';
+                })()}
                             </div>
                         </div>
                     ` : `
@@ -751,7 +751,7 @@ export class SpellingGame {
         this.attempts[this.currentIndex]++;
 
         const result = this.wordMatcher.checkWord(currentWord, userAnswer);
-        
+
         if (result.isCorrect) {
             // Clear localStorage when word is correct
             this.clearCurrentWord();
@@ -801,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackButton.addEventListener('click', () => {
             // Add rotate class
             feedbackButton.classList.add('rotate');
-            
+
             // Toggle panel visibility
             feedbackPanel.classList.toggle('visible');
 
@@ -814,8 +814,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close panel when clicking outside
         document.addEventListener('click', (event) => {
             if (
-                feedbackPanel.classList.contains('visible') && 
-                !feedbackButton.contains(event.target as Node) && 
+                feedbackPanel.classList.contains('visible') &&
+                !feedbackButton.contains(event.target as Node) &&
                 !feedbackPanel.contains(event.target as Node)
             ) {
                 feedbackPanel.classList.remove('visible');
@@ -824,7 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Listen for language changes
         const originalToggleLanguage = window.game.toggleLanguage;
-        window.game.toggleLanguage = function() {
+        window.game.toggleLanguage = function () {
             originalToggleLanguage.call(window.game);
             updateFeedbackPanel();
         };
