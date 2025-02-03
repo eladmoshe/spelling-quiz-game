@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://eladmoshe.github.io/spelling-quiz-game/sitemap.xml
