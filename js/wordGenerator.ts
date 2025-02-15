@@ -28,7 +28,13 @@ export class WordGenerator {
             'snake', 'space', 'speak', 'spoon', 'spring', 'stamp', 'stand',
             'star', 'start', 'story', 'sweet', 'table', 'thank', 'think',
             'tiger', 'train', 'tree', 'truck', 'under', 'water', 'white',
-            'world', 'write', 'young'
+            'world', 'write', 'young',
+            // Additional easy words (3-6 letters)
+            'bake', 'ball', 'barn', 'belt', 'book', 'gift', 'girl', 'goat',
+            'gold', 'good', 'hill', 'king', 'kite', 'lake', 'leaf', 'meal',
+            'milk', 'moon', 'neck', 'nest', 'rock', 'rose', 'salt', 'seed',
+            'ship', 'sing', 'song', 'swim', 'tail', 'tall', 'team', 'tent',
+            'time', 'toys', 'wall', 'wave', 'wind', 'wolf', 'zoo'
         ],
         medium: [
             // 7-9 letters
@@ -53,7 +59,12 @@ export class WordGenerator {
             'kitchen', 'kitten', 'language', 'laughter', 'learning', 'library',
             'lightning', 'listen', 'machine', 'magazine', 'magical', 'manager',
             'marble', 'market', 'memory', 'message', 'miracle', 'monkey',
-            'morning', 'mountain', 'mystery', 'natural', 'necklace', 'needle'
+            'morning', 'mountain', 'mystery', 'natural', 'necklace', 'needle',
+            // Additional medium words (7-9 letters)
+            'avocado', 'backpack', 'batteries', 'business', 'colorful',
+            'cupboard', 'notebook', 'shoulder', 'umbrella', 'vertical',
+            'scissors', 'tomorrow', 'treasure', 'sandwich', 'siblings',
+            'universe'
         ],
         hard: [
             // 10+ letters
@@ -79,8 +90,12 @@ export class WordGenerator {
             'grateful', 'happiness', 'helicopter', 'helpful', 'hospital',
             'household', 'important', 'impossible', 'improve', 'incredible',
             'independent', 'individual', 'information', 'ingredient', 'inside',
-            'instrument', 'intelligent', 'interested', 'interesting', 'international',
-            'interview', 'introduce', 'invention', 'invitation', 'keyboard'
+            'instrument', 'intelligent', 'interest', 'interesting', 'international',
+            'interview', 'introduce', 'invention', 'invitation', 'keyboard',
+            // Additional hard words (10+ letters)
+            'responsible', 'communication', 'imagination', 'supermarket',
+            'transportation', 'conservation', 'understanding', 'extraordinary',
+            'championship', 'strawberries', 'watermelon'
         ]
     };
 
