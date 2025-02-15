@@ -6,18 +6,25 @@
     <title>Interactive Spelling Quiz - Free Online Practice</title>
     <meta name="description" content="Practice your spelling skills with our free interactive multilingual quiz. Perfect for students, language learners, and educators.">
     <meta name="keywords" content="spelling quiz, language learning, educational tool, spelling practice, English Hebrew learning">
-    <link rel="apple-touch-icon" sizes="180x180" href="/resources/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/resources/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/resources/favicon-16x16.png">
-    <link rel="manifest" href="/resources/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="resources/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="resources/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="resources/favicon-16x16.png">
+    <link rel="manifest" href="./resources/site.webmanifest">
     <base href="/">
     <script>
-        // Dynamically adjust base href for GitHub Pages
+        // Dynamically adjust base href and icon paths for GitHub Pages
         if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
             document.querySelector('base').href = '/spelling-quiz-game/';
+            
+            // Update icon paths
+            const iconLinks = document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="manifest"]');
+            iconLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                link.href = `/spelling-quiz-game/${href}`;
+            });
         }
     </script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="node_modules/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
     <link href="styles/main.css" rel="stylesheet">
     <script src="https://unpkg.com/microsoft-cognitiveservices-speech-sdk@1.42.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JDYT47RXP1"></script>
