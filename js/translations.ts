@@ -30,6 +30,7 @@ interface Translation {
     startPractice: string;
     word: string;
     listen: string;
+    listenSlower: string;
     check: string;
     typePlaceholder: string;
     pressEnter: string;
@@ -86,6 +87,7 @@ export const translations: Translations = {
         startPractice: 'Start Practice',
         word: 'Word',
         listen: 'Listen',
+        listenSlower: 'Listen Slower',
         check: 'Check',
         typePlaceholder: 'Type the word...',
         pressEnter: 'Press Enter to check',
@@ -140,6 +142,7 @@ export const translations: Translations = {
         startPractice: 'התחל תרגול',
         word: 'מילה',
         listen: 'האזן',
+        listenSlower: 'האזן לאט יותר',
         check: 'בדוק',
         typePlaceholder: 'הקלד את המילה...',
         pressEnter: 'הקש Enter לבדיקה',

@@ -294,6 +294,11 @@ export class SpellingGame {
                 this.playCurrentWord();
             });
 
+            const playSlowerButton = document.getElementById('playSlowerButton');
+            playSlowerButton?.addEventListener('click', () => {
+                this.playWordSlower();
+            });
+
             checkButton?.addEventListener('click', () => {
                 this.checkAnswer();
             });
@@ -353,6 +358,33 @@ export class SpellingGame {
             utterance.lang = this.language;
             window.speechSynthesis.speak(utterance);
             console.log('Fallback to browser TTS');
+        }
+    }
+
+    private async playWordSlower(): Promise<void> {
+        const currentWord = this.wordList[this.currentIndex];
+        if (!currentWord) return;
+
+        // Determine language explicitly
+        const speechLanguage = this.language === 'he' ? 'he-IL' : 'en-US';
+
+        try {
+            const { speak } = await import('./services/speech.js');
+            console.log('Attempting Azure TTS for slower word:', currentWord);
+            await speak(currentWord, speechLanguage, 'slow'); // Use 'slow' rate
+        } catch (error) {
+            console.error('Azure TTS for slower word failed:', error);
+            
+            // Fallback to browser speech synthesis if Azure fails
+            try {
+                const utterance = new SpeechSynthesisUtterance(currentWord);
+                utterance.lang = speechLanguage;
+                utterance.rate = 0.7; // Slower rate for browser
+                window.speechSynthesis.speak(utterance);
+                console.log('Fallback to browser speech synthesis for slower word');
+            } catch (browserError) {
+                console.error('Browser speech synthesis also failed:', browserError);
+            }
         }
     }
 
@@ -574,13 +606,23 @@ export class SpellingGame {
                                 `).join('')}
                             </div>
                         </div>
-                        <button id="listenButton" class="btn btn-outline" title="${t.listen}" data-testid="listen-button">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                    d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z">
-                                </path>
-                            </svg>
-                        </button>
+                        <div class="button-group">
+                            <button id="listenButton" class="btn" title="${t.listen}" data-testid="play-button">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z">
+                                    </path>
+                                </svg>
+                            </button>
+                            <button id="playSlowerButton" class="btn" title="${t.listenSlower}" data-testid="play-slower-button">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="progress-bar">

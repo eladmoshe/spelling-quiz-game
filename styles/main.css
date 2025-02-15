@@ -31,15 +31,13 @@ body {
 .card {
     background: var(--white);
     border-radius: 2rem;
-    box-shadow: 0 8px 20px -4px rgba(64, 205, 178, 0.15);
     padding: 2rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease;
     border: 3px solid var(--primary);
 }
 
 .card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px -8px rgba(64, 205, 178, 0.25);
 }
 
 .header-container {
@@ -59,23 +57,47 @@ body {
     text-shadow: 2px 2px 0px var(--primary-light);
 }
 
+/* Button Styles */
 .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 1rem;
-    font-weight: 600;
-    cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    border: none;
-    outline: none;
-    font-size: 1.1rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    background: var(--white);
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
 }
 
 .btn:focus {
-    outline: 3px solid var(--primary);
-    outline-offset: 2px;
+    outline: none;
+    border-color: var(--primary);
+}
+
+.btn svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.btn + .btn {
+    margin-left: 0.75rem;
+}
+
+[dir="rtl"] .btn + .btn {
+    margin-left: 0;
+    margin-right: 0.75rem;
+}
+
+.btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .btn-primary {
@@ -86,19 +108,19 @@ body {
     font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: 0.025em;
-    box-shadow: 0 4px 0 var(--secondary-dark);
-    transform: translateY(-2px);
+    border: none;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .btn-primary:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 0 var(--secondary-dark);
     background: var(--secondary-dark);
+    transform: translateY(-2px);
 }
 
 .btn-primary:active {
     transform: translateY(0);
-    box-shadow: 0 2px 0 var(--secondary-dark);
 }
 
 .btn-outline {
@@ -144,7 +166,6 @@ body {
 .input:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(64, 205, 178, 0.2);
 }
 
 .ltr-input {
@@ -161,7 +182,6 @@ body {
     text-align: center;
     background: var(--accent);
     border-radius: 1rem;
-    box-shadow: 0 4px 0 var(--accent-light);
     padding: 0.75rem 1.25rem;
     transition: all 0.3s ease;
     border: none;
@@ -170,14 +190,11 @@ body {
 }
 
 .lang-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 0 var(--accent-light);
     background: var(--accent-light);
 }
 
 .lang-toggle:active {
     transform: translateY(0);
-    box-shadow: 0 2px 0 var(--accent-light);
 }
 
 .language-toggle {
@@ -283,17 +300,14 @@ body {
 
 .word-status-dot.correct {
     background: var(--success);
-    box-shadow: 0 0 8px rgba(64, 205, 148, 0.4);
 }
 
 .word-status-dot.incorrect {
     background: var(--error);
-    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
 }
 
 .word-status-dot.pending {
     background: var(--accent);
-    box-shadow: 0 0 8px rgba(255, 217, 61, 0.4);
 }
 
 @keyframes confettiSway {
@@ -385,7 +399,6 @@ body {
 .summary-card {
     background: linear-gradient(135deg, var(--primary-light) 0%, var(--white) 100%);
     border: 3px solid var(--primary);
-    box-shadow: 0 12px 24px rgba(64, 205, 178, 0.2);
 }
 
 .medal-banner {
@@ -444,7 +457,6 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     z-index: 1000;
     transition: all 0.3s ease;
@@ -476,7 +488,6 @@ body {
     width: 250px;
     background-color: var(--white);
     border-radius: 1rem;
-    box-shadow: 0 8px 20px -4px rgba(64, 205, 178, 0.15);
     border: 3px solid var(--primary);
     padding: 1.5rem;
     z-index: 1000;
