@@ -492,11 +492,12 @@ export class SpellingGame {
         return `
             <div class="space-y-2">
                 <h2 class="text-sm font-medium text-gray-700">${translations[this.language].previousSets}</h2>
-                <div class="space-y-2">
+                <div class="space-y-2 flex flex-col items-stretch">
                     ${previousSets.map((set, index) => `
                         <button 
-                            class="btn btn-outline w-full text-left px-4 py-2"
+                            class="btn btn-outline text-left px-4 py-2 w-full self-stretch text-sm"
                             onclick="window.game.loadPreviousSet(${index})"
+                            style="text-align: left !important; margin-left: 0 !important;"
                         >
                             ${set.join(', ')}
                         </button>
