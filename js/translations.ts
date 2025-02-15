@@ -115,7 +115,7 @@ export const translations: Translations = {
             vowelPairs: "Vowel pairs",
             doubleLetters: "Double letters",
             singleVowels: "Single vowels"
-        },
+        }
     },
     he: {
         title: 'תרגול כתיב',
@@ -170,6 +170,6 @@ export const translations: Translations = {
             vowelPairs: "זוגות תנועות",
             doubleLetters: "אותיות כפולות",
             singleVowels: "תנועות בודדות"
-        },
+        }
     }
 };

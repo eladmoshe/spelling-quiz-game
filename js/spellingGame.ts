@@ -27,6 +27,8 @@ export class SpellingGame {
     private readonly PREVIOUS_SETS_KEY = 'previousWordSets';
     private readonly MAX_STORED_SETS = 5;
     private readonly CURRENT_WORD_KEY = 'currentWord';
+    private lastPlayTime: number = 0;
+    private readonly PLAY_COOLDOWN_MS: number = 1000; // 1 second cooldown
 
     constructor() {
         // Restore game settings from localStorage
@@ -291,12 +293,18 @@ export class SpellingGame {
             const answerInput = document.getElementById('answerInput') as HTMLInputElement;
 
             listenButton?.addEventListener('click', () => {
-                this.playCurrentWord();
+                if (this.canPlayWord()) {
+                    this.playCurrentWord();
+                    this.disableButtonTemporarily(listenButton);
+                }
             });
 
             const playSlowerButton = document.getElementById('playSlowerButton');
             playSlowerButton?.addEventListener('click', () => {
-                this.playWordSlower();
+                if (this.canPlayWord()) {
+                    this.playWordSlower();
+                    this.disableButtonTemporarily(playSlowerButton);
+                }
             });
 
             checkButton?.addEventListener('click', () => {
@@ -359,6 +367,7 @@ export class SpellingGame {
             window.speechSynthesis.speak(utterance);
             console.log('Fallback to browser TTS');
         }
+        this.lastPlayTime = Date.now();
     }
 
     private async playWordSlower(): Promise<void> {
@@ -386,6 +395,13 @@ export class SpellingGame {
                 console.error('Browser speech synthesis also failed:', browserError);
             }
         }
+        this.lastPlayTime = Date.now();
+    }
+
+    private canPlayWord(): boolean {
+        const now = Date.now();
+        const timeSinceLastPlay = now - this.lastPlayTime;
+        return timeSinceLastPlay >= this.PLAY_COOLDOWN_MS;
     }
 
     private shuffleArray<T>(array: T[]): T[] {
@@ -820,6 +836,16 @@ export class SpellingGame {
                 resetInput.focus();
             }
         });
+    }
+
+    private disableButtonTemporarily(button: HTMLElement): void {
+        button.setAttribute('disabled', 'true');
+        button.classList.add('opacity-50', 'cursor-not-allowed');
+        
+        setTimeout(() => {
+            button.removeAttribute('disabled');
+            button.classList.remove('opacity-50', 'cursor-not-allowed');
+        }, this.PLAY_COOLDOWN_MS);
     }
 }
 
