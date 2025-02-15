@@ -27,8 +27,8 @@ function getTotalCacheSize(): number {
 
 function cleanupTTSCache(): void {
     // Collect all TTS cache items
-    const cacheItems: {key: string, item: TTSCache, size: number}[] = [];
-    
+    const cacheItems: { key: string, item: TTSCache, size: number }[] = [];
+
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith(TTS_CACHE_PREFIX)) {
@@ -50,7 +50,7 @@ function cleanupTTSCache(): void {
 
     // Remove items until cache is under the size threshold
     let currentSize = cacheItems.reduce((sum, item) => sum + item.size, 0);
-    
+
     for (const cacheItem of cacheItems) {
         if (currentSize > MAX_CACHE_SIZE_BYTES * CACHE_CLEANUP_THRESHOLD) {
             localStorage.removeItem(cacheItem.key);
@@ -74,7 +74,7 @@ function getCachedTTS(text: string, language: string, rate: number): TTSCache | 
     try {
         const cacheKey = `${TTS_CACHE_PREFIX}${text}_${language}_${rate}`;
         const cachedItem = localStorage.getItem(cacheKey);
-        
+
         if (cachedItem) {
             console.log(`🟢 TTS Cache HIT for: "${text}" (lang: ${language}, rate: ${rate})`);
             return JSON.parse(cachedItem);
@@ -91,13 +91,13 @@ function getCachedTTS(text: string, language: string, rate: number): TTSCache | 
 function cacheTTS(text: string, language: string, rate: number, audioBlob: Blob): void {
     try {
         const cacheKey = `${TTS_CACHE_PREFIX}${text}_${language}_${rate}`;
-        
+
         // Check current cache size before adding new item
         const currentSize = getTotalCacheSize();
         if (currentSize + audioBlob.size > MAX_CACHE_SIZE_BYTES) {
             cleanupTTSCache();
         }
-        
+
         // Convert blob to base64 for storage
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -132,9 +132,9 @@ export async function speak(text: string, language: string = 'en-US', rate: numb
     }
 
     // Validate rate
-    const rateValue = typeof rate === 'number' 
-        ? (rate >= 0.5 && rate <= 2 ? rate : 1.0) 
-        : (rate === 'slow' ? 0.5 : rate === 'fast' ? 1.5 : 1.0);
+    const rateValue = typeof rate === 'number'
+        ? (rate >= 0.5 && rate <= 2 ? rate : 1.0)
+        : (rate === 'slow' ? 0.7 : rate === 'fast' ? 1.5 : 1.0);
 
     // Check cache first
     const cachedTTS = getCachedTTS(text, language, rateValue);
@@ -182,7 +182,7 @@ export async function speak(text: string, language: string = 'en-US', rate: numb
             console.log('Generated SSML:', ssml);
 
             synthesizer.speakSsmlAsync(
-                ssml, 
+                ssml,
                 async (result: any) => {
                     console.log('Azure TTS Result:', result);
                     if (result.reason === (window as any).SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
@@ -195,7 +195,7 @@ export async function speak(text: string, language: string = 'en-US', rate: numb
                         reject(new Error('Speech synthesis failed: ' + JSON.stringify(result)));
                     }
                     synthesizer.close();
-                }, 
+                },
                 (error: any) => {
                     console.error('Azure TTS Error:', error);
                     reject(error);
