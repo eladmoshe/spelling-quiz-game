@@ -222,11 +222,13 @@ export class SpellingGame {
             });
 
             startPractice?.addEventListener('click', async () => {
+
                 if (this.inputMode === 'manual') {
                     const words = wordInput.value
                         .split(/[\n,]/)
                         .map(word => word.trim())
-                        .filter(word => word && /^[a-zA-Z]+$/.test(word));
+                        .filter(word => word && /^[a-zA-Z\s]+$/.test(word));
+
 
                     if (words.length === 0) {
                         wordInput.classList.add('error');
@@ -695,7 +697,7 @@ export class SpellingGame {
 
         const words = inputValue.split(/[\n,]/)
             .map(word => word.trim())
-            .filter(word => word && /^[a-zA-Z]+$/.test(word));
+            .filter(word => word && /^[a-zA-Z\s]+$/.test(word));
 
         if (words.length > 0) {
             this.savePreviousWordSet(words);
