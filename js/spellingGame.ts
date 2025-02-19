@@ -217,12 +217,14 @@ export class SpellingGame {
             manualMode?.addEventListener('click', () => {
                 this.inputMode = 'manual';
                 this.saveGameSettings(); // Save input mode
+                Analytics.trackInputModeChange('manual');
                 this.render();
             });
 
             randomMode?.addEventListener('click', () => {
                 this.inputMode = 'random';
                 this.saveGameSettings(); // Save input mode
+                Analytics.trackInputModeChange('random');
                 this.render();
             });
 
@@ -278,6 +280,20 @@ export class SpellingGame {
                     this.saveGameSettings();
                 }
 
+                const difficulty = this.inputMode === 'random' 
+                    ? (document.getElementById('difficulty') as HTMLSelectElement)?.value || 'easy'
+                    : 'manual';
+                const wordCount = this.inputMode === 'random' 
+                    ? parseInt((document.getElementById('wordCount') as HTMLInputElement)?.value || '10', 10)
+                    : this.wordList.length;
+
+                Analytics.trackGameStart({
+                    wordCount,
+                    difficulty,
+                    inputMode: this.inputMode,
+                    language: this.language
+                });
+
                 this.showPractice = true;
                 this.currentIndex = 0;
                 this.attempts = {};
@@ -311,7 +327,50 @@ export class SpellingGame {
             });
 
             checkButton?.addEventListener('click', () => {
-                this.checkAnswer();
+                const currentWord = this.wordList[this.currentIndex];
+                const userAnswer = answerInput.value.trim();
+
+                // Save current word to localStorage before checking
+                this.saveCurrentWord(userAnswer);
+
+                if (!this.attempts[this.currentIndex]) {
+                    this.attempts[this.currentIndex] = 0;
+                    this.wrongAttempts[this.currentIndex] = [];
+                }
+                this.attempts[this.currentIndex]++;
+
+                const result = this.wordMatcher.checkWord(currentWord, userAnswer);
+
+                Analytics.trackWordAttempt({
+                    word: currentWord,
+                    attempt: userAnswer,
+                    isCorrect: result.isCorrect,
+                    attemptNumber: this.attempts[this.currentIndex],
+                    language: this.language
+                });
+
+                if (result.isCorrect) {
+                    // Clear localStorage when word is correct
+                    this.clearCurrentWord();
+                    this.currentWordCorrect = true;
+                    answerInput.value = currentWord;
+                } else {
+                    // Keep the word in localStorage if incorrect
+                    this.currentWordCorrect = false;
+                    if (!this.wrongAttempts[this.currentIndex].includes(userAnswer)) {
+                        this.wrongAttempts[this.currentIndex].push(userAnswer);
+                    }
+                    const hint = this.getNextLetterHint(userAnswer);
+                    answerInput.placeholder = hint.message;
+                }
+
+                // Render and reset input
+                this.render().then(() => {
+                    const resetInput = document.querySelector('#answerInput') as HTMLInputElement;
+                    if (resetInput) {
+                        resetInput.focus();
+                    }
+                });
             });
 
             nextButton?.addEventListener('click', () => {
@@ -546,6 +605,20 @@ export class SpellingGame {
                 threeAttemptWords: Object.entries(this.attempts || {}).filter(([_, attempts]) => attempts === 3).length,
             };
 
+            const difficulty = this.inputMode === 'random' 
+                ? (document.getElementById('difficulty') as HTMLSelectElement)?.value || 'easy'
+                : 'manual';
+
+            Analytics.trackGameComplete({
+                totalWords,
+                perfectWords,
+                accuracy,
+                language: this.language,
+                inputMode: this.inputMode,
+                difficulty,
+                wrongAttempts: Object.values(this.attempts).reduce((total, attempts) => total + (attempts - 1), 0)
+            });
+
             return `
                 <div class="card summary-card">
                     <div class="space-y-6">
@@ -775,10 +848,14 @@ export class SpellingGame {
 
     public toggleLanguage(): void {
         this.language = this.language === 'en' ? 'he' : 'en';
-        localStorage.setItem('spellingQuizLanguage', this.language);
-        // Set document direction based on language
-        document.dir = this.language === 'he' ? 'rtl' : 'ltr';
+        
+        // Track language change
         Analytics.trackLanguageChange(this.language);
+
+        // Update document direction
+        document.dir = this.language === 'he' ? 'rtl' : 'ltr';
+        
+        // Render with new language
         this.render();
     }
 
