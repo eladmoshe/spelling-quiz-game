@@ -23,6 +23,8 @@ An interactive spelling quiz application that helps users learn and practice spe
    - Multiple attempts allowed per word
    - Provides hints for incorrect spellings
    - Tracks attempts and accuracy for each word
+   - Disabled mobile keyboard autocomplete to ensure users spell words manually
+   - Prevents automatic suggestions and corrections
 
 2. Input Methods
    - Manual text input

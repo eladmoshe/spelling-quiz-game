@@ -122,6 +122,9 @@ export class SpellingGame {
                                                 placeholder="${t.wordsPlaceholder}"
                                                 data-testid="word-input"
                                                 spellcheck="false"
+                                                autocomplete="off"
+                                                autocorrect="off"
+                                                autocapitalize="off"
                                             ></textarea>
                                         </div>
                                     ` : `
