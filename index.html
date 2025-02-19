@@ -2,19 +2,18 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <!-- Insert the <base> element as the very first element in the head -->
     <script>
         (function () {
             var baseHref = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
-                ? "/" 
-                : (location.hostname === "eladmoshe.github.io")
-                    ? "/spelling-quiz-game/" 
-                    : window.location.pathname.split('/').slice(0, -1).join('/') + '/';
+                ? "/" : "/spelling-quiz-game/";
             var base = document.createElement("base");
             base.href = baseHref;
+            // Insert the base element as the first child of <head>
             document.head.insertBefore(base, document.head.firstChild);
         })();
     </script>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Spelling Quiz - Free Online Practice</title>
     <meta name="description"
@@ -29,7 +28,7 @@
     <link rel="manifest" href="resources/site.webmanifest">
 
     <!-- Stylesheets -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="node_modules/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
     <link href="styles/main.css" rel="stylesheet">
 
     <!-- External scripts -->
@@ -49,11 +48,7 @@
         <section id="quiz-container">
             <div id="app">
                 <textarea id="wordInput" data-testid="word-input" class="hidden"
-                    aria-label="Word input area" 
-                    autocomplete="off" 
-                    spellcheck="false" 
-                    autocorrect="off" 
-                    autocapitalize="off"></textarea>
+                    aria-label="Word input area"></textarea>
             </div>
         </section>
     </main>
