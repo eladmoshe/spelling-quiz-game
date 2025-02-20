@@ -28,7 +28,7 @@
     <link rel="manifest" href="resources/site.webmanifest">
 
     <!-- Stylesheets -->
-    <link href="node_modules/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="styles/main.css" rel="stylesheet">
 
     <!-- External scripts -->
@@ -44,7 +44,8 @@
     <script type="text/javascript">
         (function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i+"?ref="+encodeURIComponent(document.referrer);
+            t.crossOrigin="anonymous";
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "qcyze1fkca");
     </script>
