@@ -841,13 +841,21 @@ export class SpellingGame {
             this.attempts = {};
             this.wrongAttempts = {};
             this.showPractice = true;
-            Analytics.trackGameStart(this.wordList.length);
+            Analytics.trackGameStart({
+                wordCount: this.wordList.length,
+                difficulty: 'medium', // TODO: Add difficulty level to game
+                inputMode: this.inputMode,
+                language: this.language
+            });
             this.showNextWord();
         }
     }
 
     public toggleLanguage(): void {
         this.language = this.language === 'en' ? 'he' : 'en';
+        
+        // Save to localStorage
+        localStorage.setItem('spellingQuizLanguage', this.language);
         
         // Track language change
         Analytics.trackLanguageChange(this.language);
@@ -893,19 +901,25 @@ export class SpellingGame {
 
         const result = this.wordMatcher.checkWord(currentWord, userAnswer);
 
+        Analytics.trackWordAttempt({
+            word: currentWord,
+            attempt: userAnswer,
+            isCorrect: result.isCorrect,
+            attemptNumber: this.attempts[this.currentIndex],
+            language: this.language
+        });
+
         if (result.isCorrect) {
             // Clear localStorage when word is correct
             this.clearCurrentWord();
             this.currentWordCorrect = true;
             input.value = currentWord;
-            Analytics.trackWordAttempt(currentWord, userAnswer, true, this.attempts[this.currentIndex]);
         } else {
             // Keep the word in localStorage if incorrect
             this.currentWordCorrect = false;
             if (!this.wrongAttempts[this.currentIndex].includes(userAnswer)) {
                 this.wrongAttempts[this.currentIndex].push(userAnswer);
             }
-            Analytics.trackWordAttempt(currentWord, userAnswer, false, this.attempts[this.currentIndex]);
             const hint = this.getNextLetterHint(userAnswer);
             input.placeholder = hint.message;
         }

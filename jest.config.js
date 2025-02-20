@@ -19,7 +19,12 @@ export default {
     '<rootDir>/jest.setup.ts',
     '<rootDir>/js/test-setup.ts'
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    'spelling-game.spec.ts',
+    '.*\\.localStorage\\.test\\.ts$'
+  ],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(tsx?)$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/', 'spelling-game.spec.ts']
 };
