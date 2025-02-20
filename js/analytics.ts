@@ -9,7 +9,7 @@ declare global {
 }
 
 export class Analytics {
-    static trackEvent(eventName: string, params: Record<string, any> = {}) {
+    private static trackEvent(eventName: string, params: Record<string, any>) {
         if (typeof window.gtag !== 'undefined') {
             window.gtag('event', eventName, params);
         }

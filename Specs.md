@@ -60,7 +60,7 @@ An interactive spelling quiz application that helps users learn and practice spe
 - Event logging for game interactions
 - Optional user identification for advanced tracking
 
-### Edge Cases and Error Handling
+## Edge Cases and Error Handling
 
 ### Word Matching
 1. Case Insensitivity
