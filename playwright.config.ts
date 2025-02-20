@@ -7,12 +7,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  timeout: 60000, // Increase overall test timeout to 60 seconds
+  timeout: 15000, // Reduced from 60000 to 15 seconds
   use: {
     baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',
-    navigationTimeout: 30000, // Increase navigation timeout
-    actionTimeout: 15000, // Increase action timeout
+    navigationTimeout: 10000, // Reduced from 30000 to 10 seconds
+    actionTimeout: 5000, // Reduced from 15000 to 5 seconds
   },
   projects: [
     {
@@ -26,7 +26,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run start',
     url: 'http://localhost:8080',
-    timeout: 120000, // Increase web server startup timeout to 2 minutes
+    timeout: 30000, // Reduced from 120000 to 30 seconds
     reuseExistingServer: !process.env.CI,
   },
 });
