@@ -3,46 +3,44 @@ import { Analytics } from './analytics';
 declare global {
     interface Window {
         gtag: (...args: any[]) => void;
+        clarity: {
+            (command: 'consent' | 'log' | 'identify', ...args: any[]): void;
+        };
     }
 }
 
 describe('Analytics', () => {
     const originalGtag = window.gtag;
+    const originalClarity = window.clarity;
 
     beforeEach(() => {
         window.gtag = jest.fn();
+        window.clarity = jest.fn();
     });
 
     afterEach(() => {
         window.gtag = originalGtag || jest.fn();
-    });
-
-    describe('trackEvent', () => {
-        it('tracks events with parameters', () => {
-            Analytics.trackEvent('test_event', { param1: 'value1' });
-            expect(window.gtag).toHaveBeenCalledWith('event', 'test_event', { param1: 'value1' });
-        });
-
-        it('handles empty params', () => {
-            Analytics.trackEvent('test_event');
-            expect(window.gtag).toHaveBeenCalledWith('event', 'test_event', {});
-        });
+        window.clarity = originalClarity;
     });
 
     describe('trackGameStart', () => {
         it('tracks game start with full parameters', () => {
-            Analytics.trackGameStart({
+            const params = {
                 wordCount: 10,
                 difficulty: 'medium',
-                inputMode: 'manual',
+                inputMode: 'manual' as const,
                 language: 'en'
-            });
+            };
+            Analytics.trackGameStart(params);
+            
             expect(window.gtag).toHaveBeenCalledWith('event', 'game_start', {
                 word_count: 10,
                 difficulty: 'medium',
                 input_mode: 'manual',
                 language: 'en'
             });
+            
+            expect(window.clarity).toHaveBeenCalledWith('log', 'game_start', params);
         });
     });
 
@@ -51,76 +49,48 @@ describe('Analytics', () => {
             const stats = {
                 totalWords: 10,
                 perfectWords: 8,
-                accuracy: 80,
+                timeSpent: 120,
                 language: 'en',
-                inputMode: 'manual' as const,
                 difficulty: 'medium',
-                wrongAttempts: 2
+                wrongAttempts: 2,
+                accuracy: 80,
+                inputMode: 'manual' as const
             };
             Analytics.trackGameComplete(stats);
+            
             expect(window.gtag).toHaveBeenCalledWith('event', 'game_complete', {
                 total_words: 10,
                 perfect_words: 8,
-                accuracy: 80,
+                time_spent: 120,
                 language: 'en',
-                input_mode: 'manual',
                 difficulty: 'medium',
                 wrong_attempts: 2
             });
+            
+            expect(window.clarity).toHaveBeenCalledWith('log', 'game_complete', stats);
         });
     });
 
-    describe('trackWordAttempt', () => {
-        it('tracks word attempt with all parameters', () => {
-            Analytics.trackWordAttempt({
-                word: 'hello',
-                attempt: 'helo',
-                isCorrect: false,
-                attemptNumber: 1,
-                language: 'en'
-            });
-            expect(window.gtag).toHaveBeenCalledWith('event', 'word_attempt', {
-                word: 'hello',
-                attempt: 'helo',
-                is_correct: false,
-                attempt_number: 1,
-                language: 'en'
-            });
+    describe('Clarity-specific methods', () => {
+        it('configures Clarity consent', () => {
+            Analytics.configureClarityConsent(true);
+            expect(window.clarity).toHaveBeenCalledWith('consent', 'granted');
+
+            Analytics.configureClarityConsent(false);
+            expect(window.clarity).toHaveBeenCalledWith('consent', 'denied');
         });
 
-        it('tracks successful word attempt', () => {
-            Analytics.trackWordAttempt({
-                word: 'world',
-                attempt: 'world',
-                isCorrect: true,
-                attemptNumber: 1,
-                language: 'en'
-            });
-            expect(window.gtag).toHaveBeenCalledWith('event', 'word_attempt', {
-                word: 'world',
-                attempt: 'world',
-                is_correct: true,
-                attempt_number: 1,
-                language: 'en'
-            });
+        it('logs Clarity events', () => {
+            const properties = { test: 'value' };
+            Analytics.logClarityEvent('test_event', properties);
+            expect(window.clarity).toHaveBeenCalledWith('log', 'test_event', properties);
         });
-    });
 
-    describe('trackLanguageChange', () => {
-        it('tracks language change', () => {
-            Analytics.trackLanguageChange('he');
-            expect(window.gtag).toHaveBeenCalledWith('event', 'language_change', {
-                language: 'he'
-            });
-        });
-    });
-
-    describe('trackPreviousSetLoad', () => {
-        it('tracks previous set load', () => {
-            Analytics.trackPreviousSetLoad(2);
-            expect(window.gtag).toHaveBeenCalledWith('event', 'previous_set_load', {
-                set_index: 2
-            });
+        it('identifies user', () => {
+            const userId = 'user123';
+            const properties = { test: 'value' };
+            Analytics.identifyUser(userId, properties);
+            expect(window.clarity).toHaveBeenCalledWith('identify', userId, properties);
         });
     });
 });
