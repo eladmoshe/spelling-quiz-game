@@ -2,6 +2,9 @@
 declare global {
     interface Window {
         gtag: (...args: any[]) => void;
+        clarity: {
+            (command: 'consent' | 'log' | 'identify', ...args: any[]): void;
+        };
     }
 }
 
@@ -18,12 +21,16 @@ export class Analytics {
         inputMode: 'manual' | 'random', 
         language: string
     }) {
+        // Existing Google Analytics tracking
         this.trackEvent('game_start', {
             word_count: params.wordCount,
             difficulty: params.difficulty,
             input_mode: params.inputMode,
             language: params.language
         });
+
+        // Additional Clarity logging
+        this.logClarityEvent('game_start', params);
     }
 
     static trackGameComplete(stats: {
@@ -35,6 +42,7 @@ export class Analytics {
         difficulty: string,
         wrongAttempts: number
     }) {
+        // Existing Google Analytics tracking
         this.trackEvent('game_complete', {
             total_words: stats.totalWords,
             perfect_words: stats.perfectWords,
@@ -44,6 +52,9 @@ export class Analytics {
             difficulty: stats.difficulty,
             wrong_attempts: stats.wrongAttempts
         });
+
+        // Additional Clarity logging
+        this.logClarityEvent('game_complete', stats);
     }
 
     static trackWordAttempt(params: {
@@ -76,5 +87,24 @@ export class Analytics {
 
     static trackDifficultyChange(difficulty: string) {
         this.trackEvent('difficulty_change', { difficulty });
+    }
+
+    // Clarity-specific methods
+    static configureClarityConsent(isConsented: boolean = true) {
+        if (typeof window.clarity !== 'undefined') {
+            window.clarity('consent', isConsented ? 'granted' : 'denied');
+        }
+    }
+
+    static logClarityEvent(eventName: string, properties?: Record<string, any>) {
+        if (typeof window.clarity !== 'undefined') {
+            window.clarity('log', eventName, properties);
+        }
+    }
+
+    static identifyUser(userId?: string, properties?: Record<string, any>) {
+        if (typeof window.clarity !== 'undefined') {
+            window.clarity('identify', userId, properties);
+        }
     }
 }

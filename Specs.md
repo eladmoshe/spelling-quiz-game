@@ -50,7 +50,17 @@ An interactive spelling quiz application that helps users learn and practice spe
 - Accessibility considerations
 - Error handling for speech synthesis
 
-## Edge Cases and Error Handling
+### Analytics and Tracking
+- Google Analytics for basic web traffic tracking
+- Microsoft Clarity for user behavior insights and heatmaps
+- Anonymous tracking to understand user interactions
+- No personally identifiable information collected
+- Configurable consent management
+- Bot detection enabled by default
+- Event logging for game interactions
+- Optional user identification for advanced tracking
+
+### Edge Cases and Error Handling
 
 ### Word Matching
 1. Case Insensitivity
@@ -119,11 +129,6 @@ An interactive spelling quiz application that helps users learn and practice spe
 - High contrast mode
 - Keyboard navigation
 - Localized error messages and instructions
-
-## Analytics and Monitoring
-- Google Analytics integration
-- Basic usage tracking
-- Error logging
 
 ## Security Considerations
 - No sensitive data storage
