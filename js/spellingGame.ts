@@ -677,7 +677,7 @@ export class SpellingGame {
             `;
         }
 
-        const progress = ((this.currentIndex + 1) / this.wordList.length) * 100;
+        // Progress calculation is now used directly in the progress bar
         const input = document.querySelector('#answerInput') as HTMLInputElement;
         const lastAttempt = input?.value.trim() || '';
         const hint = this.attempts[this.currentIndex] > 0 ? this.getNextLetterHint(lastAttempt) : null;
@@ -690,13 +690,20 @@ export class SpellingGame {
                             <h2 class="text-lg font-medium">
                                 ${t.word} ${this.currentIndex + 1}/${this.wordList.length}
                             </h2>
-                            <div class="word-status">
-                                ${this.wordList.map((_, index) => `
-                                    <div 
-                                        class="w-2 h-2 rounded-full ${index < this.currentIndex ? 'bg-green-500' : index === this.currentIndex ? (this.currentWordCorrect ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-400'}" 
-                                        data-testid="word-status-${index < this.currentIndex ? 'correct' : index === this.currentIndex ? (this.currentWordCorrect ? 'correct' : 'incorrect') : 'pending'}"
-                                    ></div>
-                                `).join('')}
+                            <div class="progress-indicators">
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width: ${((this.currentIndex + (this.currentWordCorrect ? 1 : 0)) / this.wordList.length) * 100}%"></div>
+                                </div>
+                                <div class="word-status">
+                                    ${this.wordList.map((_, index) => `
+                                        <div 
+                                            class="word-status-indicator ${index < this.currentIndex ? 'completed' : index === this.currentIndex ? (this.currentWordCorrect ? 'correct' : 'current') : 'pending'}"
+                                            data-testid="word-status-${index < this.currentIndex ? 'correct' : index === this.currentIndex ? (this.currentWordCorrect ? 'correct' : 'incorrect') : 'pending'}"
+                                        >
+                                            ${index < this.currentIndex ? '✓' : index === this.currentIndex ? (this.currentWordCorrect ? '✓' : '') : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
                         </div>
                         <div class="button-group">
@@ -718,9 +725,7 @@ export class SpellingGame {
                         </div>
                     </div>
 
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill" style="width: ${progress}%"></div>
-                    </div>
+                    <!-- Progress bar replaced by the new progress indicators above -->
 
                     <div class="relative">
                         <input type="text" 

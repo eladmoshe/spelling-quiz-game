@@ -49,7 +49,6 @@ describe('Analytics', () => {
             const stats = {
                 totalWords: 10,
                 perfectWords: 8,
-                timeSpent: 120,
                 language: 'en',
                 difficulty: 'medium',
                 wrongAttempts: 2,
@@ -61,8 +60,9 @@ describe('Analytics', () => {
             expect(window.gtag).toHaveBeenCalledWith('event', 'game_complete', {
                 total_words: 10,
                 perfect_words: 8,
-                time_spent: 120,
+                accuracy: 80,
                 language: 'en',
+                input_mode: 'manual',
                 difficulty: 'medium',
                 wrong_attempts: 2
             });
