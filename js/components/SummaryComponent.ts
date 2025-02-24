@@ -1,7 +1,6 @@
 import Component from './Component';
 import { GameEngine } from '../core/GameEngine';
 import { translations } from '../i18n/translations';
-import { GameStats } from '../models/GameState';
 
 export class SummaryComponent extends Component {
   private gameEngine: GameEngine;
@@ -12,7 +11,7 @@ export class SummaryComponent extends Component {
     this.gameEngine = GameEngine.getInstance();
     
     // Listen for game completion event
-    const unsubscribe = this.eventBus.on('gameCompleted', (stats: GameStats) => {
+    const unsubscribe = this.eventBus.on('gameCompleted', () => {
       this.createConfetti();
     });
     

@@ -4,16 +4,18 @@ import { SummaryComponent } from './components/SummaryComponent';
 import { GameEngine } from './core/GameEngine';
 import { AnalyticsService } from './services/AnalyticsService';
 import { translations } from './i18n/translations';
+import Component from './components/Component';
 
 /**
  * Main application class
  */
 export class App {
-  private menuComponent: MenuComponent;
-  private gameBoardComponent: GameBoardComponent;
-  private summaryComponent: SummaryComponent;
-  private gameEngine: GameEngine;
-  private analyticsService: AnalyticsService;
+  // Core services
+  private readonly gameEngine: GameEngine;
+  private readonly analyticsService: AnalyticsService;
+  
+  // @ts-expect-error Components are initialized but kept as instance variables to prevent garbage collection
+  readonly #components: Component[];
   
   /**
    * Initialize the application
@@ -26,10 +28,12 @@ export class App {
     // Configure analytics (optional)
     this.analyticsService.configureClarityConsent(true);
     
-    // Initialize UI components
-    this.menuComponent = new MenuComponent('app');
-    this.gameBoardComponent = new GameBoardComponent('app');
-    this.summaryComponent = new SummaryComponent('app');
+    // Initialize UI components and store them to prevent garbage collection
+    this.#components = [
+      new MenuComponent('app'),
+      new GameBoardComponent('app'),
+      new SummaryComponent('app')
+    ];
     
     // Initialize and render the application
     this.initializeFeedbackPanel();
@@ -94,13 +98,7 @@ export class App {
     });
   }
   
-  /**
-   * Render the application
-   */
-  private render(): void {
-    // Each component will handle its own rendering based on the current state
-    // This is managed through the state subscription
-  }
+  // Note: Each component handles its own rendering based on state changes
 }
 
 // Export the game for global access

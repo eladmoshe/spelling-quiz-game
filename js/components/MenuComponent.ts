@@ -2,7 +2,7 @@ import Component from './Component';
 import { GameEngine } from '../core/GameEngine';
 import { translations } from '../i18n/translations';
 import { StorageService } from '../services/StorageService';
-import { Language, InputMode } from '../models/GameState';
+import { Language } from '../models/GameState';
 import { PreviousWordSet } from '../models/WordModel';
 
 export class MenuComponent extends Component {
@@ -178,7 +178,7 @@ export class MenuComponent extends Component {
     
     // Set up event listeners for previous word sets buttons
     const previousSetButtons = this.getAllElements<HTMLButtonElement>('[data-previous-set]');
-    previousSetButtons.forEach((button, index) => {
+    previousSetButtons.forEach((button) => {
       const handlePreviousSet = () => {
         const setIndex = parseInt(button.getAttribute('data-previous-set') || '0', 10);
         this.gameEngine.loadPreviousSet(setIndex);

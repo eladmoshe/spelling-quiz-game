@@ -94,29 +94,29 @@ export class StateManager {
   
   // Convenience methods for common state updates
   public updateSettings(settings: Partial<GameSettings>): void {
-    this.dispatch(state => ({
+    this.dispatch(() => ({
       settings: {
-        ...state.settings,
+        ...this.state.settings,
         ...settings,
       }
     }));
   }
   
   public updateProgress(progress: Partial<GameProgress>): void {
-    this.dispatch(state => ({
+    this.dispatch(() => ({
       progress: {
-        ...state.progress,
+        ...this.state.progress,
         ...progress,
       }
     }));
   }
   
   public setScreen(screen: GameScreen): void {
-    this.dispatch(state => ({ screen }));
+    this.dispatch(() => ({ screen }));
   }
   
   public resetProgress(wordList: string[] = []): void {
-    this.dispatch(state => ({
+    this.dispatch(() => ({
       progress: {
         currentIndex: 0,
         wordList,
