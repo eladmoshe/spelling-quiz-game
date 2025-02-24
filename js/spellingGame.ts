@@ -128,7 +128,7 @@ export class SpellingGame {
                                             ></textarea>
                                         </div>
                                     ` : `
-                                        <div class="space-y-4">
+                                        <div class="flex space-x-4">
                                             <div class="flex-1">
                                                 <label class="block text-sm font-medium text-gray-700">
                                                     ${t.difficulty}
