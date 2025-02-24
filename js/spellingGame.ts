@@ -571,12 +571,27 @@ export class SpellingGame {
     public loadPreviousSet(index: number): void {
         const previousSets = this.getPreviousWordSets();
         if (index >= 0 && index < previousSets.length) {
-            const input = document.querySelector('#wordInput') as HTMLInputElement;
-            if (input) {
-                input.value = previousSets[index].join(', ');
-            }
+            // Save the words to the word list directly
+            this.wordList = [...previousSets[index]];
+            
+            // Reset game state
+            this.currentIndex = 0;
+            this.attempts = {};
+            this.wrongAttempts = {};
+            this.currentWordCorrect = false;
+            this.showPractice = true;
+            
+            // Track the event
             Analytics.trackPreviousSetLoad(index);
-            this.startGame();
+            Analytics.trackGameStart({
+                wordCount: this.wordList.length,
+                difficulty: 'manual',
+                inputMode: this.inputMode,
+                language: this.language
+            });
+            
+            // Render and start
+            this.showNextWord();
         }
     }
 
@@ -694,6 +709,11 @@ export class SpellingGame {
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" style="width: ${((this.currentIndex + (this.currentWordCorrect ? 1 : 0)) / this.wordList.length) * 100}%"></div>
                                 </div>
+                                <style>
+                                    .progress-bar:before {
+                                        --progress-percent: ${((this.currentIndex + (this.currentWordCorrect ? 1 : 0)) / this.wordList.length) * 100};
+                                    }
+                                </style>
                                 <div class="word-status">
                                     ${this.wordList.map((_, index) => `
                                         <div 
