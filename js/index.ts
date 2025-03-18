@@ -1,4 +1,5 @@
-import App from './app';
+import initApp from './app';
+import SpellingApp from './spellingGame';
 
 // Import all modules
 import { GameEngine } from './core/GameEngine';
@@ -13,7 +14,8 @@ import { translations } from './i18n/translations';
 
 // Export for module use
 export {
-  App,
+  initApp,
+  SpellingApp,
   GameEngine,
   WordMatcher,
   WordGenerator,
@@ -26,4 +28,4 @@ export {
 };
 
 // Default export for direct script tag use
-export default App;
+export default initApp;

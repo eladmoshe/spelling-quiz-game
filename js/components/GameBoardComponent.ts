@@ -1,8 +1,8 @@
-import Component from './Component';
-import { GameEngine } from '../core/GameEngine';
-import { WordMatcher } from '../core/WordMatcher';
-import { translations } from '../i18n/translations';
-import { GameState } from '../models/GameState';
+import Component from './Component.js';
+import { GameEngine } from '../core/GameEngine.js';
+import { WordMatcher } from '../core/WordMatcher.js';
+import { translations } from '../i18n/translations.js';
+import { GameState } from '../models/GameState.js';
 
 export class GameBoardComponent extends Component {
   private gameEngine: GameEngine;

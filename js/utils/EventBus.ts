@@ -1,13 +1,20 @@
-type EventCallback = (...args: any[]) => void;
-
+/**
+ * Simple event bus for application-wide communication
+ */
 export class EventBus {
   private static instance: EventBus;
-  private events: Map<string, EventCallback[]>;
+  private events: Map<string, Array<(data?: any) => void>>;
 
+  /**
+   * Create a new event bus
+   */
   private constructor() {
     this.events = new Map();
   }
 
+  /**
+   * Get the singleton instance
+   */
   public static getInstance(): EventBus {
     if (!EventBus.instance) {
       EventBus.instance = new EventBus();
@@ -17,68 +24,107 @@ export class EventBus {
 
   /**
    * Subscribe to an event
-   * @param event Event name
-   * @param callback Callback function
+   * @param eventName Event name to subscribe to
+   * @param callback Function to call when event is emitted
    * @returns Unsubscribe function
    */
-  public on(event: string, callback: EventCallback): () => void {
-    if (!this.events.has(event)) {
-      this.events.set(event, []);
+  public on(eventName: string, callback: (data?: any) => void): () => void {
+    // Create event array if it doesn't exist
+    if (!this.events.has(eventName)) {
+      this.events.set(eventName, []);
     }
-    
-    const callbacks = this.events.get(event)!;
-    callbacks.push(callback);
-    
+
+    // Add callback to event array
+    const handlers = this.events.get(eventName)!;
+    handlers.push(callback);
+
+    // Return unsubscribe function
     return () => {
-      const index = callbacks.indexOf(callback);
-      if (index !== -1) {
-        callbacks.splice(index, 1);
-      }
+      this.off(eventName, callback);
     };
   }
 
   /**
-   * Emit an event with payload
-   * @param event Event name
-   * @param args Arguments to pass to callbacks
+   * Emit an event
+   * @param eventName Event name to emit
+   * @param args Arguments to pass to event handlers
    */
-  public emit(event: string, ...args: any[]): void {
-    if (!this.events.has(event)) {
-      return;
-    }
-    
-    const callbacks = this.events.get(event)!;
-    callbacks.forEach(callback => {
+  public emit(eventName: string, ...args: any[]): void {
+    // Get event handlers
+    const handlers = this.events.get(eventName);
+
+    // If no handlers, do nothing
+    if (!handlers) return;
+
+    // Call each handler with all arguments
+    handlers.forEach(callback => {
       try {
         callback(...args);
       } catch (error) {
-        console.error(`Error in event '${event}' callback:`, error);
+        console.error(`Error in event handler for ${eventName}:`, error);
       }
     });
   }
 
   /**
-   * Subscribe to an event and unsubscribe after first trigger
-   * @param event Event name
-   * @param callback Callback function 
+   * Unsubscribe from an event
+   * @param eventName Event name to unsubscribe from
+   * @param callback Function to remove from event handlers
    */
-  public once(event: string, callback: EventCallback): void {
-    const unsubscribe = this.on(event, (...args: any[]) => {
-      callback(...args);
-      unsubscribe();
-    });
+  public off(eventName: string, callback: (data?: any) => void): void {
+    // Get event handlers
+    const handlers = this.events.get(eventName);
+
+    // If no handlers, do nothing
+    if (!handlers) return;
+
+    // Filter out the callback
+    const filteredHandlers = handlers.filter(handler => handler !== callback);
+
+    // Update event handlers
+    if (filteredHandlers.length > 0) {
+      this.events.set(eventName, filteredHandlers);
+    } else {
+      this.events.delete(eventName);
+    }
   }
 
   /**
-   * Remove all event listeners
-   * @param event Optional event name. If not provided, all events are cleared
+   * Clear all event handlers for a specific event
+   * @param eventName Event name to clear handlers for
    */
-  public clear(event?: string): void {
-    if (event) {
-      this.events.delete(event);
+  public clear(eventName?: string): void {
+    if (eventName) {
+      // Clear specific event
+      this.events.delete(eventName);
     } else {
+      // Clear all events
       this.events.clear();
     }
+  }
+
+  /**
+   * Get the number of handlers for a specific event
+   * @param eventName Event name to get handler count for
+   * @returns Number of handlers
+   */
+  public listenerCount(eventName: string): number {
+    const handlers = this.events.get(eventName);
+    return handlers ? handlers.length : 0;
+  }
+
+  /**
+   * Subscribe to an event once
+   * @param eventName Event name to subscribe to
+   * @param callback Function to call when event is emitted
+   * @returns Unsubscribe function
+   */
+  public once(eventName: string, callback: (data?: any) => void): () => void {
+    const onceWrapper = (...args: any[]) => {
+      this.off(eventName, onceWrapper);
+      callback(...args);
+    };
+    return this.on(eventName, onceWrapper);
   }
 }
 

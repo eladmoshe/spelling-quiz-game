@@ -1,4 +1,4 @@
-import { WordOptions } from '../models/WordModel';
+import { WordOptions } from '../models/WordModel.js';
 
 export class WordGenerator {
   private readonly wordLists = {

@@ -1,5 +1,5 @@
-import { EventBus } from '../utils/EventBus';
-import { StateManager } from '../utils/StateManager';
+import { EventBus } from '../utils/EventBus.js';
+import { StateManager } from '../utils/StateManager.js';
 
 export abstract class Component {
   protected element: HTMLElement | null = null;

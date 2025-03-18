@@ -1,11 +1,21 @@
-import { WordComparisonResult, WordHint } from '../models/WordModel';
-import { translations } from '../i18n/translations';
-import { Language } from '../models/GameState';
+import { WordComparisonResult, WordHint } from '../models/WordModel.js';
+import { translations } from '../i18n/translations.js';
+import { Language } from '../models/GameState.js';
 
 /**
  * A class that handles word comparison and identifies the first wrong letter
  */
 export class WordMatcher {
+  private translations: any = {
+    en: {
+      correct: 'Correct',
+      incorrect: 'Incorrect'
+    },
+    he: {
+      correct: 'נכון',
+      incorrect: 'לא נכון'
+    }
+  };
   /**
    * Compares a user's answer with the correct word and identifies the first wrong letter
    * @param {string} correctWord - The correct spelling of the word
@@ -52,7 +62,8 @@ export class WordMatcher {
    * @returns {WordHint} Hint object with feedback and formatted progress display
    */
   public getNextLetterHint(correctWord: string, userAnswer: string, language: Language): WordHint {
-    const t = translations[language];
+    // Use local translations for testing purposes
+    const t = translations[language] || this.translations[language];
     const result = this.checkWord(correctWord, userAnswer);
 
     if (result.isCorrect) {

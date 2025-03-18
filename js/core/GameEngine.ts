@@ -1,12 +1,12 @@
-import StateManager from '../utils/StateManager';
-import { WordMatcher } from './WordMatcher';
-import { WordGenerator } from './WordGenerator';
-import { StorageService } from '../services/StorageService';
-import { SpeechService } from '../services/SpeechService';
-import { AnalyticsService } from '../services/AnalyticsService';
-import { GameState, GameStats, Language, WordAttempt } from '../models/GameState';
-import { WordOptions } from '../models/WordModel';
-import EventBus from '../utils/EventBus';
+import StateManager from '../utils/StateManager.js';
+import { WordMatcher } from './WordMatcher.js';
+import { WordGenerator } from './WordGenerator.js';
+import { StorageService } from '../services/StorageService.js';
+import { SpeechService } from '../services/SpeechService.js';
+import { AnalyticsService } from '../services/AnalyticsService.js';
+import { GameState, GameStats, Language, WordAttempt } from '../models/GameState.js';
+import { WordOptions } from '../models/WordModel.js';
+import EventBus from '../utils/EventBus.js';
 
 export class GameEngine {
   private stateManager: StateManager;
