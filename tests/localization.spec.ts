@@ -90,7 +90,7 @@ test.describe('Spelling Quiz Localization', () => {
     await page.keyboard.press('Enter');
     
     // Go to summary screen
-    await page.getByTestId('next-word-button').click();
+    await page.getByTestId('next-button').click();
     
     // Wait for summary screen
     await page.waitForSelector('.summary-card', { state: 'visible', timeout: 5000 });
@@ -123,7 +123,7 @@ test.describe('Spelling Quiz Localization', () => {
     await page.keyboard.press('Enter');
     
     // Should be able to proceed
-    await expect(page.getByTestId('next-word-button')).toBeVisible();
+    await expect(page.getByTestId('next-button')).toBeVisible();
   });
   
   test('should maintain language setting after page reload', async ({ page }) => {

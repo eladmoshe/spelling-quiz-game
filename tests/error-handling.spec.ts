@@ -116,8 +116,8 @@ test.describe('Spelling Quiz Error Handling', () => {
     await page.keyboard.press('Enter');
     
     // Wait for next button and click it
-    await expect(page.getByTestId('next-word-button')).toBeVisible();
-    await page.getByTestId('next-word-button').click();
+    await expect(page.getByTestId('next-button')).toBeVisible();
+    await page.getByTestId('next-button').click();
     
     // Now reload the page during the second word
     await page.reload();
@@ -156,6 +156,6 @@ test.describe('Spelling Quiz Error Handling', () => {
     await page.keyboard.press('Enter');
     
     // Should still be able to progress
-    await expect(page.getByTestId('next-word-button')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('next-button')).toBeVisible({ timeout: 5000 });
   });
 });
