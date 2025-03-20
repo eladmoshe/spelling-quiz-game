@@ -6,12 +6,13 @@
   "type": "module",
   "homepage": "https://eladmoshe.github.io/spelling-quiz-game/",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && vite build",
+    "dev": "vite",
     "test": "jest",
-    "test:e2e": "playwright test",
-    "start": "npx http-server .",
-    "watch": "tsc --watch",
-    "dev": "concurrently \"npm run watch\" \"npm start\""
+    "test:e2e": "npm run build && playwright test --config=playwright.testdir.config.ts",
+    "test:all": "npm run test && npm run test:e2e",
+    "serve:test": "npm run build && npm run start",
+    "start": "vite preview --port 4173"
   },
   "keywords": [
     "spelling",

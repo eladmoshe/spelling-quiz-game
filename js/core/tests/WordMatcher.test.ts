@@ -1,4 +1,4 @@
-import WordMatcher from './wordMatcher';
+import { WordMatcher } from '../WordMatcher';
 
 describe('WordMatcher', () => {
     let wordMatcher: WordMatcher;
@@ -127,6 +127,54 @@ describe('WordMatcher', () => {
                 isCorrect: false,
                 firstWrongLetter: 4
             });
+        });
+    });
+
+    describe('getNextLetterHint', () => {
+        // Mock translations
+        const mockTranslations = {
+            en: {
+                correct: 'Correct',
+                incorrect: 'Incorrect'
+            },
+            he: {
+                correct: 'נכון',
+                incorrect: 'לא נכון'
+            }
+        };
+
+        // Mock the translations import
+        jest.mock('../../i18n/translations', () => ({
+            translations: mockTranslations
+        }));
+
+        test('returns correct hint for correct word', () => {
+            const hint = wordMatcher.getNextLetterHint('test', 'test', 'en');
+            expect(hint.correct).toBe(true);
+            expect(hint.wrongLetterPosition).toBe(-1);
+        });
+
+        test('returns incorrect hint with position for wrong word', () => {
+            const hint = wordMatcher.getNextLetterHint('test', 'tast', 'en');
+            expect(hint.correct).toBe(false);
+            expect(hint.wrongLetterPosition).toBe(1);
+            expect(hint.progress).toContain('text-red-500');
+        });
+
+        test('handles missing letter at end', () => {
+            const hint = wordMatcher.getNextLetterHint('test', 'tes', 'en');
+            expect(hint.correct).toBe(false);
+            expect(hint.wrongLetterPosition).toBe(3);
+            expect(hint.progress).toContain('text-red-500');
+            expect(hint.progress).toContain('_');
+        });
+
+        test('correctly formats HTML for incorrect word', () => {
+            const hint = wordMatcher.getNextLetterHint('spelling', 'speling', 'en');
+            expect(hint.correct).toBe(false);
+            expect(hint.progress).toContain('<span class="text-green-600">spel');
+            expect(hint.progress).toContain('<span class="text-red-500">i');
+            expect(hint.progress).toContain('<span class="text-gray-400">ng');
         });
     });
 });

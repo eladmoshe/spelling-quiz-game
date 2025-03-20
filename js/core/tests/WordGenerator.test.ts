@@ -1,4 +1,5 @@
-import { WordGenerator, WordOptions } from './wordGenerator';
+import { WordGenerator } from '../WordGenerator';
+import { WordOptions } from '../../models/WordModel';
 
 describe('WordGenerator', () => {
     let wordGenerator: WordGenerator;
@@ -107,6 +108,45 @@ describe('WordGenerator', () => {
             const words = await wordGenerator.getRandomWords(options);
             expect(words.length).toBeLessThan(1000);
             expect(words.length).toBeGreaterThan(0);
+        });
+    });
+
+    describe('shuffleArray', () => {
+        test('returns an array of the same length', () => {
+            const array = [1, 2, 3, 4, 5];
+            const shuffled = wordGenerator.shuffleArray(array);
+            expect(shuffled.length).toBe(array.length);
+        });
+
+        test('returns a new array instance', () => {
+            const array = [1, 2, 3, 4, 5];
+            const shuffled = wordGenerator.shuffleArray(array);
+            expect(shuffled).not.toBe(array);
+        });
+
+        test('contains all the same elements', () => {
+            const array = [1, 2, 3, 4, 5];
+            const shuffled = wordGenerator.shuffleArray(array);
+            expect(shuffled.sort()).toEqual(array.sort());
+        });
+
+        test('does not modify the original array', () => {
+            const array = [1, 2, 3, 4, 5];
+            const original = [...array];
+            wordGenerator.shuffleArray(array);
+            expect(array).toEqual(original);
+        });
+
+        test('empty array returns empty array', () => {
+            const array: number[] = [];
+            const shuffled = wordGenerator.shuffleArray(array);
+            expect(shuffled).toEqual([]);
+        });
+
+        test('single item array returns same array', () => {
+            const array = [1];
+            const shuffled = wordGenerator.shuffleArray(array);
+            expect(shuffled).toEqual([1]);
         });
     });
 });

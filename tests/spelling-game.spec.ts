@@ -158,12 +158,21 @@ test.describe('Language Toggle', () => {
 
     // Click to change language
     await languageToggle.click();
+    
+    // Wait a bit for the change to be applied
+    await page.waitForTimeout(500);
 
     // Reload the page
     await page.reload();
 
     // Wait for the app to be fully rendered
     await page.waitForSelector('#app', { state: 'visible', timeout: 10000 });
+    
+    // Wait for the languageToggle to be visible
+    await page.getByTestId('language-toggle').waitFor({ state: 'visible', timeout: 10000 });
+    
+    // Allow a bit more time for the DOM to stabilize after loading
+    await page.waitForTimeout(500);
 
     // Check that the language persists
     const reloadedText = await page.getByTestId('language-toggle').textContent();

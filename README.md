@@ -1,5 +1,9 @@
 # Spelling Quiz Game 🎯
 
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/eladmoshe/spelling-quiz-game)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
+
 Try it now: [Spelling Quiz Game](https://eladmoshe.github.io/spelling-quiz-game/) 🎮
 
 Welcome to Spelling Quiz - an interactive and engaging way to improve your spelling skills! This game makes practicing English spelling fun and effective.
@@ -42,3 +46,57 @@ Simply open the game in your web browser and start practicing! No installation o
 - Focus on specific spelling patterns to improve systematically
 
 Happy spelling! 📚✏️
+
+## For Developers 💻
+
+### Project Structure
+
+The project follows a modular architecture to maintain separation of concerns:
+
+- **core/**: Core business logic and game mechanics
+  - `GameEngine.ts`: Central game controller
+  - `WordGenerator.ts`: Generates word lists based on difficulty
+  - `WordMatcher.ts`: Compares and validates user inputs
+  
+- **components/**: UI components
+  - `MenuComponent.ts`: Game menu interface
+  - `GameBoardComponent.ts`: Game play interface
+  - `SummaryComponent.ts`: Game summary and results
+
+- **services/**: Application services
+  - `StorageService.ts`: Local storage management
+  - `SpeechService.ts`: Text-to-speech functionality
+  - `AnalyticsService.ts`: Usage tracking
+
+- **utils/**: Utility functions and helpers
+  - `StateManager.ts`: State management
+  - `EventBus.ts`: Event propagation system
+
+- **models/**: Data models and interfaces
+
+- **i18n/**: Internationalization resources
+
+### Getting Started with Development
+
+1. Clone the repository
+```bash
+git clone https://github.com/eladmoshe/spelling-quiz-game.git
+cd spelling-quiz-game
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Start the development server
+```bash
+npm run dev
+```
+
+4. Run tests
+```bash
+npm test
+```
+
+> **Note:** Performance tests are not supported and have been disabled in this project. The test suite focuses on functional correctness rather than performance benchmarks.

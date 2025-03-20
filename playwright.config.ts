@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: 'html',
   timeout: 15000, // Reduced from 60000 to 15 seconds
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
     navigationTimeout: 10000, // Reduced from 30000 to 10 seconds
     actionTimeout: 5000, // Reduced from 15000 to 5 seconds
@@ -23,10 +23,11 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: 'npm run start',
-    url: 'http://localhost:8080',
-    timeout: 30000, // Reduced from 120000 to 30 seconds
-    reuseExistingServer: !process.env.CI,
-  },
+  // We're not using the webServer option since we're managing the server manually in our script
+  // webServer: {
+  //   command: 'npm run build && npm run start',
+  //   url: 'http://localhost:4173',
+  //   timeout: 60000,
+  //   reuseExistingServer: !process.env.CI,
+  // },
 });
