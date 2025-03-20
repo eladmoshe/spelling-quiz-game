@@ -244,16 +244,26 @@ describe('SpeechService', () => {
   });
   
   test('handles synthesis errors gracefully', async () => {
-    // Mock speakWithAzure to throw an error
-    (speechService['speakWithAzure'] as jest.Mock).mockRejectedValueOnce(new Error('Synthesis failed'));
-
-    // Set useBrowserFallback to false to prevent fallback
-    Object.defineProperty(speechService, 'speakWithBrowser', { 
-      value: jest.fn().mockRejectedValue(new Error('Browser synthesis failed too'))
+    // Create a new instance for this test to avoid property redefinition issues
+    Object.defineProperty(SpeechService, 'instance', {
+      value: undefined,
+      writable: true
     });
+    const testSpeechService = SpeechService.getInstance();
     
+    // Set up mocks for this specific instance
+    const mockAzure = jest.fn().mockRejectedValueOnce(new Error('Synthesis failed'));
+    const mockBrowser = jest.fn().mockRejectedValue(new Error('Browser synthesis failed too'));
+    
+    // Define properties for the first time on this new instance
+    Object.defineProperty(testSpeechService, 'speakWithAzure', { value: mockAzure });
+    Object.defineProperty(testSpeechService, 'speakWithBrowser', { value: mockBrowser });
+    
+    // Mock canPlayWord for this specific test
+    jest.spyOn(testSpeechService, 'canPlayWord').mockReturnValue(true);
+
     // Should reject with the error
-    await expect(speechService.speak('apple', 'en-US')).rejects.toThrow();
+    await expect(testSpeechService.speak('apple', 'en-US')).rejects.toThrow();
   });
   
   test('uses browser fallback if Azure fails', async () => {
