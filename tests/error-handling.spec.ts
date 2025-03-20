@@ -149,7 +149,7 @@ test.describe('Spelling Quiz Error Handling', () => {
     });
     
     // Try to play the word
-    await page.getByTestId('play-word-button').click();
+    await page.getByTestId('play-button').click();
     
     // Game should not crash, still be usable
     await page.getByTestId('answer-input').fill('test');

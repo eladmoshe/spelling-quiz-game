@@ -39,6 +39,16 @@ export class GameBoardComponent extends Component {
     // Clean up previous event listeners
     this.removeEventListeners();
     
+    // Menu button
+    const menuButton = this.getElement('#menuButton');
+    if (menuButton) {
+      const handleMenu = () => {
+        this.gameEngine.resetGame();
+      };
+      menuButton.addEventListener('click', handleMenu);
+      this.cleanupHandlers.push(() => menuButton.removeEventListener('click', handleMenu));
+    }
+
     // Listen button
     const listenButton = this.getElement('#listenButton');
     if (listenButton) {
@@ -163,6 +173,11 @@ export class GameBoardComponent extends Component {
         <div class="space-y-6">
           <div class="flex justify-between items-center">
             <div>
+              <button class="btn btn-sm btn-outline mb-2" id="menuButton" data-testid="menu-button" title="${t.newWords}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+              </button>
               <h2 class="text-lg font-medium">
                 ${t.word} ${currentIndex + 1}/${wordList.length}
               </h2>

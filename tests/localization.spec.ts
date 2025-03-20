@@ -56,8 +56,8 @@ test.describe('Spelling Quiz Localization', () => {
     await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
     
     // Check play button text in Hebrew
-    const playButton = page.getByTestId('play-word-button');
-    expect(await playButton.getAttribute('aria-label')).toBeTruthy();
+    const playButton = page.getByTestId('play-button');
+    expect(await playButton.getAttribute('title')).toBeTruthy();
   });
   
   test('should persist language across game screens', async ({ page }) => {
