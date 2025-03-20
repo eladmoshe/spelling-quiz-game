@@ -147,10 +147,13 @@ export class GameEngine {
     setTimeout(() => {
       try {
         this.playCurrentWord();
+        
+        // Emit an event to signal that the game is fully loaded
+        this.eventBus.emit('gameFullyLoaded');
       } catch (error) {
         console.error('Error playing word:', error);
       }
-    }, 500);
+    }, 700);
   }
   
   /**
@@ -175,16 +178,21 @@ export class GameEngine {
         // Emit a special event for tests to indicate we're loading a previous set
         this.eventBus.emit('loadingPreviousSet', index);
         
-        // Set a small delay to ensure UI updates properly
+        // Set a longer delay to ensure UI updates properly
         setTimeout(() => {
           // Start the game with the selected word set
           this.startGame(words);
           
-          // Force the game board to be rendered again after a small delay
+          // Force the game board to be rendered again after a delay
           setTimeout(() => {
             this.eventBus.emit('forcePracticeScreen');
-          }, 100);
-        }, 50);
+            
+            // Emit an additional event after the practice screen is forced
+            setTimeout(() => {
+              this.eventBus.emit('previousSetLoaded', index);
+            }, 200);
+          }, 300);
+        }, 250);
       }
     } catch (error) {
       console.error('Error loading previous set:', error);
@@ -290,8 +298,12 @@ export class GameEngine {
       // Emit a special event for tests to ensure we clear the input field
       this.eventBus.emit('resetInputField');
 
-      // Play the new word with a reasonable timeout
-      setTimeout(() => this.playCurrentWord(), 300);
+      // Play the new word with a longer timeout to ensure UI is ready
+      setTimeout(() => {
+        this.playCurrentWord();
+        // Emit event to signal that next word is ready
+        this.eventBus.emit('nextWordReady', currentIndex + 1);
+      }, 500);
     }
   }
   

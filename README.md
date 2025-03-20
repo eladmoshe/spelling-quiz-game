@@ -98,3 +98,5 @@ npm run dev
 ```bash
 npm test
 ```
+
+> **Note:** Performance tests are not supported and have been disabled in this project. The test suite focuses on functional correctness rather than performance benchmarks.

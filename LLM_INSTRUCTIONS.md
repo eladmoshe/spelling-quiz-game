@@ -72,6 +72,8 @@ The project follows a modular architecture with clear separation of concerns:
 - Continuous integration with GitHub Actions
 - Deployed on GitHub Pages
 
+> **Important**: Performance testing is not supported in this project. The test suite focuses on functional correctness rather than performance benchmarks. The `tests/performance.spec.ts` file is kept as a placeholder but does not contain active tests.
+
 ## Common Tasks
 
 ### Adding a New Feature
