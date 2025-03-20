@@ -19,23 +19,23 @@ Spelling Quiz includes a comprehensive build validation system to ensure deploym
 To ensure your changes will work in production:
 
 ```bash
+# Standard validation
 npm run build:prod     # Runs validation and simulation
 
+# GitHub Pages specific deployment
+npm run build:gh-pages  # Build with GitHub Pages fixes
+
 # Individual validation steps
-npm run validate      # Validates build output
-npm run simulate      # Simulates GitHub Pages deployment
-npm run test:simulation # Tests ES modules configuration
+npm run validate        # Validates build output
+npm run simulate        # Simulates GitHub Pages deployment
+npm run deploy:fix      # Applies GitHub Pages specific fixes
 
 # First-time setup
 chmod +x scripts/make-executable.sh
 ./scripts/make-executable.sh   # Makes scripts executable
 ```
 
-This prevents common deployment issues like:
-- TypeScript references that won't work in production
-- Path resolution problems with GitHub Pages base URL
-- MIME type inconsistencies
-- Missing configuration files
+See [GitHub Pages Deployment Guide](GITHUB_PAGES_DEPLOYMENT.md) for detailed information.
 
 > **Note:** Performance tests are not supported and have been disabled in this project. The test suite focuses on functional correctness rather than performance benchmarks.
 
