@@ -2,6 +2,8 @@
 
 This document serves as a quick reference for LLMs working with the SpellingQuiz codebase. It provides context, architecture overview, and guidance to help you quickly understand the project.
 
+> **Important**: Performance testing is not supported in this project. The test suite focuses on functional correctness rather than performance benchmarks. The `tests/performance.spec.ts` file is kept as a placeholder but does not contain active tests.
+
 ## Project Overview
 
 SpellingQuiz is an interactive web application designed to help users practice and improve their English spelling skills. Key features include:
@@ -69,10 +71,27 @@ The project follows a modular architecture with clear separation of concerns:
 - Built with TypeScript and bundled with Vite
 - Unit tests use Jest
 - E2E tests use Playwright
+- Build validation system prevents deployment issues
 - Continuous integration with GitHub Actions
 - Deployed on GitHub Pages
 
-> **Important**: Performance testing is not supported in this project. The test suite focuses on functional correctness rather than performance benchmarks. The `tests/performance.spec.ts` file is kept as a placeholder but does not contain active tests.
+### Build Validation System
+
+The project includes a comprehensive build validation system to prevent deployment issues:
+
+- **scripts/validate-build.js**: Validates build output for issues that would break in production
+- **scripts/simulate-deployment.js**: Simulates GitHub Pages constraints and tests the built app
+- **scripts/production-build.js**: Runs the complete build and validation process
+
+These scripts are available through npm commands:
+
+```bash
+npm run build:prod   # Production build with validation
+npm run validate     # Validate an existing build
+npm run simulate     # Simulate GitHub Pages deployment
+```
+
+The CI/CD pipeline is configured to use these scripts to prevent problematic deployments.
 
 ## Common Tasks
 

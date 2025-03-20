@@ -8,6 +8,37 @@ Try it now: [Spelling Quiz Game](https://eladmoshe.github.io/spelling-quiz-game/
 
 Welcome to Spelling Quiz - an interactive and engaging way to improve your spelling skills! This game makes practicing English spelling fun and effective.
 
+## Preventing Deployment Issues 🔍
+
+Spelling Quiz includes a comprehensive build validation system to ensure deployments work correctly:
+
+- **Build Validation**: Catches issues that would break the app in production
+- **Deployment Simulation**: Tests the built app with GitHub Pages constraints
+- **CI Integration**: Validates builds during continuous integration
+
+To ensure your changes will work in production:
+
+```bash
+npm run build:prod     # Runs validation and simulation
+
+# Individual validation steps
+npm run validate      # Validates build output
+npm run simulate      # Simulates GitHub Pages deployment
+npm run test:simulation # Tests ES modules configuration
+
+# First-time setup
+chmod +x scripts/make-executable.sh
+./scripts/make-executable.sh   # Makes scripts executable
+```
+
+This prevents common deployment issues like:
+- TypeScript references that won't work in production
+- Path resolution problems with GitHub Pages base URL
+- MIME type inconsistencies
+- Missing configuration files
+
+> **Note:** Performance tests are not supported and have been disabled in this project. The test suite focuses on functional correctness rather than performance benchmarks.
+
 ## Why Use Spelling Quiz? ✨
 
 - **Learn at Your Own Pace**: Practice spelling with words that matter to you
@@ -96,7 +127,15 @@ npm run dev
 
 4. Run tests
 ```bash
-npm test
+npm test             # Run unit tests
+npm run test:e2e     # Run end-to-end tests
+npm run test:all     # Run all tests (unit + E2E)
 ```
 
-> **Note:** Performance tests are not supported and have been disabled in this project. The test suite focuses on functional correctness rather than performance benchmarks.
+5. Build and validate
+```bash
+npm run build        # Standard build
+npm run build:prod   # Production build with validation
+npm run validate     # Validate an existing build
+npm run simulate     # Simulate GitHub Pages deployment
+```

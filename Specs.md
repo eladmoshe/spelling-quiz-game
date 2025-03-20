@@ -100,12 +100,20 @@ An interactive spelling quiz application that helps users learn and practice spe
    - Validate localStorage data
    - Provide default values if data is corrupted
 
-## Technical Constraints
+## Build and Deployment
 - Deployed on GitHub Pages
 - Base URL: `/spelling-quiz-game/`
 - Built and deployed using GitHub Actions
+- Build validation system prevents deployment issues
 - TypeScript as primary language
 - All source code under `js/` directory
+
+### Build Validation
+The project includes a comprehensive validation system that:
+- Validates build output for GitHub Pages compatibility
+- Detects path resolution issues and MIME type problems
+- Simulates GitHub Pages constraints to test deployments
+- Prevents broken builds from being deployed
 
 ## Future Improvements
 - Add medium and hard difficulty levels

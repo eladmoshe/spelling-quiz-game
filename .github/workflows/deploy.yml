@@ -31,13 +31,16 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm install microsoft-cognitiveservices-speech-sdk dotenv
+          npm install microsoft-cognitiveservices-speech-sdk dotenv chalk glob mime-types
 
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
-      - name: Build
-        run: npm run build
+      - name: Build and validate
+        run: |
+          chmod +x ./scripts/validate-build.js
+          NODE_ENV=production npm run build
+          node ./scripts/validate-build.js
         env:
           NODE_ENV: production
           AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}

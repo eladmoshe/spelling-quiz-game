@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "chalk": "^4.1.2",
+    "glob": "^10.3.10",
+    "mime-types": "^2.1.35",
+    "puppeteer": "^21.5.2"
+  }
+}
