@@ -22,6 +22,8 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
+    // Fix for GitHub Pages path issues
+    assetsDir: 'assets',
   },
   
   // Configure the dev server

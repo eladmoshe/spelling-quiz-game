@@ -37,10 +37,10 @@ try {
   execSync('npm run build', { stdio: 'inherit', env: { ...process.env, NODE_ENV: 'production' } });
   console.log(chalk.green('✅ Build completed!'));
   
-  // Step 4: Ensure .nojekyll exists in dist
-  console.log(chalk.gray('\nEnsuring .nojekyll file exists...'));
-  fs.writeFileSync(path.join('dist', '.nojekyll'), '');
-  console.log(chalk.green('✅ .nojekyll file created!'));
+  // Step 4: Apply build fixes
+  console.log(chalk.gray('\nApplying build fixes...'));
+  execSync('node scripts/fixes/fix-build.js', { stdio: 'inherit' });
+  console.log(chalk.green('✅ Build fixes applied!'));
   
   // Step 5: Validate the build
   console.log(chalk.gray('\nValidating the build...'));

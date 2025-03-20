@@ -5,5 +5,6 @@ chmod +x scripts/validate-build.js
 chmod +x scripts/simulate-deployment.js
 chmod +x scripts/production-build.js
 chmod +x scripts/test-simulation.js
+chmod +x scripts/fixes/fix-build.js
 
 echo "Scripts are now executable."

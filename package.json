@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc && vite build",
     "build:prod": "node scripts/production-build.js",
+    "build:fix": "node scripts/fixes/fix-build.js",
     "validate": "node scripts/validate-build.js",
     "simulate": "node scripts/simulate-deployment.js",
     "test:simulation": "node scripts/test-simulation.js",
