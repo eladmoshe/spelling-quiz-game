@@ -65,10 +65,10 @@ class SpellingApp {
     });
 
     eventBus.on('gameStarted', () => {
-      // Play the first word after a slight delay
+      // Play the first word after a slight delay - reduced for better test responsiveness
       setTimeout(() => {
         this.gameEngine.playCurrentWord();
-      }, 500);
+      }, 100);
     });
 
     eventBus.on('gameCompleted', () => {

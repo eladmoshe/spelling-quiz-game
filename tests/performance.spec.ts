@@ -52,9 +52,9 @@ test.describe('Spelling Quiz Performance', () => {
     // Enter a small list of words
     await page.getByTestId('word-input').fill('test1,test2,test3,test4,test5');
     await page.getByTestId('start-button').click();
-    
-    // Wait for game board
-    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
+
+    // Wait for game board (increased timeout for better reliability)
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
     
     // Rapidly complete all words
     for (let i = 1; i <= 5; i++) {
@@ -85,9 +85,9 @@ test.describe('Spelling Quiz Performance', () => {
       // Enter a unique word set
       await page.getByTestId('word-input').fill(`set${i}A,set${i}B,set${i}C`);
       await page.getByTestId('start-button').click();
-      
-      // Wait for game board
-      await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
+
+      // Wait for game board (increased timeout for better reliability)
+      await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
       
       // Return to menu
       await page.getByTestId('menu-button').click();

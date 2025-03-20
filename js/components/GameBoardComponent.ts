@@ -104,8 +104,8 @@ export class GameBoardComponent extends Component {
       answerInput.addEventListener('keydown', handleKeydown);
       this.cleanupHandlers.push(() => answerInput.removeEventListener('keydown', handleKeydown));
       
-      // Focus the input after rendering
-      setTimeout(() => answerInput.focus(), 100);
+      // Focus the input after rendering - using a faster focus timing
+      setTimeout(() => answerInput.focus(), 10);
     }
   }
   

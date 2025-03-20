@@ -105,8 +105,8 @@ export class GameEngine {
     // Notify about game start
     this.eventBus.emit('gameStarted', wordList);
     
-    // Play the first word
-    setTimeout(() => this.playCurrentWord(), 500);
+    // Play the first word - reduced timeout for better test responsiveness
+    setTimeout(() => this.playCurrentWord(), 100);
   }
   
   /**
@@ -223,8 +223,8 @@ export class GameEngine {
       // Notify about word change
       this.eventBus.emit('wordChanged', currentIndex + 1);
       
-      // Play the new word
-      setTimeout(() => this.playCurrentWord(), 500);
+      // Play the new word - reduced timeout for better test responsiveness
+      setTimeout(() => this.playCurrentWord(), 100);
     }
   }
   

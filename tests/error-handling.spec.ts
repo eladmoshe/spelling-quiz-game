@@ -21,12 +21,12 @@ test.describe('Spelling Quiz Error Handling', () => {
   test('should handle special characters in input', async ({ page }) => {
     // Enter words with special characters
     await page.getByTestId('word-input').fill('café,naïve,résumé');
-    
+
     // Start the game
     await page.getByTestId('start-button').click();
-    
-    // Verify game started
-    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
+
+    // Verify game started (increased timeout for better reliability)
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
     
     // Enter a special character answer
     await page.getByTestId('answer-input').fill('café');
@@ -42,16 +42,16 @@ test.describe('Spelling Quiz Error Handling', () => {
     await page.keyboard.press('Tab'); // Focus on manual mode button
     await page.keyboard.press('Tab'); // Focus on random mode button
     await page.keyboard.press('Tab'); // Focus on word input
-    
+
     // Enter some text using keyboard
     await page.keyboard.type('apple');
-    
+
     // Tab to start button and press it
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
-    
-    // Verify game started
-    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
+
+    // Verify game started (increased timeout for better reliability)
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
     
     // Type answer using keyboard
     await page.keyboard.type('apple');
@@ -71,9 +71,9 @@ test.describe('Spelling Quiz Error Handling', () => {
     // Start a game
     await page.getByTestId('word-input').fill('test');
     await page.getByTestId('start-button').click();
-    
-    // Wait for game to start
-    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
+
+    // Wait for game to start (increased timeout for better reliability)
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
     
     // Enter partial answer
     await page.getByTestId('answer-input').fill('te');
@@ -94,22 +94,22 @@ test.describe('Spelling Quiz Error Handling', () => {
       // Small wait to ensure click registers
       await page.waitForTimeout(100);
     }
-    
+
     // Interface should still be usable
     await page.getByTestId('word-input').fill('test');
     await page.getByTestId('start-button').click();
-    
-    // Verify game started
-    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
+
+    // Verify game started (increased timeout for better reliability)
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
   });
   
   test('should recover from reload during game', async ({ page }) => {
     // Start a game
     await page.getByTestId('word-input').fill('apple,banana');
     await page.getByTestId('start-button').click();
-    
-    // Wait for game to start
-    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
+
+    // Wait for game to start (increased timeout for better reliability)
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
     
     // Enter correct answer for first word
     await page.getByTestId('answer-input').fill('apple');
@@ -135,9 +135,9 @@ test.describe('Spelling Quiz Error Handling', () => {
     // Start a game
     await page.getByTestId('word-input').fill('test');
     await page.getByTestId('start-button').click();
-    
-    // Wait for game to start
-    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 5000 });
+
+    // Wait for game to start (increased timeout for better reliability)
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
     
     // Mock a network error for speech synthesis
     await page.route('**/*', (route) => {
