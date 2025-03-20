@@ -120,6 +120,9 @@ describe('GameEngine Edge Cases', () => {
     // Start with empty word list
     gameEngine.startGame([]);
     
+    // Should emit the emptyWordList event
+    expect(mockEventBus.emit).toHaveBeenCalledWith('emptyWordList', expect.anything());
+    
     // Should still update state
     expect(mockStateManager.resetProgress).toHaveBeenCalledWith([]);
     expect(mockStateManager.setScreen).toHaveBeenCalledWith('practice');
@@ -130,21 +133,23 @@ describe('GameEngine Edge Cases', () => {
   });
   
   test('handles null or undefined word list gracefully', () => {
-    // Override startGame to handle null/undefined
-    const originalStartGame = gameEngine.startGame;
-    gameEngine.startGame = jest.fn().mockImplementation((wordList) => {
-      // Safely handle null/undefined wordList
-      const safeWordList = wordList || [];
-      return originalStartGame.call(gameEngine, safeWordList);
-    });
-
+    // Reset event bus mock to check specific calls
+    mockEventBus.emit.mockClear();
+    
     // @ts-ignore - Testing runtime behavior with invalid input
-    expect(() => gameEngine.startGame(null)).not.toThrow();
+    gameEngine.startGame(null);
+    
+    // Should emit the emptyWordList event
+    expect(mockEventBus.emit).toHaveBeenCalledWith('emptyWordList', expect.anything());
+    
+    // Reset for next check
+    mockEventBus.emit.mockClear();
+    
     // @ts-ignore - Testing runtime behavior with invalid input
-    expect(() => gameEngine.startGame(undefined)).not.toThrow();
-
-    // Restore original method
-    gameEngine.startGame = originalStartGame;
+    gameEngine.startGame(undefined);
+    
+    // Should emit the emptyWordList event again
+    expect(mockEventBus.emit).toHaveBeenCalledWith('emptyWordList', expect.anything());
   });
   
   test('handles last word in list correctly', () => {
@@ -195,11 +200,18 @@ describe('GameEngine Edge Cases', () => {
       }
     } as any);
     
+    // Reset event bus mock to check specific calls
+    mockEventBus.emit.mockClear();
+    
     // Should not throw an error
     await gameEngine.playCurrentWord();
     
-    // Should emit speech error event
-    expect(mockEventBus.emit).toHaveBeenCalledWith('speechError', expect.any(Error));
+    // Should emit speech error event with structured data
+    expect(mockEventBus.emit).toHaveBeenCalledWith('speechError', expect.objectContaining({
+      type: 'playWordFailed',
+      message: 'Error playing word',
+      error: expect.any(Error)
+    }));
   });
   
   test('handles non-existent index in loadPreviousSet', () => {

@@ -50,7 +50,12 @@ export class GameEngine {
           });
         }
       } catch (error) {
-        console.error('Error forcing correct answer:', error);
+        // Emit error event instead of console.error
+        this.eventBus.emit('gameError', { 
+          type: 'forceCorrectFailed', 
+          message: 'Error forcing correct answer', 
+          error 
+        });
       }
     });
     
@@ -65,7 +70,12 @@ export class GameEngine {
           this.eventBus.emit('stateChanged');
         }
       } catch (error) {
-        console.error('Error forcing practice screen:', error);
+        // Emit error event instead of console.error
+        this.eventBus.emit('gameError', { 
+          type: 'forcePracticeScreenFailed', 
+          message: 'Error forcing practice screen', 
+          error 
+        });
       }
     });
   }
@@ -116,17 +126,21 @@ export class GameEngine {
    * Starts a new game with the provided word list
    */
   public startGame(wordList: string[]): void {
-    // Validate word list
-    if (!wordList || wordList.length === 0) {
-      console.error('Cannot start game with empty word list');
-      return;
+    // Ensure wordList is an array
+    const safeWordList = Array.isArray(wordList) ? wordList : [];
+    
+    // For empty word lists, emit an event instead of console warning
+    if (safeWordList.length === 0) {
+      this.eventBus.emit('emptyWordList', { message: 'Starting game with empty word list' });
     }
     
-    // Save the word set for future use
-    this.storageService.savePreviousWordSet(wordList);
+    // Save the word set for future use (only if not empty)
+    if (safeWordList.length > 0) {
+      this.storageService.savePreviousWordSet(safeWordList);
+    }
 
     // Update game state
-    this.stateManager.resetProgress(wordList);
+    this.stateManager.resetProgress(safeWordList);
     
     // Set screen directly without delay for immediate transition
     this.stateManager.setScreen('practice');
@@ -134,34 +148,61 @@ export class GameEngine {
     // Track game start
     const state = this.stateManager.getState();
     this.analyticsService.trackGameStart({
-      wordCount: wordList.length,
+      wordCount: safeWordList.length,
       difficulty: state.settings.inputMode === 'random' ? state.settings.difficulty : 'manual',
       inputMode: state.settings.inputMode,
       language: state.settings.language
     });
 
     // Notify about game start
-    this.eventBus.emit('gameStarted', wordList);
+    this.eventBus.emit('gameStarted', safeWordList);
 
     // Add a delay before playing the first word to ensure UI has updated
-    setTimeout(() => {
-      try {
-        this.playCurrentWord();
-        
-        // Emit an event to signal that the game is fully loaded
+    // Only try to play if we have words
+    if (safeWordList.length > 0) {
+      setTimeout(() => {
+        try {
+          this.playCurrentWord();
+          
+          // Emit an event to signal that the game is fully loaded
+          this.eventBus.emit('gameFullyLoaded');
+        } catch (error) {
+          // Emit error event instead of console.error
+          this.eventBus.emit('gameError', { 
+            type: 'startGamePlayFailed', 
+            message: 'Error playing first word', 
+            error 
+          });
+          
+          // Still emit fully loaded event to ensure UI responds
+          this.eventBus.emit('gameFullyLoaded');
+        }
+      }, 500);
+    } else {
+      // Still emit the game loaded event
+      setTimeout(() => {
         this.eventBus.emit('gameFullyLoaded');
-      } catch (error) {
-        console.error('Error playing word:', error);
-      }
-    }, 700);
+      }, 500);
+    }
   }
   
   /**
    * Starts a game with random words
    */
   public async startRandomGame(options: WordOptions): Promise<void> {
-    const wordList = await this.wordGenerator.getRandomWords(options);
-    this.startGame(wordList);
+    try {
+      const wordList = await this.wordGenerator.getRandomWords(options);
+      this.startGame(wordList);
+    } catch (error) {
+      // Emit error event instead of console.error
+      this.eventBus.emit('gameError', { 
+        type: 'wordGenerationFailed', 
+        message: 'Error generating random words', 
+        error 
+      });
+      // Start with empty list as fallback
+      this.startGame([]);
+    }
   }
   
   /**
@@ -178,24 +219,26 @@ export class GameEngine {
         // Emit a special event for tests to indicate we're loading a previous set
         this.eventBus.emit('loadingPreviousSet', index);
         
-        // Set a longer delay to ensure UI updates properly
+        // Start the game with the selected word set
+        this.startGame(words);
+        
+        // Force the game board to be rendered
         setTimeout(() => {
-          // Start the game with the selected word set
-          this.startGame(words);
+          this.eventBus.emit('forcePracticeScreen');
           
-          // Force the game board to be rendered again after a delay
+          // Emit an additional event after the practice screen is forced
           setTimeout(() => {
-            this.eventBus.emit('forcePracticeScreen');
-            
-            // Emit an additional event after the practice screen is forced
-            setTimeout(() => {
-              this.eventBus.emit('previousSetLoaded', index);
-            }, 200);
-          }, 300);
-        }, 250);
+            this.eventBus.emit('previousSetLoaded', index);
+          }, 100);
+        }, 200);
       }
     } catch (error) {
-      console.error('Error loading previous set:', error);
+      // Emit error event instead of console.error
+      this.eventBus.emit('gameError', { 
+        type: 'loadPreviousSetFailed', 
+        message: 'Error loading previous set', 
+        error 
+      });
     }
   }
   
@@ -298,12 +341,12 @@ export class GameEngine {
       // Emit a special event for tests to ensure we clear the input field
       this.eventBus.emit('resetInputField');
 
-      // Play the new word with a longer timeout to ensure UI is ready
+      // Play the new word with a timeout to ensure UI is ready
       setTimeout(() => {
         this.playCurrentWord();
         // Emit event to signal that next word is ready
         this.eventBus.emit('nextWordReady', currentIndex + 1);
-      }, 500);
+      }, 400);
     }
   }
   
@@ -387,8 +430,12 @@ export class GameEngine {
       await this.speechService.speak(currentWord, 'en-US');
       this.stateManager.updateLastPlayTime();
     } catch (error) {
-      console.error('Error playing word:', error);
-      this.eventBus.emit('speechError', error);
+      // Emit more structured event instead of just passing the error
+      this.eventBus.emit('speechError', {
+        type: 'playWordFailed',
+        message: 'Error playing word',
+        error
+      });
     }
   }
   
@@ -410,8 +457,12 @@ export class GameEngine {
       await this.speechService.speak(currentWord, 'en-US', 'slow');
       this.stateManager.updateLastPlayTime();
     } catch (error) {
-      console.error('Error playing word slower:', error);
-      this.eventBus.emit('speechError', error);
+      // Emit more structured event instead of just passing the error
+      this.eventBus.emit('speechError', {
+        type: 'playWordSlowerFailed',
+        message: 'Error playing word at slower rate',
+        error
+      });
     }
   }
   

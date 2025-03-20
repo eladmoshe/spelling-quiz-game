@@ -41,7 +41,10 @@ export class GameBoardComponent extends Component {
    */
   public render(): void {
     if (!this.element) {
-      console.warn('GameBoardComponent: Element not found in render');
+      this.gameEngine.getEventBus().emit('componentError', { 
+        type: 'elementNotFound', 
+        message: 'GameBoardComponent: Element not found in render'
+      });
       return;
     }
 
@@ -49,11 +52,11 @@ export class GameBoardComponent extends Component {
 
     // Only render when on the practice screen
     if (state.screen !== 'practice') {
-      console.log('GameBoardComponent: Not rendering because screen is', state.screen);
+      // Skip rendering for non-practice screens
       return;
     }
 
-    console.log('GameBoardComponent: Rendering practice screen');
+    // Render the practice screen
     
     // Update the DOM
     this.element.innerHTML = this.renderGameBoard(state);
@@ -71,9 +74,12 @@ export class GameBoardComponent extends Component {
         answerInput.style.visibility = 'visible !important';
         answerInput.setAttribute('aria-hidden', 'false');
         answerInput.focus();
-        console.log('GameBoardComponent: Input field made visible and focused');
+        // Input field is now visible and focused
       } else {
-        console.warn('GameBoardComponent: Answer input not found after render');
+        this.gameEngine.getEventBus().emit('componentError', { 
+          type: 'inputNotFound', 
+          message: 'GameBoardComponent: Answer input not found after render'
+        });
       }
     }, 100);
   }
@@ -149,7 +155,11 @@ export class GameBoardComponent extends Component {
           // Let GameEngine handle next word
           this.gameEngine.nextWord();
         } catch (error) {
-          console.error('Error handling next word:', error);
+          this.gameEngine.getEventBus().emit('componentError', { 
+            type: 'nextWordError', 
+            message: 'Error handling next word', 
+            error 
+          });
         }
       };
       nextButton.addEventListener('click', handleNextWord);
@@ -178,7 +188,11 @@ export class GameBoardComponent extends Component {
                 this.gameEngine.nextWord();
               }, 10);
             } catch (error) {
-              console.error('Error handling keyboard navigation:', error);
+              this.gameEngine.getEventBus().emit('componentError', { 
+                type: 'keyboardNavigationError', 
+                message: 'Error handling keyboard navigation', 
+                error 
+              });
               this.gameEngine.nextWord();
             }
           } else {
@@ -226,7 +240,7 @@ export class GameBoardComponent extends Component {
         this.gameEngine.checkAnswer(userAnswer);
         
         // Always force it to be correct for test reliability regardless of result
-        console.log("Force marking test answer as correct for test reliability");
+        // Force marking test answer as correct for test reliability
         this.gameEngine.getEventBus().emit('forceCorrect');
         
         // Add a longer timeout to ensure UI updates properly
@@ -236,7 +250,11 @@ export class GameBoardComponent extends Component {
         this.gameEngine.checkAnswer(userAnswer);
       }
     } catch (error) {
-      console.error('Error checking answer:', error);
+      this.gameEngine.getEventBus().emit('componentError', { 
+        type: 'checkAnswerError', 
+        message: 'Error checking answer', 
+        error 
+      });
     }
   }
   
