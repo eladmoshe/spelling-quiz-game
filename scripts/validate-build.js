@@ -64,7 +64,9 @@ htmlFiles.forEach(file => {
   });
   
   // Check for absolute paths that might break in GitHub Pages
-  const absolutePathMatches = content.match(/src=["']\/(?!${BASE_URL.replace(/\//g, '\\/')})[^"']*["']/g);
+  const baseUrlEscaped = BASE_URL.replace(/\//g, '\\/'); // Escape slashes separately
+  const absolutePathRegex = new RegExp(`src=["']\/(?!${baseUrlEscaped})[^"']*["']`, 'g');
+  const absolutePathMatches = content.match(absolutePathRegex);
   if (absolutePathMatches) {
     CRITICAL_ERRORS.push(`${relativePath}: Contains absolute paths that will break on GitHub Pages:`);
     absolutePathMatches.forEach(match => {
