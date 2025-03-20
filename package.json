@@ -10,6 +10,7 @@
     "dev": "vite",
     "test": "jest",
     "test:e2e": "npm run build && playwright test --config=playwright.testdir.config.ts",
+    "test:all": "npm run test && npm run test:e2e",
     "serve:test": "npm run build && npm run start",
     "start": "vite preview --port 4173"
   },
