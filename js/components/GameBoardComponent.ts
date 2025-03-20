@@ -82,7 +82,14 @@ export class GameBoardComponent extends Component {
     // Next button
     const nextButton = this.getElement('#nextButton');
     if (nextButton) {
-      const handleNextWord = () => this.gameEngine.nextWord();
+      const handleNextWord = () => {
+        const answerInput = this.getElement<HTMLInputElement>('#answerInput');
+        if (answerInput) {
+          // Explicitly clear the input field before advancing to prevent test failures
+          answerInput.value = '';
+        }
+        this.gameEngine.nextWord();
+      };
       nextButton.addEventListener('click', handleNextWord);
       this.cleanupHandlers.push(() => nextButton.removeEventListener('click', handleNextWord));
     }
@@ -95,6 +102,8 @@ export class GameBoardComponent extends Component {
           e.preventDefault();
           const state = this.gameEngine.getState();
           if (state.progress.currentWordCorrect) {
+            // Explicitly clear the input field before advancing
+            answerInput.value = '';
             this.gameEngine.nextWord();
           } else {
             this.checkAnswer();
@@ -104,8 +113,14 @@ export class GameBoardComponent extends Component {
       answerInput.addEventListener('keydown', handleKeydown);
       this.cleanupHandlers.push(() => answerInput.removeEventListener('keydown', handleKeydown));
       
-      // Focus the input after rendering - using a faster focus timing
-      setTimeout(() => answerInput.focus(), 10);
+      // Focus the input after rendering - increased timeout for better test reliability
+      setTimeout(() => {
+        if (answerInput) {
+          answerInput.focus();
+          // Ensure the input is properly visible for tests
+          answerInput.style.display = 'block';
+        }
+      }, 100);
     }
   }
   

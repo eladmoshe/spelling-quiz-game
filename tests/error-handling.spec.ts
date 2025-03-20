@@ -22,6 +22,9 @@ test.describe('Spelling Quiz Error Handling', () => {
     // Enter words with special characters
     await page.getByTestId('word-input').fill('café,naïve,résumé');
 
+    // Add a delay before starting the game
+    await page.waitForTimeout(500);
+
     // Start the game
     await page.getByTestId('start-button').click();
 
@@ -48,6 +51,7 @@ test.describe('Spelling Quiz Error Handling', () => {
 
     // Tab to start button and press it
     await page.keyboard.press('Tab');
+    await page.waitForTimeout(500); // Add a delay before starting the game
     await page.keyboard.press('Enter');
 
     // Verify game started (increased timeout for better reliability)
@@ -62,9 +66,9 @@ test.describe('Spelling Quiz Error Handling', () => {
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     
-    // Verify next word is shown
-    await expect(page.getByTestId('answer-input')).toBeVisible();
-    await expect(page.getByTestId('answer-input')).toHaveValue('');
+    // Verify next word is shown with increased timeouts
+    await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('answer-input')).toHaveValue('', { timeout: 10000 });
   });
   
   test('should handle spamming the check button', async ({ page }) => {

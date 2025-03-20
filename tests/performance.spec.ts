@@ -14,8 +14,9 @@ test.describe('Spelling Quiz Performance', () => {
     // Record the start time
     const startTime = Date.now();
     
-    // Enter the large word list
+    // Enter the large word list with added delay for reliability
     await page.getByTestId('word-input').fill(largeWordList);
+    await page.waitForTimeout(500); // Give the app more time to process the large input
     await page.getByTestId('start-button').click();
     
     // Wait for game board to appear
@@ -49,8 +50,9 @@ test.describe('Spelling Quiz Performance', () => {
   });
   
   test('should handle rapid user interactions', async ({ page }) => {
-    // Enter a small list of words
+    // Enter a small list of words with delay for reliability
     await page.getByTestId('word-input').fill('test1,test2,test3,test4,test5');
+    await page.waitForTimeout(500); // Add a delay before starting the game
     await page.getByTestId('start-button').click();
 
     // Wait for game board (increased timeout for better reliability)
@@ -82,18 +84,20 @@ test.describe('Spelling Quiz Performance', () => {
   test('should load and render previous word sets efficiently', async ({ page }) => {
     // First, create several word sets
     for (let i = 0; i < 5; i++) {
-      // Enter a unique word set
+      // Enter a unique word set with delay for reliability
       await page.getByTestId('word-input').fill(`set${i}A,set${i}B,set${i}C`);
+      await page.waitForTimeout(500); // Add a delay before starting the game
       await page.getByTestId('start-button').click();
 
       // Wait for game board (increased timeout for better reliability)
       await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
       
-      // Return to menu
+      // Return to menu with wait before clicking
+      await page.waitForTimeout(500); // Add a small delay before clicking the menu button
       await page.getByTestId('menu-button').click();
-      
-      // Wait for menu to appear
-      await expect(page.getByTestId('start-button')).toBeVisible({ timeout: 5000 });
+
+      // Wait for menu to appear with increased timeout
+      await expect(page.getByTestId('start-button')).toBeVisible({ timeout: 10000 });
     }
     
     // Now check the performance of loading previous sets

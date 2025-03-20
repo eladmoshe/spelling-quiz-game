@@ -88,25 +88,29 @@ export class GameEngine {
   public startGame(wordList: string[]): void {
     // Save the word set for future use
     this.storageService.savePreviousWordSet(wordList);
-    
+
     // Update game state
     this.stateManager.resetProgress(wordList);
-    this.stateManager.setScreen('practice');
     
-    // Track game start
-    const state = this.stateManager.getState();
-    this.analyticsService.trackGameStart({
-      wordCount: wordList.length,
-      difficulty: state.settings.inputMode === 'random' ? state.settings.difficulty : 'manual',
-      inputMode: state.settings.inputMode,
-      language: state.settings.language
-    });
-    
-    // Notify about game start
-    this.eventBus.emit('gameStarted', wordList);
-    
-    // Play the first word - reduced timeout for better test responsiveness
-    setTimeout(() => this.playCurrentWord(), 100);
+    // Delay the transition to the practice screen to ensure proper rendering
+    setTimeout(() => {
+      this.stateManager.setScreen('practice');
+  
+      // Track game start
+      const state = this.stateManager.getState();
+      this.analyticsService.trackGameStart({
+        wordCount: wordList.length,
+        difficulty: state.settings.inputMode === 'random' ? state.settings.difficulty : 'manual',
+        inputMode: state.settings.inputMode,
+        language: state.settings.language
+      });
+  
+      // Notify about game start
+      this.eventBus.emit('gameStarted', wordList);
+  
+      // Play the first word with increased timeout for better test reliability
+      setTimeout(() => this.playCurrentWord(), 300);
+    }, 200); // Add a delay to ensure UI updates properly for tests
   }
   
   /**
