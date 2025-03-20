@@ -75,19 +75,23 @@ describe('SpeechService', () => {
   const mockFileReader = {
     onloadend: null,
     result: '',
-    readAsDataURL: jest.fn().mockImplementation(function() {
+    readAsDataURL: jest.fn().mockImplementation((blob) => {
       // We use setTimeout to simulate async behavior
       setTimeout(() => {
-        if (this.onloadend) {
-          this.result = 'data:audio/wav;base64,mockBase64Data';
-          this.onloadend();
+        if (mockFileReader.onloadend) {
+          mockFileReader.result = 'data:audio/wav;base64,mockBase64Data';
+          mockFileReader.onloadend();
         }
       }, 0);
     })
   };
-  
+
   // Fix TypeScript errors by adding required properties to FileReader constructor
-  const mockFileReaderConstructor = jest.fn().mockImplementation(() => mockFileReader);
+  const mockFileReaderConstructor = jest.fn(() => mockFileReader) as unknown as jest.Mock & {
+    EMPTY: number;
+    LOADING: number;
+    DONE: number;
+  };
   mockFileReaderConstructor.EMPTY = 0;
   mockFileReaderConstructor.LOADING = 1;
   mockFileReaderConstructor.DONE = 2;
@@ -125,7 +129,7 @@ describe('SpeechService', () => {
     global.Audio = jest.fn().mockImplementation(() => mockAudio);
     
     // Mock FileReader with proper static properties
-    global.FileReader = mockFileReaderConstructor;
+    global.FileReader = mockFileReaderConstructor as unknown as typeof FileReader;
     
     // Mock localStorage
     Object.defineProperty(window, 'localStorage', {

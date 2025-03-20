@@ -157,11 +157,11 @@ describe('SummaryComponent', () => {
       threeAttemptWords: 0,
       wrongAttempts: 2
     });
-    
+
     summaryComponent.render();
-    
+
     summaryContent = document.querySelector('.summary-card');
-    expect(summaryContent?.innerHTML).toContain('Good job'); // Should show good job message
+    expect(summaryContent?.innerHTML).toContain('Great Job'); // Should show "Great Job!" message
     
     // Test with low accuracy
     document.body.innerHTML = '<div id="app"></div>';
@@ -191,12 +191,13 @@ describe('SummaryComponent', () => {
       threeAttemptWords: 1,
       wrongAttempts: 5
     });
-    
+
     summaryComponent.render();
-    
-    const attemptDistribution = document.querySelector('.attempt-distribution');
+
+    // Use medal-breakdown instead of attempt-distribution since that's the actual class used
+    const attemptDistribution = document.querySelector('.medal-breakdown');
     expect(attemptDistribution).not.toBeNull();
-    
+
     // Check attempt counts
     expect(attemptDistribution?.innerHTML).toContain('5'); // One-attempt words
     expect(attemptDistribution?.innerHTML).toContain('3'); // Two-attempt words
