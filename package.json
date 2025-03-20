@@ -6,7 +6,7 @@
   "type": "module",
   "homepage": "https://eladmoshe.github.io/spelling-quiz-game/",
   "scripts": {
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node scripts/post-build.js",
     "build:prod": "node scripts/production-build.js",
     "build:fix": "node scripts/fixes/fix-build.js",
     "deploy:fix": "node scripts/deploy-fix/fix-github-pages.js",

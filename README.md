@@ -8,32 +8,33 @@ Try it now: [Spelling Quiz Game](https://eladmoshe.github.io/spelling-quiz-game/
 
 Welcome to Spelling Quiz - an interactive and engaging way to improve your spelling skills! This game makes practicing English spelling fun and effective.
 
-## Preventing Deployment Issues 🔍
+## Deployment and GitHub Pages 🚀
 
-Spelling Quiz includes a comprehensive build validation system to ensure deployments work correctly:
+Spelling Quiz includes an automated build and deployment system optimized for GitHub Pages:
 
+- **Automatic Fixes**: The build process automatically fixes common GitHub Pages issues
+- **CI/CD Integration**: GitHub Actions builds and deploys the site automatically
 - **Build Validation**: Catches issues that would break the app in production
-- **Deployment Simulation**: Tests the built app with GitHub Pages constraints
-- **CI Integration**: Validates builds during continuous integration
 
 To ensure your changes will work in production:
 
 ```bash
-# Standard validation
-npm run build:prod     # Runs validation and simulation
-
-# GitHub Pages specific deployment
-npm run build:gh-pages  # Build with GitHub Pages fixes
-
-# Individual validation steps
-npm run validate        # Validates build output
-npm run simulate        # Simulates GitHub Pages deployment
-npm run deploy:fix      # Applies GitHub Pages specific fixes
-
-# First-time setup
+# Make scripts executable (first time only)
 chmod +x scripts/make-executable.sh
-./scripts/make-executable.sh   # Makes scripts executable
+./scripts/make-executable.sh
+
+# Standard build with GitHub Pages fixes automatically applied
+npm run build          # Builds the app with post-build fixes
+
+# Validate the build
+npm run validate       # Validates the build output
 ```
+
+The **post-build script** automatically:
+- Creates the required `.nojekyll` file
+- Fixes asset paths for GitHub Pages
+- Adds proper base tag
+- Ensures script tags have correct type attributes
 
 See [GitHub Pages Deployment Guide](GITHUB_PAGES_DEPLOYMENT.md) for detailed information.
 

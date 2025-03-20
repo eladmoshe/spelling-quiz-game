@@ -9,9 +9,13 @@ The project is set up with a GitHub Actions workflow that automatically builds a
 ### How It Works
 
 1. The workflow is defined in `.github/workflows/build-and-deploy.yml`
-2. It builds the project using `npm run build`
-3. Applies necessary fixes for GitHub Pages with `scripts/deploy-fix/fix-github-pages.js`
-4. Deploys the `dist` directory to GitHub Pages
+2. It makes all scripts executable with `chmod +x` and `./scripts/make-executable.sh`
+3. Builds the project using `npm run build` which:
+   - Compiles TypeScript with `tsc`
+   - Bundles with Vite
+   - **Automatically applies GitHub Pages fixes with the post-build script**
+4. Creates the `.nojekyll` file as a safety measure
+5. Deploys the `dist` directory to GitHub Pages
 
 ## Common Deployment Issues
 
@@ -45,40 +49,62 @@ Certain scripts may need explicit type attributes.
 
 If you need to manually prepare a build for deployment:
 
-1. Run the pre-deployment script:
+1. Ensure scripts are executable:
    ```bash
-   chmod +x scripts/pre-deploy.sh
-   ./scripts/pre-deploy.sh
+   chmod +x scripts/make-executable.sh
+   ./scripts/make-executable.sh
    ```
 
-2. Or use the npm script:
+2. Build the project (fixes are automatically applied):
    ```bash
-   npm run build:gh-pages
+   npm run build
    ```
 
-3. Then validate the build:
+3. Validate the build:
    ```bash
    npm run validate
+   ```
+
+4. If needed, you can run additional fixes manually:
+   ```bash
+   npm run deploy:fix
    ```
 
 ## Troubleshooting
 
 If you encounter deployment issues:
 
-1. Check the build validation output:
+1. Make sure all scripts are executable:
    ```bash
-   npm run build
+   chmod +x scripts/post-build.js
+   chmod +x scripts/make-executable.sh
+   ./scripts/make-executable.sh
+   ```
+
+2. Check if the build process includes the post-build step:
+   ```bash
+   # The 'build' script in package.json should include post-build.js
+   cat package.json | grep build
+   ```
+
+3. Manually run the post-build script if needed:
+   ```bash
+   node scripts/post-build.js
+   ```
+
+4. Validate the build and check for errors:
+   ```bash
    npm run validate
    ```
 
-2. Apply fixes manually:
+5. Inspect the generated index.html for issues:
    ```bash
-   npm run deploy:fix
+   cat dist/index.html | grep -B 1 -A 1 "spelling-quiz-game"
    ```
 
-3. Simulate GitHub Pages constraints:
+6. Verify the .nojekyll file exists:
    ```bash
-   npm run simulate
+   ls -la dist/.nojekyll
    ```
 
 ## More Information

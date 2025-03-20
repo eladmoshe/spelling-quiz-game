@@ -8,5 +8,6 @@ chmod +x scripts/test-simulation.js
 chmod +x scripts/fixes/fix-build.js
 chmod +x scripts/deploy-fix/fix-github-pages.js
 chmod +x scripts/pre-deploy.sh
+chmod +x scripts/post-build.js
 
 echo "Scripts are now executable."
