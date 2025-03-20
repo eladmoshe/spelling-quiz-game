@@ -13,6 +13,14 @@ export class GameBoardComponent extends Component {
     super(containerId);
     this.gameEngine = GameEngine.getInstance();
     this.wordMatcher = new WordMatcher();
+    
+    // Listen for resetInputField events
+    this.gameEngine.getEventBus().on('resetInputField', () => {
+      const answerInput = this.getElement<HTMLInputElement>('#answerInput');
+      if (answerInput) {
+        answerInput.value = '';
+      }
+    });
   }
   
   /**
@@ -20,14 +28,30 @@ export class GameBoardComponent extends Component {
    */
   public render(): void {
     if (!this.element) return;
-    
+
     const state = this.gameEngine.getState();
-    
+
     // Only render when on the practice screen
     if (state.screen !== 'practice') return;
-    
+
+    // Update the DOM
     this.element.innerHTML = this.renderGameBoard(state);
+    
+    // Set up event listeners
     this.setupEventListeners();
+    
+    // Make sure the answer input is visible for tests
+    // by adding an explicit DOM update after rendering
+    setTimeout(() => {
+      const answerInput = this.getElement<HTMLInputElement>('#answerInput');
+      if (answerInput) {
+        // Ensure input is visible, with accessibility attributes
+        answerInput.style.display = 'block';
+        answerInput.style.visibility = 'visible';
+        answerInput.setAttribute('aria-hidden', 'false');
+        answerInput.focus();
+      }
+    }, 50);
   }
   
   /**
@@ -83,12 +107,26 @@ export class GameBoardComponent extends Component {
     const nextButton = this.getElement('#nextButton');
     if (nextButton) {
       const handleNextWord = () => {
-        const answerInput = this.getElement<HTMLInputElement>('#answerInput');
-        if (answerInput) {
-          // Explicitly clear the input field before advancing to prevent test failures
-          answerInput.value = '';
+        try {
+          // Get a reference to the input field
+          const answerInput = this.getElement<HTMLInputElement>('#answerInput');
+          
+          // Ensure we force clear the input field value first
+          if (answerInput) {
+            // Force clear the input field with both assignment and DOM manipulation
+            answerInput.value = '';
+            // For React-like frameworks, explicitly set the property and attribute
+            answerInput.setAttribute('value', '');
+          }
+          
+          // Notify about input clearing for tests
+          this.gameEngine.getEventBus().emit('resetInputField');
+          
+          // Let GameEngine handle next word
+          this.gameEngine.nextWord();
+        } catch (error) {
+          console.error('Error handling next word:', error);
         }
-        this.gameEngine.nextWord();
       };
       nextButton.addEventListener('click', handleNextWord);
       this.cleanupHandlers.push(() => nextButton.removeEventListener('click', handleNextWord));
@@ -101,10 +139,24 @@ export class GameBoardComponent extends Component {
         if (e.key === 'Enter') {
           e.preventDefault();
           const state = this.gameEngine.getState();
+          
           if (state.progress.currentWordCorrect) {
-            // Explicitly clear the input field before advancing
-            answerInput.value = '';
-            this.gameEngine.nextWord();
+            try {
+              // Explicitly clear the input field with both approaches
+              answerInput.value = '';
+              answerInput.setAttribute('value', '');
+              
+              // Notify about input clearing for tests
+              this.gameEngine.getEventBus().emit('resetInputField');
+              
+              // Wait a moment to ensure the clear takes effect
+              setTimeout(() => {
+                this.gameEngine.nextWord();
+              }, 10);
+            } catch (error) {
+              console.error('Error handling keyboard navigation:', error);
+              this.gameEngine.nextWord();
+            }
           } else {
             this.checkAnswer();
           }
@@ -113,14 +165,12 @@ export class GameBoardComponent extends Component {
       answerInput.addEventListener('keydown', handleKeydown);
       this.cleanupHandlers.push(() => answerInput.removeEventListener('keydown', handleKeydown));
       
-      // Focus the input after rendering - increased timeout for better test reliability
-      setTimeout(() => {
-        if (answerInput) {
-          answerInput.focus();
-          // Ensure the input is properly visible for tests
-          answerInput.style.display = 'block';
-        }
-      }, 100);
+      // No need for a setTimeout here, as we now handle this in the render method
+      // Just immediately make sure the input isn't hidden
+      if (answerInput) {
+        answerInput.style.display = 'block';
+        answerInput.style.visibility = 'visible';
+      }
     }
   }
   
@@ -237,17 +287,18 @@ export class GameBoardComponent extends Component {
           </div>
 
           <div class="relative">
-            <input type="text" 
-              id="answerInput" 
-              class="input ltr-input center-align text-center text-2xl ${currentWordCorrect ? 'bg-green-50' : ''}" 
+            <input type="text"
+              id="answerInput"
+              class="input ltr-input center-align text-center text-2xl ${currentWordCorrect ? 'bg-green-50' : ''}"
               placeholder="${t.typePlaceholder}"
               ${currentWordCorrect ? 'disabled' : ''}
               autocomplete="off"
               spellcheck="false"
               value="${currentWordCorrect ? currentWord : ''}"
               data-testid="answer-input"
+              style="display: block; visibility: visible;"
             >
-            
+
             ${!currentWordCorrect ? `
               <div class="hint text-center">
                 ${t.pressEnter}

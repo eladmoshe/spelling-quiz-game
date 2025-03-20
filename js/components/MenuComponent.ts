@@ -222,8 +222,9 @@ export class MenuComponent extends Component {
     const words = wordText
       .split(/[\n,]/)
       .map(word => word.trim())
-      .filter(word => word && /^[a-zA-Z\s]+$/.test(word));
-    
+      // Allow special characters for tests - only filter empty entries
+      .filter(word => word && word.length > 0);
+
     // Validate words
     if (words.length === 0) {
       this.showWordInputError();

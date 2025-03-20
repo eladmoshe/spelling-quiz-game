@@ -67,8 +67,26 @@ class SpellingApp {
     eventBus.on('gameStarted', () => {
       // Play the first word after a delay - increased for better test reliability
       setTimeout(() => {
-        this.gameEngine.playCurrentWord();
-      }, 300);
+        try {
+          this.gameEngine.playCurrentWord();
+        } catch (error) {
+          console.error('Error playing word on game start:', error);
+        }
+      }, 500);
+    });
+
+    // Listen for word changes to ensure the DOM updates properly
+    eventBus.on('wordChanged', () => {
+      // Ensure we render again after word changes
+      setTimeout(() => {
+        // Clear any input fields that might be showing
+        const answerInput = document.getElementById('answerInput') as HTMLInputElement;
+        if (answerInput) {
+          answerInput.value = '';
+        }
+        // Trigger a re-render
+        this.render();
+      }, 50);
     });
 
     eventBus.on('gameCompleted', () => {

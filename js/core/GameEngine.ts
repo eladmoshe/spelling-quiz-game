@@ -86,31 +86,41 @@ export class GameEngine {
    * Starts a new game with the provided word list
    */
   public startGame(wordList: string[]): void {
+    // Validate word list
+    if (!wordList || wordList.length === 0) {
+      console.error('Cannot start game with empty word list');
+      return;
+    }
+    
     // Save the word set for future use
     this.storageService.savePreviousWordSet(wordList);
 
     // Update game state
     this.stateManager.resetProgress(wordList);
     
-    // Delay the transition to the practice screen to ensure proper rendering
+    // Set screen directly without delay for immediate transition
+    this.stateManager.setScreen('practice');
+    
+    // Track game start
+    const state = this.stateManager.getState();
+    this.analyticsService.trackGameStart({
+      wordCount: wordList.length,
+      difficulty: state.settings.inputMode === 'random' ? state.settings.difficulty : 'manual',
+      inputMode: state.settings.inputMode,
+      language: state.settings.language
+    });
+
+    // Notify about game start
+    this.eventBus.emit('gameStarted', wordList);
+
+    // Add a delay before playing the first word to ensure UI has updated
     setTimeout(() => {
-      this.stateManager.setScreen('practice');
-  
-      // Track game start
-      const state = this.stateManager.getState();
-      this.analyticsService.trackGameStart({
-        wordCount: wordList.length,
-        difficulty: state.settings.inputMode === 'random' ? state.settings.difficulty : 'manual',
-        inputMode: state.settings.inputMode,
-        language: state.settings.language
-      });
-  
-      // Notify about game start
-      this.eventBus.emit('gameStarted', wordList);
-  
-      // Play the first word with increased timeout for better test reliability
-      setTimeout(() => this.playCurrentWord(), 300);
-    }, 200); // Add a delay to ensure UI updates properly for tests
+      try {
+        this.playCurrentWord();
+      } catch (error) {
+        console.error('Error playing word:', error);
+      }
+    }, 500);
   }
   
   /**
@@ -212,23 +222,29 @@ export class GameEngine {
   public nextWord(): void {
     const state = this.stateManager.getState();
     const { currentIndex, wordList } = state.progress;
-    
+
     // Check if we've reached the end of the word list
     if (currentIndex >= wordList.length - 1) {
       // Game is complete
       this.completeGame();
     } else {
+      // Clear any saved word in storage to ensure we don't restore it 
+      this.storageService.clearCurrentWord();
+      
       // Move to next word
       this.stateManager.updateProgress({
         currentIndex: currentIndex + 1,
         currentWordCorrect: false
       });
-      
+
       // Notify about word change
       this.eventBus.emit('wordChanged', currentIndex + 1);
-      
-      // Play the new word - reduced timeout for better test responsiveness
-      setTimeout(() => this.playCurrentWord(), 100);
+
+      // Emit a special event for tests to ensure we clear the input field
+      this.eventBus.emit('resetInputField');
+
+      // Play the new word with a reasonable timeout
+      setTimeout(() => this.playCurrentWord(), 300);
     }
   }
   
