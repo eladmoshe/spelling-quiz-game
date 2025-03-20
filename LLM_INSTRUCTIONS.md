@@ -32,6 +32,8 @@ The project follows a modular architecture with clear separation of concerns:
 - **StorageService** (`js/services/StorageService.ts`): Manages localStorage persistence
 - **SpeechService** (`js/services/SpeechService.ts`): Handles text-to-speech functionality
 - **AnalyticsService** (`js/services/AnalyticsService.ts`): Tracks user interactions
+  - Analytics only activate on the GitHub Pages site (not localhost)
+  - Environment detection in index.html prevents local tracking
 
 ### Utilities
 - **StateManager** (`js/utils/StateManager.ts`): Manages application state

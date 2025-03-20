@@ -89,6 +89,23 @@ if (!fs.existsSync(path.join(BUILD_DIR, '.nojekyll'))) {
   CRITICAL_ERRORS.push('.nojekyll file is missing in the build directory. This is required for GitHub Pages.');
 }
 
+// Check for analytics scripts that should only be loaded in production
+try {
+  const htmlContent = fs.readFileSync(path.join(BUILD_DIR, 'index.html'), 'utf8');
+  if (htmlContent.includes('src="https://www.googletagmanager.com/gtag/js?id=') || 
+      htmlContent.includes('https://www.clarity.ms/tag/')) {
+    // Ensure analytics code is wrapped in environment check
+    if (!htmlContent.includes('location.hostname !== "localhost"') && 
+        !htmlContent.includes('if (location.hostname !==')) {
+      CRITICAL_ERRORS.push('Analytics code should only be loaded in production environments. Add environment checks.');
+    } else {
+      console.log(chalk.green('✅ Analytics scripts have proper environment checks.'));
+    }
+  }
+} catch (error) {
+  console.log(chalk.yellow('⚠️ Could not check analytics scripts: ' + error.message));
+}
+
 // Check JavaScript files for import statements that might break
 const jsFiles = globSync(`${BUILD_DIR}/**/*.js`);
 console.log(chalk.gray(`Found ${jsFiles.length} JavaScript files to validate.`));

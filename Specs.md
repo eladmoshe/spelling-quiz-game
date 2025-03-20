@@ -57,12 +57,14 @@ An interactive spelling quiz application that helps users learn and practice spe
 ### Analytics and Tracking
 - Google Analytics for basic web traffic tracking
 - Microsoft Clarity for user behavior insights and heatmaps
+- **Environment-aware**: Analytics only activate on production site (GitHub Pages)
+- **Development mode**: Analytics automatically disabled on localhost
 - Anonymous tracking to understand user interactions
 - No personally identifiable information collected
 - Configurable consent management
 - Bot detection enabled by default
 - Event logging for game interactions
-- Optional user identification for advanced tracking
+- Build validation ensures analytics code has proper environment checks
 
 ## Edge Cases and Error Handling
 

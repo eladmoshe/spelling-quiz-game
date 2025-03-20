@@ -69,6 +69,12 @@ This prevents common deployment issues like:
 
 Simply open the game in your web browser and start practicing! No installation or setup required.
 
+## Privacy Features 🔒
+
+- **Development Mode**: Analytics tracking is automatically disabled when running locally
+- **Production Only**: Google Analytics and Microsoft Clarity only activate on the GitHub Pages site
+- **Anonymous**: No personally identifiable information is collected
+
 ## Tips for Success 💡
 
 - Practice regularly with small sets of words
