@@ -9,10 +9,18 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: true,
+    // Ensure proper MIME types for GitHub Pages
+    assetsInlineLimit: 4096,
     rollupOptions: {
       input: {
         main: 'index.html',
       },
+      output: {
+        // Ensure all file extensions are explicitly set for correct MIME types
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
     },
   },
   

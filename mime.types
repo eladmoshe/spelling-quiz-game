@@ -1,4 +1,15 @@
-text/typescript     ts
-application/javascript     js
-text/html     html
-text/css     css
+application/javascript    js
+text/typescript            ts
+text/css                   css
+application/json           json
+text/html                  html htm
+image/svg+xml              svg
+image/png                  png
+image/jpeg                 jpg jpeg
+image/webp                 webp
+audio/mpeg                 mp3
+font/woff                  woff
+font/woff2                 woff2
+application/xml            xml
+text/plain                 txt md
+application/manifest+json  webmanifest
