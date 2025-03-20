@@ -23,7 +23,8 @@ export default {
     '/node_modules/',
     '/dist/',
     'spelling-game.spec.ts',
-    '.*\\.localStorage\\.test\\.ts$'
+    '.*\\.localStorage\\.test\\.ts$',
+    '/tests/'
   ],
   testRegex: '(/__tests__/.*|(/|\\\\)(tests|test|spec)s?/.*|(\\.|/)(test|spec))\\.(tsx?)$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],

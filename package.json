@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "dev": "vite",
     "test": "jest",
-    "test:e2e": "sh run-e2e-tests.sh",
+    "test:e2e": "npm run build && playwright test --config=playwright.testdir.config.ts",
     "serve:test": "npm run build && npm run start",
     "start": "vite preview --port 4173"
   },

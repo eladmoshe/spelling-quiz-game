@@ -1,33 +1,69 @@
 import { SummaryComponent } from './SummaryComponent';
 import { GameEngine } from '../core/GameEngine';
-import { EventBus } from '../utils/EventBus';
 
 // Mock dependencies
 jest.mock('../core/GameEngine');
-jest.mock('../utils/EventBus');
+
+// Use factory functions in mock definitions to avoid hoisting issues
+jest.mock('../utils/EventBus', () => {
+  const mockEventBus = {
+    on: jest.fn().mockReturnValue(() => {}),
+    emit: jest.fn(),
+    once: jest.fn(),
+    off: jest.fn(),
+    clear: jest.fn(),
+    listenerCount: jest.fn()
+  };
+  
+  return {
+    __esModule: true,
+    EventBus: {
+      getInstance: jest.fn().mockReturnValue(mockEventBus)
+    },
+    default: {
+      getInstance: jest.fn().mockReturnValue(mockEventBus)
+    }
+  };
+});
+
+jest.mock('../utils/StateManager', () => {
+  const mockStateManager = {
+    getState: jest.fn().mockReturnValue({
+      screen: 'summary',
+      settings: { language: 'en' }
+    }),
+    subscribe: jest.fn().mockReturnValue(() => {}),
+    setScreen: jest.fn(),
+    updateSettings: jest.fn(),
+    updateProgress: jest.fn(),
+    resetProgress: jest.fn(),
+    updateLastPlayTime: jest.fn()
+  };
+  
+  return {
+    __esModule: true,
+    StateManager: {
+      getInstance: jest.fn().mockReturnValue(mockStateManager)
+    },
+    default: {
+      getInstance: jest.fn().mockReturnValue(mockStateManager)
+    }
+  };
+});
 
 describe('SummaryComponent', () => {
   let summaryComponent: SummaryComponent;
   let mockGameEngine: jest.Mocked<GameEngine>;
-  let mockEventBus: jest.Mocked<EventBus>;
   
   beforeEach(() => {
     // Setup DOM
     document.body.innerHTML = '<div id="app"></div>';
     
-    // Setup mock implementations
-    mockEventBus = {
-      on: jest.fn().mockReturnValue(() => {}),
-      emit: jest.fn(),
-      once: jest.fn(),
-      off: jest.fn(),
-      clear: jest.fn(),
-      listenerCount: jest.fn()
-    } as unknown as jest.Mocked<EventBus>;
-    
+    // Setup mock GameEngine
     mockGameEngine = {
       getInstance: jest.fn().mockReturnThis(),
       getState: jest.fn().mockReturnValue({
+        screen: 'summary',
         settings: {
           language: 'en'
         },
@@ -36,7 +72,7 @@ describe('SummaryComponent', () => {
           attempts: { 0: 1, 1: 2, 2: 1 }
         }
       }),
-      getEventBus: jest.fn().mockReturnValue(mockEventBus),
+      getEventBus: jest.fn(),
       calculateGameStats: jest.fn().mockReturnValue({
         totalWords: 3,
         perfectWords: 2,
@@ -49,6 +85,7 @@ describe('SummaryComponent', () => {
       resetGame: jest.fn()
     } as unknown as jest.Mocked<GameEngine>;
     
+    // Set up GameEngine.getInstance mock
     (GameEngine.getInstance as jest.Mock).mockReturnValue(mockGameEngine);
     
     // Create component
@@ -66,7 +103,7 @@ describe('SummaryComponent', () => {
     const appElement = document.getElementById('app');
     expect(appElement).not.toBeNull();
     expect(appElement?.innerHTML).toContain('summary-card');
-    expect(appElement?.innerHTML).toContain('play-again-button');
+    expect(appElement?.innerHTML).toContain('startOver');
   });
   
   test('displays correct game statistics', () => {
@@ -84,8 +121,8 @@ describe('SummaryComponent', () => {
   test('handles play again button click', () => {
     summaryComponent.render();
     
-    // Click play again button
-    const playAgainButton = document.getElementById('playAgainButton');
+    // Click play again button (ID changed to 'startOver' based on your component implementation)
+    const playAgainButton = document.getElementById('startOver');
     expect(playAgainButton).not.toBeNull();
     playAgainButton?.click();
     

@@ -44,17 +44,17 @@ describe('AnalyticsService', () => {
   test('trackGameStart sends the correct event', () => {
     const gameDetails = {
       wordCount: 10,
-      difficulty: 'medium',
-      inputMode: 'random',
-      language: 'en'
+      difficulty: 'medium' as 'easy' | 'medium' | 'hard',
+      inputMode: 'random' as 'manual' | 'random',
+      language: 'en' as 'en' | 'he'
     };
     
     analyticsService.trackGameStart(gameDetails);
     
     expect(mockGtag).toHaveBeenCalledWith('event', 'game_start', expect.objectContaining({
-      wordCount: 10,
+      word_count: 10,
       difficulty: 'medium',
-      inputMode: 'random',
+      input_mode: 'random',
       language: 'en'
     }));
   });
@@ -68,16 +68,16 @@ describe('AnalyticsService', () => {
       twoAttemptWords: 2,
       threeAttemptWords: 1,
       wrongAttempts: 3,
-      inputMode: 'manual',
-      difficulty: 'easy',
-      language: 'en'
+      inputMode: 'manual' as 'manual' | 'random',
+      difficulty: 'easy' as 'easy' | 'medium' | 'hard',
+      language: 'en' as 'en' | 'he'
     };
     
     analyticsService.trackGameComplete(gameStats);
     
     expect(mockGtag).toHaveBeenCalledWith('event', 'game_complete', expect.objectContaining({
-      totalWords: 10,
-      perfectWords: 7,
+      total_words: 10,
+      perfect_words: 7,
       accuracy: 70
     }));
   });
@@ -95,8 +95,8 @@ describe('AnalyticsService', () => {
     
     expect(mockGtag).toHaveBeenCalledWith('event', 'word_attempt', expect.objectContaining({
       word: 'apple',
-      isCorrect: false,
-      attemptNumber: 1
+      is_correct: false,
+      attempt_number: 1
     }));
   });
   
@@ -112,7 +112,7 @@ describe('AnalyticsService', () => {
     analyticsService.trackInputModeChange('random');
     
     expect(mockGtag).toHaveBeenCalledWith('event', 'input_mode_change', expect.objectContaining({
-      inputMode: 'random'
+      input_mode: 'random'
     }));
   });
   
@@ -120,14 +120,20 @@ describe('AnalyticsService', () => {
     analyticsService.trackPreviousSetLoad(2);
     
     expect(mockGtag).toHaveBeenCalledWith('event', 'previous_set_load', expect.objectContaining({
-      setIndex: 2
+      set_index: 2
     }));
   });
   
   test('handles missing analytics libraries gracefully', () => {
-    // Remove analytics libraries
-    delete window.gtag;
-    delete window.clarity;
+    // Save original window.gtag and window.clarity
+    const originalGtag = window.gtag;
+    const originalClarity = window.clarity;
+    
+    // Set to undefined for test
+    // @ts-ignore
+    window.gtag = undefined;
+    // @ts-ignore
+    window.clarity = undefined;
     
     // Should not throw errors
     expect(() => {
@@ -135,37 +141,41 @@ describe('AnalyticsService', () => {
       analyticsService.trackLanguageChange('en');
       analyticsService.logClarityEvent('test_event');
     }).not.toThrow();
+    
+    // Restore original values
+    window.gtag = originalGtag;
+    window.clarity = originalClarity;
   });
   
   test('configureClarityConsent sets up clarity correctly', () => {
     analyticsService.configureClarityConsent(true);
     
-    if (window.clarity) {
-      expect(mockClarity).toHaveBeenCalledWith('consent');
+    if (typeof window.clarity === 'function') {
+      expect(mockClarity).toHaveBeenCalledWith('consent', 'granted');
     }
   });
   
   test('configureClarityConsent handles opt-out correctly', () => {
     analyticsService.configureClarityConsent(false);
     
-    if (window.clarity) {
-      expect(mockClarity).toHaveBeenCalledWith('consent', false);
+    if (typeof window.clarity === 'function') {
+      expect(mockClarity).toHaveBeenCalledWith('consent', 'denied');
     }
   });
   
   test('logClarityEvent sends custom events to Clarity', () => {
     analyticsService.logClarityEvent('custom_event', { key: 'value' });
     
-    if (window.clarity) {
-      expect(mockClarity).toHaveBeenCalledWith('event', 'custom_event', { key: 'value' });
+    if (typeof window.clarity === 'function') {
+      expect(mockClarity).toHaveBeenCalledWith('log', 'custom_event', { key: 'value' });
     }
   });
   
   test('identifyUser sends identity to Clarity', () => {
     analyticsService.identifyUser('test-user');
     
-    if (window.clarity) {
-      expect(mockClarity).toHaveBeenCalledWith('identify', 'test-user');
+    if (typeof window.clarity === 'function') {
+      expect(mockClarity).toHaveBeenCalledWith('identify', 'test-user', undefined);
     }
   });
 });

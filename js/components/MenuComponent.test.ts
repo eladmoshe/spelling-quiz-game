@@ -34,7 +34,15 @@ describe('MenuComponent', () => {
           difficulty: 'medium',
           wordCount: 10
         },
-        screen: 'menu'
+        screen: 'menu',
+        lastPlayTime: 0,
+        progress: {
+          currentIndex: 0,
+          wordList: [],
+          attempts: {},
+          wrongAttempts: {},
+          currentWordCorrect: false
+        }
       }),
       getEventBus: jest.fn().mockReturnValue(mockEventBus),
       toggleLanguage: jest.fn(),
@@ -90,9 +98,19 @@ describe('MenuComponent', () => {
     mockGameEngine.getState.mockReturnValue({
       settings: {
         language: 'en',
-        inputMode: 'manual'
+        inputMode: 'manual',
+        difficulty: 'medium',
+        wordCount: 10
       },
-      screen: 'menu'
+      screen: 'menu',
+      lastPlayTime: 0,
+      progress: {
+        currentIndex: 0,
+        wordList: [],
+        attempts: {},
+        wrongAttempts: {},
+        currentWordCorrect: false
+      }
     });
     
     menuComponent.render();
@@ -115,9 +133,19 @@ describe('MenuComponent', () => {
     mockGameEngine.getState.mockReturnValue({
       settings: {
         language: 'en',
-        inputMode: 'random'
+        inputMode: 'random',
+        difficulty: 'medium',
+        wordCount: 10
       },
-      screen: 'menu'
+      screen: 'menu',
+      lastPlayTime: 0,
+      progress: {
+        currentIndex: 0,
+        wordList: [],
+        attempts: {},
+        wrongAttempts: {},
+        currentWordCorrect: false
+      }
     });
     
     menuComponent.render();
@@ -143,9 +171,19 @@ describe('MenuComponent', () => {
     mockGameEngine.getState.mockReturnValue({
       settings: {
         language: 'en',
-        inputMode: 'manual'
+        inputMode: 'manual',
+        difficulty: 'medium',
+        wordCount: 10
       },
-      screen: 'menu'
+      screen: 'menu',
+      lastPlayTime: 0,
+      progress: {
+        currentIndex: 0,
+        wordList: [],
+        attempts: {},
+        wrongAttempts: {},
+        currentWordCorrect: false
+      }
     });
     
     menuComponent.render();

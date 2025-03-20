@@ -9,13 +9,24 @@ export class SummaryComponent extends Component {
   constructor(containerId: string) {
     super(containerId);
     this.gameEngine = GameEngine.getInstance();
+  }
+  
+  /**
+   * Initialize the component
+   * Overriding to add game completion event listener
+   */
+  protected initialize(): void {
+    super.initialize();
     
-    // Listen for game completion event
-    const unsubscribe = this.eventBus.on('gameCompleted', () => {
-      this.createConfetti();
-    });
-    
-    this.unsubscribeFunctions.push(unsubscribe);
+    // Only set up the event listener if eventBus is available
+    if (this.eventBus) {
+      // Listen for game completion event
+      const unsubscribe = this.eventBus.on('gameCompleted', () => {
+        this.createConfetti();
+      });
+      
+      this.unsubscribeFunctions.push(unsubscribe);
+    }
   }
   
   /**
