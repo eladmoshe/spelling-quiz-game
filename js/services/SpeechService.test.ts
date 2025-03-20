@@ -73,9 +73,9 @@ describe('SpeechService', () => {
   
   // Mock FileReader and its methods
   const mockFileReader = {
-    onloadend: null,
+    onloadend: null as (() => void) | null,
     result: '',
-    readAsDataURL: jest.fn().mockImplementation((blob) => {
+    readAsDataURL: jest.fn().mockImplementation((_blob) => {
       // We use setTimeout to simulate async behavior
       setTimeout(() => {
         if (mockFileReader.onloadend) {
