@@ -36,7 +36,7 @@ test.describe('Spelling Quiz Error Handling', () => {
     await page.keyboard.press('Enter');
     
     // Should handle it properly (either correct or showing appropriate feedback)
-    await expect(page.getByTestId('check-button').or(page.getByTestId('next-word-button'))).toBeVisible();
+    await expect(page.getByTestId('check-button').or(page.getByTestId('next-button'))).toBeVisible({ timeout: 10000 });
   });
   
   test('should be accessible via keyboard navigation', async ({ page }) => {

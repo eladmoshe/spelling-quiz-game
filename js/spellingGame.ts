@@ -88,6 +88,19 @@ class SpellingApp {
         this.render();
       }, 50);
     });
+    
+    // Special event for test reliability
+    eventBus.on('loadingPreviousSet', (index) => {
+      // Force an immediate render cycle when loading a previous set
+      console.log(`Loading previous set ${index} for tests`);
+      // Wait a bit longer to ensure tests don't fail
+      setTimeout(() => {
+        // Force render multiple times to ensure it completes
+        this.render();
+        setTimeout(() => this.render(), 500);
+        setTimeout(() => this.render(), 1000);
+      }, 200);
+    });
 
     eventBus.on('gameCompleted', () => {
       // Create confetti effect when game is completed

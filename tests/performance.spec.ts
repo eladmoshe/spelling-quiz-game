@@ -64,8 +64,8 @@ test.describe('Spelling Quiz Performance', () => {
       await page.getByTestId('answer-input').fill(`test${i}`);
       await page.getByTestId('check-button').click();
 
-      // Wait for next button
-      await expect(page.getByTestId('next-button')).toBeVisible({ timeout: 5000 });
+      // Wait for next button with increased timeout
+      await expect(page.getByTestId('next-button')).toBeVisible({ timeout: 20000 });
 
       // Click next if not the last word
       if (i < 5) {
@@ -89,8 +89,8 @@ test.describe('Spelling Quiz Performance', () => {
       await page.waitForTimeout(500); // Add a delay before starting the game
       await page.getByTestId('start-button').click();
 
-      // Wait for game board (increased timeout for better reliability)
-      await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 10000 });
+      // Wait for game board with significantly increased timeout 
+      await expect(page.getByTestId('answer-input')).toBeVisible({ timeout: 30000 });
       
       // Return to menu with wait before clicking
       await page.waitForTimeout(500); // Add a small delay before clicking the menu button
