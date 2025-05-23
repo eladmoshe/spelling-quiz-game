@@ -70,8 +70,8 @@ export class GameBoardComponent extends Component {
       const answerInput = this.getElement<HTMLInputElement>('#answerInput');
       if (answerInput) {
         // Ensure input is visible, with accessibility attributes
-        answerInput.style.display = 'block !important';
-        answerInput.style.visibility = 'visible !important';
+        answerInput.style.setProperty('display', 'block', 'important');
+        answerInput.style.setProperty('visibility', 'visible', 'important');
         answerInput.setAttribute('aria-hidden', 'false');
         answerInput.focus();
         // Input field is now visible and focused
