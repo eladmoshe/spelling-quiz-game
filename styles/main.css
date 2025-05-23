@@ -33,17 +33,23 @@ body {
 }
 
 .card {
-    background: var(--white);
-    border-radius: 2rem;
-    padding: 2rem;
-    transition: all 0.3s ease;
-    border: 4px dashed var(--primary);
-    box-shadow: 0 8px 24px rgba(0, 188, 212, 0.2);
+    padding: 1rem;
 }
 
-.card:hover {
-    transform: translateY(-4px) rotate(0.5deg);
-    border-color: var(--secondary);
+@media (min-width: 641px) {
+    .card {
+        background: var(--white);
+        border-radius: 2rem;
+        padding: 2rem;
+        transition: all 0.3s ease;
+        border: 4px dashed var(--primary);
+        box-shadow: 0 8px 24px rgba(0, 188, 212, 0.2);
+    }
+
+    .card:hover {
+        transform: translateY(-4px) rotate(0.5deg);
+        border-color: var(--secondary);
+    }
 }
 
 .header-container {
@@ -712,10 +718,6 @@ body {
         margin: 0.5rem;
     }
 
-    .card {
-        padding: 1rem;
-        border-width: 2px;
-    }
 
     .title {
         font-size: 1.75rem;
