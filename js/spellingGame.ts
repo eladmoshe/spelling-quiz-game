@@ -126,40 +126,38 @@ class SpellingApp {
     }
 
     // Setup feedback button and panel
-    document.addEventListener('DOMContentLoaded', () => {
-      const feedbackButton = document.getElementById('feedbackButton');
-      const feedbackPanel = document.getElementById('feedbackPanel');
+    const feedbackButton = document.getElementById('feedbackButton');
+    const feedbackPanel = document.getElementById('feedbackPanel');
 
-      if (feedbackButton && feedbackPanel) {
-        // Initial setup
-        this.updateFeedbackPanel();
+    if (feedbackButton && feedbackPanel) {
+      // Initial setup
+      this.updateFeedbackPanel();
 
-        // Add click event listener with rotation
-        feedbackButton.addEventListener('click', () => {
-          // Add rotate class
-          feedbackButton.classList.add('rotate');
+      // Add click event listener with rotation
+      feedbackButton.addEventListener('click', () => {
+        // Add rotate class
+        feedbackButton.classList.add('rotate');
 
-          // Toggle panel visibility
-          feedbackPanel.classList.toggle('visible');
+        // Toggle panel visibility
+        feedbackPanel.classList.toggle('visible');
 
-          // Remove rotate class after animation completes
-          setTimeout(() => {
-            feedbackButton.classList.remove('rotate');
-          }, 500); // Match the animation duration
-        });
+        // Remove rotate class after animation completes
+        setTimeout(() => {
+          feedbackButton.classList.remove('rotate');
+        }, 500); // Match the animation duration
+      });
 
-        // Close panel when clicking outside
-        document.addEventListener('click', (event) => {
-          if (
-            feedbackPanel.classList.contains('visible') &&
-            !feedbackButton.contains(event.target as Node) &&
-            !feedbackPanel.contains(event.target as Node)
-          ) {
-            feedbackPanel.classList.remove('visible');
-          }
-        });
-      }
-    });
+      // Close panel when clicking outside
+      document.addEventListener('click', (event) => {
+        if (
+          feedbackPanel.classList.contains('visible') &&
+          !feedbackButton.contains(event.target as Node) &&
+          !feedbackPanel.contains(event.target as Node)
+        ) {
+          feedbackPanel.classList.remove('visible');
+        }
+      });
+    }
   }
 
   /**
