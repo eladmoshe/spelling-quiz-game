@@ -47,6 +47,7 @@ See [GitHub Pages Deployment Guide](GITHUB_PAGES_DEPLOYMENT.md) for detailed inf
 - **Interactive Learning**: Hear the words pronounced and type them out
 - **Immediate Feedback**: Know instantly if your spelling is correct
 - **Track Your Progress**: See how well you're doing with each practice session
+- **Mobile Friendly**: Responsive layout works across phones, tablets, and desktops
 
 ## How to Use 🎮
 
