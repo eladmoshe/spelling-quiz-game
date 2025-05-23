@@ -146,3 +146,9 @@ npm run build:prod   # Production build with validation
 npm run validate     # Validate an existing build
 npm run simulate     # Simulate GitHub Pages deployment
 ```
+
+### Additional Documentation
+
+Developer notes and troubleshooting summaries are located in
+`docs/fix-summaries/`. These files capture previous build and test fixes
+that may be helpful when debugging or updating the project.
